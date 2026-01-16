@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048 - Gameist</title>
+    <meta name="description" content="2048: Sayıları birleştir, stratejini kur ve 2048'e ulaş. Gameist içinde oynanabilir klasik bulmaca oyunu." />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="./index.html" />
+    <meta property="og:site_name" content="Gameist" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="2048 - Gameist" />
+    <meta property="og:description" content="Sayıları birleştir, stratejini kur ve 2048'e ulaş." />
+    <meta property="og:url" content="./index.html" />
+    <meta property="og:image" content="./logo.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="2048 - Gameist" />
+    <meta name="twitter:description" content="Sayıları birleştir, stratejini kur ve 2048'e ulaş." />
+    <meta name="twitter:image" content="./logo.png" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "2048 - Gameist",
+        "url": "https://gameist.fun/2048/index.html",
+        "isPartOf": {
+          "@type": "WebSite",
+          "name": "Gameist",
+          "url": "https://gameist.fun/"
+        }
+      }
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-57L2NFVJYL"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', 'G-57L2NFVJYL');
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9478711342689131"
+         crossorigin="anonymous"></script>
+    <base href="./">
+    <link id="app-styles" rel="stylesheet" href="./styles.css">
+    <!-- Removed web manifest for packaged Store build to avoid icon scanning conflicts -->
+    <meta name="theme-color" content="#0D0D0D">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect rx='12' width='64' height='64' fill='%23f59f3a'/><text x='50%' y='54%' text-anchor='middle' font-family='Arial, Helvetica, sans-serif' font-size='24' font-weight='700' fill='%23ffffff'>PM</text></svg>">
+    <link rel="icon" href="./logo.png" type="image/png">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>2048 PulseMerge</h1>
+            <div class="scores">
+                <div class="score-box">
+                    <div class="score-title">SCORE</div>
+                    <div id="score">0</div>
+                </div>
+                <div class="score-box">
+                    <div class="score-title">BEST</div>
+                    <div id="best-score">0</div>
+                </div>
+                <span id="combo-badge" class="combo-badge" style="display:none;">COMBO x2</span>
+                <div id="combo-meter" class="combo-meter" style="display:none;">
+                    <div class="fill"></div>
+                </div>
+                <button id="reveal-btn" class="menu-btn" title="Reveal" style="display:none;">Reveal (<span id="reveal-left">3</span>)</button>
+                <button id="header-new-game" class="menu-btn" title="New Game">New Game</button>
+                <button id="open-menu" class="menu-btn" title="Menu">☰</button>
+            </div>
+        </div>
+        <div class="game-intro">
+            <p>Join the tiles, get to <strong>2048!</strong></p>
+        </div>
+        <div class="game-container">
+            <div class="grid"></div>
+            <div class="tiles"></div>
+            <div class="game-over">
+                <p>Game Over!</p>
+                <button id="try-again">Try Again</button>
+            </div>
+            <div class="win">
+                <p>You Win!</p>
+                <button id="keep-going">Keep Going</button>
+            </div>
+        </div>
+        <p class="game-explanation" id="howToPlayText">
+            <strong>HOW TO PLAY:</strong> Use your <strong>arrow keys</strong> to move the tiles. When two tiles with the same number touch, they <strong>merge into one!</strong>
+        </p>
+
+        <!-- Main Menu Overlay -->
+        <div id="main-menu" class="overlay solid" style="display:flex;">
+            <canvas id="menu-bg" class="menu-bg"></canvas>
+            <div class="overlay-card">
+                <h2 class="menu-title">2048 PulseMerge</h2>
+                <div class="overlay-actions">
+                    <button id="menu-play">Play</button>
+                    <button id="menu-settings">Settings</button>
+                    <button id="menu-exit">Exit</button>
+                    <button id="menu-hub">Back to Main Menu</button>
+                </div>
+            </div>
+            <!-- Promo section removed for Store build to avoid any external asset dependency or broken-image icons -->
+        </div>
+
+        <!-- Mode Selection Modal -->
+        <div id="mode-modal" class="overlay solid" style="display:none;">
+            <div class="overlay-card">
+                <h2 class="menu-title">Select Mode</h2>
+                <div class="setting">
+                    <div class="setting-row modes-list">
+                        <label>
+                            <input type="radio" name="mode" value="classic" checked>
+                            <div class="mode-line">
+                                <div id="mode-title-classic" class="mode-title">Classic</div>
+                                <div id="mode-desc-classic" class="mode-desc">The original 2048 experience.</div>
+                            </div>
+                        </label>
+                        <label>
+                            <input type="radio" name="mode" value="timeCollapse">
+                            <div class="mode-line">
+                                <div id="mode-title-timeCollapse" class="mode-title">Time Collapse</div>
+                                <div id="mode-desc-timeCollapse" class="mode-desc">Every X seconds a random tile becomes hidden; use Reveal to briefly show it.</div>
+                            </div>
+                        </label>
+                        <label>
+                            <input type="radio" name="mode" value="portal">
+                            <div class="mode-line">
+                                <div id="mode-title-portal" class="mode-title">Portal</div>
+                                <div id="mode-desc-portal" class="mode-desc">On moves, two random tiles may swap positions.</div>
+                            </div>
+                        </label>
+                        <label>
+                            <input type="radio" name="mode" value="combo">
+                            <div class="mode-line">
+                                <div id="mode-title-combo" class="mode-title">Combo Rush</div>
+                                <div id="mode-desc-combo" class="mode-desc">After 3 merge moves in a row, get x2 score for the next 2 moves.</div>
+                            </div>
+                        </label>
+                        <label>
+                            <input type="radio" name="mode" value="bomb">
+                            <div class="mode-line">
+                                <div id="mode-title-bomb" class="mode-title">Bomb Tile</div>
+                                <div id="mode-desc-bomb" class="mode-desc">Bombs spawn periodically; at 0 they clear a 3×3 area.</div>
+                            </div>
+                        </label>
+                        <label>
+                            <input type="radio" name="mode" value="freeze">
+                            <div class="mode-line">
+                                <div id="mode-title-freeze" class="mode-title">Freeze Tile</div>
+                                <div id="mode-desc-freeze" class="mode-desc">Frozen tiles don’t merge; merges nearby thaw them.</div>
+                            </div>
+                        </label>
+                        <label>
+                            <input type="radio" name="mode" value="infinite">
+                            <div class="mode-line">
+                                <div id="mode-title-infinite" class="mode-title">Infinite Grid</div>
+                                <div id="mode-desc-infinite" class="mode-desc">After every move, the whole grid shifts one cell.</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div class="setting">
+                    <label>Difficulty</label>
+                    <div class="setting-row">
+                        <label><input type="radio" name="difficulty" value="easy"> Easy</label>
+                        <label><input type="radio" name="difficulty" value="normal" checked> Normal</label>
+                        <label><input type="radio" name="difficulty" value="hard"> Hard</label>
+                        <label><input type="radio" name="difficulty" value="hardcore"> Hardcore</label>
+                    </div>
+                </div>
+                <div class="overlay-actions">
+                    <button id="mode-start">Start</button>
+                    <button id="mode-cancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="overlay solid" style="display:none;">
+            <div class="overlay-card">
+                <h2>Settings</h2>
+                <div class="setting">
+                    <label>Theme</label>
+                    <div class="setting-row">
+                        <label><input type="radio" name="theme" value="light" checked> Light</label>
+                    </div>
+                </div>
+                <div class="setting">
+                    <label>Language</label>
+                    <div class="setting-row">
+                        <label><input type="radio" name="lang" value="en" checked> English</label>
+                        <label><input type="radio" name="lang" value="de"> Deutsch</label>
+                        <label><input type="radio" name="lang" value="tr"> Türkçe</label>
+                    </div>
+                </div>
+                <div class="setting">
+                    <label id="label-sound">Sound</label>
+                    <div class="setting-row">
+                        <label><input id="sound-on" type="checkbox" checked> <span id="label-sound-on">On</span></label>
+                        <label><input id="beat-on" type="checkbox" checked> <span id="label-beat-on">Beat</span></label>
+                    </div>
+                </div>
+                <div class="setting">
+                    <label id="label-fullscreen">Fullscreen</label>
+                    <div class="setting-row">
+                        <label><input id="fullscreen-on" type="checkbox" checked> <span id="label-fullscreen-on">On</span></label>
+                    </div>
+                </div>
+                <div class="setting">
+                    <label id="label-menu-start">Menu at Startup</label>
+                    <div class="setting-row">
+                        <label><input id="menu-on-start" type="checkbox"> <span id="label-menu-start-on">On</span></label>
+                    </div>
+                </div>
+                <div class="setting">
+                    <label id="label-effects-vol" for="effects-vol">Effects Volume</label>
+                    <input id="effects-vol" type="range" min="0" max="1" step="0.05" value="0.9">
+                </div>
+                <div class="setting">
+                    <label for="anim-speed">Animation Speed</label>
+                    <input id="anim-speed" type="range" min="0.5" max="1.5" step="0.1" value="1">
+                    <div class="setting-hint">0.5x – 1.5x</div>
+                </div>
+                <div class="overlay-actions">
+                    <button id="settings-save">Save</button>
+                    <button id="settings-cancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./game.js"></script>
+
+    <script>
+      (function () {
+        const btn = document.getElementById("menu-hub");
+        if (!btn) return;
+
+        function pickLang() {
+          const saved = localStorage.getItem("gameistLang");
+          if (saved) {
+            const s = String(saved).toLowerCase();
+            if (s.startsWith("tr")) return "tr";
+            if (s.startsWith("de")) return "de";
+            return "en";
+          }
+          const raw = String(navigator.language || "en").toLowerCase();
+          if (raw.startsWith("tr")) return "tr";
+          if (raw.startsWith("de")) return "de";
+          return "en";
+        }
+
+        function update() {
+          const l = pickLang();
+          if (l === "tr") btn.textContent = "Ana menüye dön";
+          else if (l === "de") btn.textContent = "Zurück zum Hauptmenü";
+          else btn.textContent = "Back to Main Menu";
+        }
+
+        btn.addEventListener("click", function (e) {
+          try {
+            e.preventDefault();
+          } catch (_) {}
+          window.location.href = "../index.html";
+        });
+
+        update();
+        try {
+          window.addEventListener('resize', update, { passive: true });
+          window.addEventListener('orientationchange', update, { passive: true });
+        } catch (_) {}
+      })();
+    </script>
+
+    <script>
+      (function () {
+        const howto = document.getElementById('howToPlayText');
+        if (!howto) return;
+
+        function pickLang() {
+          const saved = localStorage.getItem("gameistLang");
+          if (saved) {
+            const s = String(saved).toLowerCase();
+            if (s.startsWith("tr")) return "tr";
+            return "en";
+          }
+          const raw = String(navigator.language || "en").toLowerCase();
+          if (raw.startsWith("tr")) return "tr";
+          return "en";
+        }
+
+        function isTouchLike() {
+          try {
+            const mm = window.matchMedia;
+            const coarse = !!(mm && mm('(pointer: coarse)').matches);
+            const noHoverCoarse = !!(mm && mm('(hover: none) and (pointer: coarse)').matches);
+            const smallViewport = Math.min(window.innerWidth || 9999, window.innerHeight || 9999) <= 1024;
+            const smallScreen = Math.min(screen.width || 9999, screen.height || 9999) <= 1024;
+            const touchPoints = !!(navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
+            const legacy = 'ontouchstart' in window;
+            const ua = String(navigator.userAgent || '');
+            const uaMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+            return !!(coarse || noHoverCoarse || touchPoints || legacy || uaMobile || smallViewport || smallScreen);
+          } catch (e) {
+            return true;
+          }
+        }
+
+        function update() {
+          const lang = pickLang();
+          const forceMobile = Math.min(window.innerWidth || 9999, window.innerHeight || 9999) <= 1024;
+          const forceMobile2 = Math.min(screen.width || 9999, screen.height || 9999) <= 1024;
+          const mobile = isTouchLike() || forceMobile || forceMobile2;
+          if (lang === "tr") {
+            if (mobile) {
+              howto.innerHTML = "<strong>NASIL OYNANIR:</strong> Ekrana dokunup <strong>sağa, sola, yukarı veya aşağı kaydır</strong>. Aynı sayılar yan yana gelince <strong>birleşir!</strong>";
+            } else {
+              howto.innerHTML = "<strong>NASIL OYNANIR:</strong> Taşları hareket ettirmek için <strong>ok tuşlarını</strong> kullan. Aynı sayılar yan yana gelince <strong>birleşir!</strong>";
+            }
+          } else {
+            if (mobile) {
+              howto.innerHTML = "<strong>HOW TO PLAY:</strong> Touch the screen and <strong>swipe left, right, up, or down</strong>. When two tiles with the same number touch, they <strong>merge into one!</strong>";
+            } else {
+              howto.innerHTML = "<strong>HOW TO PLAY:</strong> Use your <strong>arrow keys</strong> to move the tiles. When two tiles with the same number touch, they <strong>merge into one!</strong>";
+            }
+          }
+        }
+
+        function scheduleUpdate() {
+          try { update(); } catch (_) {}
+          try { setTimeout(update, 0); } catch (_) {}
+        }
+
+        scheduleUpdate();
+        try {
+          window.addEventListener('load', scheduleUpdate, { passive: true });
+          window.addEventListener('resize', scheduleUpdate, { passive: true });
+          window.addEventListener('orientationchange', scheduleUpdate, { passive: true });
+        } catch (_) {}
+      })();
+    </script>
+
+    <script>
+      (function () {
+        const el = document.querySelector('.game-container');
+        if (!el) return;
+
+        el.addEventListener(
+          'touchmove',
+          function (e) {
+            try {
+              e.preventDefault();
+            } catch (_) {}
+          },
+          { passive: false }
+        );
+      })();
+    </script>
+
+    <script>
+      (function () {
+        function pickLang() {
+          const saved = localStorage.getItem("gameistLang");
+          if (saved) {
+            const s = String(saved).toLowerCase();
+            if (s.startsWith("tr")) return "tr";
+            if (s.startsWith("de")) return "de";
+            return "en";
+          }
+          const raw = String(navigator.language || "en").toLowerCase();
+          if (raw.startsWith("tr")) return "tr";
+          if (raw.startsWith("de")) return "de";
+          return "en";
+        }
+
+        function apply() {
+          const lang = pickLang();
+          try {
+            document.documentElement.setAttribute('lang', lang);
+          } catch (_) {}
+
+          const input = document.querySelector('input[name="lang"][value="' + lang + '"]');
+          if (!input) return false;
+          if (!input.checked) input.checked = true;
+          try {
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          } catch (_) {}
+          return true;
+        }
+
+        try {
+          if (apply()) return;
+          let n = 0;
+          const t = setInterval(function () {
+            try { apply(); } catch (_) {}
+            if (++n > 30) clearInterval(t);
+          }, 200);
+        } catch (_) {}
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,435 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wordlist - Gameist</title>
+    <meta
+      name="description"
+      content="Wordlist: Türkçe kelime tahmin oyunu. 5 harfli gizli kelimeyi 6 denemede bul ve zihnini geliştir."
+    />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="./index.html" />
+    <meta property="og:site_name" content="Gameist" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Wordlist - Gameist" />
+    <meta
+      property="og:description"
+      content="Türkçe kelime tahmin oyunu: 5 harfli kelimeyi 6 denemede bul."
+    />
+    <meta property="og:url" content="./index.html" />
+    <meta property="og:image" content="./wordlist.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Wordlist - Gameist" />
+    <meta
+      name="twitter:description"
+      content="Türkçe kelime tahmin oyunu: 5 harfli kelimeyi 6 denemede bul."
+    />
+    <meta name="twitter:image" content="./wordlist.png" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Wordlist - Gameist",
+        "url": "https://gameist.fun/wordle/index.html",
+        "isPartOf": {
+          "@type": "WebSite",
+          "name": "Gameist",
+          "url": "https://gameist.fun/"
+        }
+      }
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-57L2NFVJYL"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', 'G-57L2NFVJYL');
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9478711342689131"
+         crossorigin="anonymous"></script>
+    <link rel="icon" href="./wordlist.png" type="image/png" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#121213" />
+    <link rel="stylesheet" href="style.css" />
+      <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+  </head>
+
+  
+  <body>
+   
+
+     <div id="gameContainer">
+
+        <div id="mainMenu" class="screen">
+            <div class="menu-header">
+                <h1>
+                    <i class="fas fa-brain"></i>
+                    <span data-lang="title">Wordlist - Wordle oyunu</span>
+                </h1>
+                <div class="menu-controls">
+                    <button id="themeToggle" class="control-icon" title="Dark/Light Mode">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button id="languageToggle" class="control-icon" title="Language">
+                        <i class="fas fa-globe"></i>
+                        <span id="currentLang">TR</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="menu-buttons">
+                <button id="startGame" class="menu-btn primary">
+                    <i class="fas fa-play"></i>
+                    <span data-lang="startGame">Oyuna Başla</span>
+                </button>
+                <button id="showSettings" class="menu-btn settings">
+                    <i class="fas fa-cog"></i>
+                    <span data-lang="settings">Ayarlar</span>
+                </button>
+                <button id="showRules" class="menu-btn secondary">
+                    <i class="fas fa-book"></i>
+                    <span data-lang="rules">Kurallar</span>
+                </button>
+                
+                <button id="quitGame" class="menu-btn danger">
+                    <i class="fas fa-power-off"></i>
+                    <span data-lang="quitGame">Oyunu Kapat</span>
+                </button>
+
+                <button id="backToHub" class="menu-btn secondary">
+                    <i class="fas fa-home"></i>
+                    <span id="backToHubText" data-lang="backToMenu">Ana Menüye Dön</span>
+                </button>
+            </div>
+
+        <div class="brand">
+          <h3 class="brand-name"><span class="brand-accent">242</span> Games</h3>
+          <p class="brand-tagline" data-lang="tagline">Akıl Oyunları ve Daha Fazlası</p>
+        </div>
+        </div>
+    <div id="wordleGameScreen" class="screen hidden">
+      <h1 class="oyunicih1"><span data-lang="gameTitle">Wordlist Kelime Tahmin Oyunu</span></h1>
+      <p id="message"></p>
+
+      <div id="game-board" onclick="openKeyboard()">
+        <div class="row">
+          <div class="tile"></div>
+          <div class="tile"></div>
+          <div class="tile"></div>
+          <div class="tile"></div>
+          <div class="tile"></div>
+        </div>
+        <div class="row">
+          <div class="tile"></div>
+          <div class="tile"></div>
+          <div class="tile"></div>
+          <div class="tile"></div>
+          <div class="tile"></div>
+        </div>
+        <div class="row">
+          <div class="tile"></div>
+          <div class="tile"></div>
+          <div class="tile"></div>
+          <div class="tile"></div>
+          <div class="tile"></div>
+        </div>
+        <div class="row">
+          <div class="tile"></div>
+          <div class="tile"></div>
+          <div class="tile"></div>
+          <div class="tile"></div>
+          <div class="tile"></div>
+        </div>
+        <div class="row">
+          <div class="tile"></div>
+          <div class="tile"></div>
+          <div class="tile"></div>
+          <div class="tile"></div>
+          <div class="tile"></div>
+        </div>
+        <div class="row">
+          <div class="tile"></div>
+          <div class="tile"></div>
+          <div class="tile"></div>
+          <div class="tile"></div>
+          <div class="tile"></div>
+        </div>
+      </div>
+
+      <div id="keyboard">
+        <div class="keyboard-row">
+          <button>Q</button>
+          <button>W</button>
+          <button>E</button>
+          <button>R</button>
+          <button>T</button>
+          <button>Y</button>
+          <button>U</button>
+          <button class="tr-only">Ü</button>
+          <button>I</button>
+          <button>O</button>
+          <button>P</button>
+        </div>
+        <div class="keyboard-row">
+          <button>A</button>
+          <button>S</button>
+          <button>D</button>
+          <button>F</button>
+          <button>G</button>
+          <button>H</button>
+          <button>J</button>
+          <button>K</button>
+          <button>L</button>
+        </div>
+        <div class="keyboard-row">
+          <button>Ç</button>
+          <button>İ</button>
+          <button>Ğ</button>
+          <button>Ö</button>
+          <button>Ş</button>
+          <button>Z</button>
+          <button>X</button>
+          <button>C</button>
+          <button>V</button>
+          <button>B</button>
+        </div>
+        <div class="keyboard-row">
+          <button>N</button>
+          <button>M</button>
+        </div>
+<!-- Klavyedeki son satırı bul ve şununla değiştir -->
+<div class="keyboard-row keyboard-row-wide">
+  <button id="" class="wide-button">Enter</button>
+  <button class="wide-button">⌫</button>
+  <button id="menu-button" class="wide-button" type="button"><i class="fas fa-bars"></i> <span data-lang="menu">Menü</span></button>
+  <button id="reset-button" class="wide-button" type="button"><span data-lang="refresh">Yenile</span></button>
+</div>
+   
+<!-- Modal taşındı: Artık body sonunda -->
+
+      </div>
+      
+
+    </div>
+    
+    <script src="script.js"></script>
+
+    <script>
+      (function () {
+        const btn = document.getElementById("backToHub");
+        if (!btn) return;
+
+        btn.addEventListener("click", function (e) {
+          try {
+            e.preventDefault();
+          } catch (_) {}
+          window.location.href = "../index.html";
+        });
+      })();
+    </script>
+
+    <script>
+      (function () {
+        function updateTrOnlyKeys() {
+          const langEl = document.getElementById('currentLang');
+          const isTr = !!langEl && String(langEl.textContent || '').trim().toUpperCase() === 'TR';
+          document.querySelectorAll('.tr-only').forEach((el) => {
+            try { el.style.display = isTr ? '' : 'none'; } catch (_) {}
+          });
+        }
+
+        try { updateTrOnlyKeys(); } catch (_) {}
+        try {
+          const toggle = document.getElementById('languageToggle');
+          if (toggle) toggle.addEventListener('click', updateTrOnlyKeys, true);
+        } catch (_) {}
+        try {
+          const langEl = document.getElementById('currentLang');
+          if (langEl && 'MutationObserver' in window) {
+            const mo = new MutationObserver(updateTrOnlyKeys);
+            mo.observe(langEl, { childList: true, characterData: true, subtree: true });
+          }
+        } catch (_) {}
+      })();
+    </script>
+    <!-- <script> 
+      const text = "11 AYIN SULTANI RAMAZANI GÖNÜLDEN KUTLUYORUZ";
+      const typingElement = document.querySelector(".typing");
+      let index = 0;
+      let isWriting = true;
+
+      function typeEffect() {
+        if (isWriting) {
+          typingElement.textContent = text.slice(0, index++);
+          if (index > text.length) {
+            isWriting = false;
+            setTimeout(() => {
+              typingElement.textContent = "";
+              index = 0;
+              isWriting = true;
+              setTimeout(typeEffect, 500);
+            }, 8000);
+            return;
+          }
+        }
+        setTimeout(typeEffect, 100);
+      }
+      typeEffect();
+      const keys = document.querySelectorAll("#keyboard button");
+      const inputField = document.getElementById("mobile-input");
+
+      keys.forEach((key) => {
+        key.addEventListener("click", function () {
+          inputField.value += key.textContent;
+        });
+      // }); 
+
+      const backspaceButton = document.querySelector(
+        ".wide-button:nth-of-type(2)"
+      );
+      backspaceButton.addEventListener("click", function () {
+        inputField.value = inputField.value.slice(0, -1);
+      });
+
+      const enterButton = document.querySelector(".wide-button:nth-of-type(1)"); // ENTER tuşu
+      enterButton.addEventListener("click", function () {
+        console.log(inputField.value);
+      });
+
+      function openKeyboard() {
+        document.getElementById("keyboard").style.display = "flex";
+        document.body.style.overflow = "hidden";
+        inputField.style.display = "inline-block";
+      } -->
+    
+    <div id="settingsScreen" class="screen hidden">
+    <div class="screen-header">
+        <h2 data-lang="gameSettings">Oyun Ayarları</h2>
+    </div>
+
+    <div class="settings-content">
+        <div class="setting-item">
+            <div class="setting-header">
+                <i class="fas fa-volume-up setting-icon"></i>
+                <span class="setting-label" data-lang="volume">Ses Seviyesi</span>
+            </div>
+            <div class="setting-control">
+                <input type="range" min="0" max="100" value="30" class="setting-slider" id="settingsVolumeSlider">
+                <span class="setting-value" id="settingsVolumeValue">30</span>
+            </div>
+        </div>
+
+        <div class="setting-item">
+            <div class="setting-header">
+                <i class="fas fa-music setting-icon"></i>
+                <span class="setting-label" data-lang="soundToggle">Ses Aç/Kapat</span>
+            </div>
+            <div class="setting-control">
+                <button class="setting-toggle active" id="soundToggleBtn">
+                    <span data-lang="soundEnabled">Ses Açık</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <button id="backToSettingsMenu" class="menu-btn secondary">
+        <i class="fas fa-arrow-left"></i>
+        <span data-lang="back">Geri</span>
+    </button>
+</div>
+
+<div id="rulesScreen" class="screen hidden">
+    <div class="screen-header">
+        <h2 data-lang="gameRules">Oyun Kuralları</h2>
+    </div>
+
+    <div class="rules-content">
+        <div class="rule-item">
+            <div class="rule-prefix">
+                <i class="fas fa-bullseye"></i>
+            </div>
+            <p data-lang-rule="1">Amaç: 5 harfli gizli kelimeyi 6 denemede bulmak.</p>
+        </div>
+        <div class="rule-item">
+            <div class="rule-prefix">
+                <i class="fas fa-keyboard"></i>
+            </div>
+            <p data-lang-rule="2">Her deneme, 5 harfli anlamlı bir kelime olmalıdır.</p>
+        </div>
+        <div class="rule-item">
+            <div class="rule-prefix">
+                <i class="fas fa-palette"></i>
+            </div>
+            <p data-lang-rule="3">Tahminden sonra harflerin renkleri size ipucu verir:</p>
+        </div>
+        
+        <div class="rule-item">
+            <div class="rule-prefix tile correct rule-tile-display">A</div>
+            <p data-lang-rule="4"><b>Yeşil:</b> Harf doğru ve doğru yerde.</p>
+        </div>
+         <div class="rule-item">
+            <div class="rule-prefix tile present rule-tile-display">B</div>
+            <p data-lang-rule="5"><b>Sarı:</b> Harf doğru ama yanlış yerde.</p>
+        </div>
+         <div class="rule-item">
+            <div class="rule-prefix tile absent rule-tile-display">C</div>
+            <p data-lang-rule="6"><b>Gri:</b> Harf kelimede yok.</p>
+        </div>
+    </div>
+
+    <button id="backToMenu" class="menu-btn secondary">
+        <i class="fas fa-arrow-left"></i>
+        <span data-lang-rule="backToMenu">Ana Menüye Dön</span>
+    </button>
+  </div>
+
+  <!-- Oyun Menüsü Modal (body seviyesinde) -->
+  <div id="gameMenuModal" class="modal">
+    <div class="modal-content">
+      <h3 data-lang="gameMenuTitle">Oyun Menüsü</h3>
+
+      <div class="settings-content-modal">
+        <div class="setting-item">
+          <div class="setting-header">
+            <i class="fas fa-volume-up setting-icon"></i>
+            <span class="setting-label" data-lang="volume">Ses Seviyesi</span>
+          </div>
+          <div class="setting-control">
+            <input type="range" min="0" max="100" class="setting-slider" id="modalVolumeSlider" />
+            <span class="setting-value" id="modalVolumeValue">30</span>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-header">
+            <i class="fas fa-music setting-icon"></i>
+            <span class="setting-label" data-lang="soundToggle">Ses Aç/Kapat</span>
+          </div>
+          <div class="setting-control">
+            <button class="setting-toggle" id="modalSoundToggleBtn">
+              <span data-lang="soundEnabled">Ses Açık</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-buttons">
+        <button id="resumeGame" class="menu-btn primary">
+          <i class="fas fa-play"></i>
+          <span data-lang="resumeGame">Oyuna Devam Et</span>
+        </button>
+        <button id="backToMainMenu" class="menu-btn secondary">
+          <i class="fas fa-home"></i>
+          <span data-lang="back">Geri</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  </body>
+
+</html>

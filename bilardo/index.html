@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="application-name" content="Bilardist : 8Ball">
+    <meta name="msapplication-TileColor" content="#0b132b">
+    <meta name="msapplication-TileImage" content="img/icon-144x144.png">
+    <title>Bilardist : 8Ball</title>
+    <meta
+      name="description"
+      content="Bilardist: Gerçekçi fizik ve premium grafiklerle 8-ball bilardo deneyimi. En iyi deneyim masaüstünde sağlanır."
+    />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="./index.html" />
+    <meta property="og:site_name" content="Gameist" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Bilardist : 8Ball" />
+    <meta
+      property="og:description"
+      content="Gerçekçi fizik ve premium grafiklerle bilardo. En iyi deneyim masaüstünde."
+    />
+    <meta property="og:url" content="./index.html" />
+    <meta property="og:image" content="img/bilardist.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Bilardist - Gameist" />
+    <meta
+      name="twitter:description"
+      content="Premium bilardo deneyimi. Gerçekçi fizik motoru ve etkileyici grafiklerle oyna!"
+    />
+    <meta name="twitter:image" content="img/bilardist.png" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Bilardist - Gameist",
+        "url": "https://gameist.fun/bilardo/index.html",
+        "isPartOf": {
+          "@type": "WebSite",
+          "name": "Gameist",
+          "url": "https://gameist.fun/"
+        }
+      }
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-57L2NFVJYL"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', 'G-57L2NFVJYL');
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9478711342689131"
+         crossorigin="anonymous"></script>
+    <link rel="icon" href="img/bilardist.png" type="image/png" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="img/bilardist.png" type="image/x-icon" />
+    <meta name="theme-color" content="#0b132b" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Bilardist" />
+    <link rel="apple-touch-icon" href="img/icon-192x192.png.png" />
+
+    <style>
+      .mobile-compat-warning {
+        display: none;
+        position: sticky;
+        top: 0;
+        z-index: 99999;
+        background: rgba(0, 0, 0, 0.85);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        color: #ffffff;
+        padding: 10px 12px;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 13px;
+        line-height: 1.35;
+      }
+      .mobile-compat-warning strong {
+        font-weight: 700;
+      }
+      @media (hover: none) and (pointer: coarse) {
+        .mobile-compat-warning {
+          display: block;
+        }
+      }
+    </style>
+    
+    <!-- Microsoft Store PWA Tags -->
+    <meta name="msapplication-starturl" content="/" />
+    <meta name="msapplication-navbutton-color" content="#0b132b" />
+    <meta name="msapplication-window" content="width=1024;height=768" />
+  </head>
+  <body class="dark-theme">
+    <div class="mobile-compat-warning" role="status" aria-live="polite">
+      <strong>Uyarı:</strong> Bilardist mobil cihazlarda tam uyumlu değildir. En iyi deneyim için masaüstü tarayıcı önerilir.
+    </div>
+    <div id="orientation-overlay" class="hidden">
+      <div class="orientation-message">
+        <i class="fas fa-mobile-alt"></i>
+        <p>En iyi deneyim için lütfen cihazınızı yatay konuma getirin.</p>
+      </div>
+    </div>
+    <div id="gameContainer">
+      <!-- Ana Menü -->
+      <div id="mainMenu" class="screen">
+        <div class="menu-header">
+          <h1>
+            <i class="fas fa-circle"></i>
+            <span data-lang="title">Bilardist - Professional Billiards</span>
+          </h1>
+          <div class="menu-controls">
+            <button
+              id="themeToggle"
+              class="control-icon"
+              title="Dark/Light Mode"
+            >
+              <i class="fas fa-moon"></i>
+            </button>
+            <button id="languageToggle" class="control-icon" title="Language">
+              <i class="fas fa-globe"></i>
+              <span id="currentLang">EN</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="menu-buttons">
+          <button id="startGame" class="menu-btn primary">
+            <i class="fas fa-play"></i>
+            <span data-lang="startGame">Oyuna Başla</span>
+          </button>
+          <button id="showThemes" class="menu-btn theme">
+            <i class="fas fa-palette"></i>
+            <span data-lang="themes">Temalar</span>
+          </button>
+          <button id="showCues" class="menu-btn cue">
+            <i class="fas fa-magic"></i>
+            <span data-lang="cues">Istakalar</span>
+          </button>
+          <button id="showSettings" class="menu-btn settings">
+            <i class="fas fa-cog"></i>
+            <span data-lang="settings">Ayarlar</span>
+          </button>
+          <button id="showRules" class="menu-btn secondary">
+            <i class="fas fa-book"></i>
+            <span data-lang="rules">Kurallar</span>
+          </button>
+
+          <button id="backToHub" class="menu-btn secondary">
+            <i class="fas fa-home"></i>
+            <span id="backToHubText" data-lang="backToMainMenu">Ana Menüye Dön</span>
+          </button>
+
+         
+        </div>
+
+        <div class="menu-brand">
+          <span class="brand-text">
+            <span class="brand-242">242</span>
+            <span class="brand-games">GAMES</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Tema Seçim Ekranı -->
+      <div id="themeScreen" class="screen hidden">
+        <div class="screen-header">
+          <h2 data-lang="selectTheme">Masa Teması Seçin</h2>
+        </div>
+        <div class="selection-container">
+          <div class="selection-grid">
+            <!-- Rick and Morty Teması - İlk sırada -->
+            <div id="theme-rickmorty" class="selection-item theme-item">
+              <div class="selection-preview theme-preview rickmorty"></div>
+              <div class="item-title">Portal Green</div>
+              <div class="item-description">
+                Neon portals and green vortex
+              </div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <!-- The Simpsons Teması -->
+            <div id="theme-simpsons" class="selection-item theme-item">
+              <div class="selection-preview theme-preview simpsons"></div>
+              <div class="item-title">Golden Day</div>
+              <div class="item-description">
+                Warm yellows and oranges
+              </div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+            <div id="theme-classic" class="selection-item theme-item selected">
+              <div class="selection-preview theme-preview classic"></div>
+              <div class="item-title">Klasik Yeşil</div>
+              <div class="item-description">
+                Geleneksel bilardo masası teması
+              </div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+            <div id="theme-ocean" class="selection-item theme-item">
+              <div class="selection-preview theme-preview ocean"></div>
+              <div class="item-title">Mavi Okyanus</div>
+              <div class="item-description">
+                Sakin mavi tonlarında modern tema
+              </div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+            <div id="theme-luxury" class="selection-item theme-item">
+              <div class="selection-preview theme-preview luxury"></div>
+              <div class="item-title">Kırmızı Lüks</div>
+              <div class="item-description">Lüks kırmızı kadife görünümü</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+            <div id="theme-professional" class="selection-item theme-item">
+              <div class="selection-preview theme-preview professional"></div>
+              <div class="item-title">Siyah Profesyonel</div>
+              <div class="item-description">Profesyonel turnuva masası</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+            <div id="theme-vintage" class="selection-item theme-item">
+              <div class="selection-preview theme-preview vintage"></div>
+              <div class="item-title">Ahşap Vintage</div>
+              <div class="item-description">Nostaljik ahşap görünümü</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+            <div id="theme-neon" class="selection-item theme-item">
+              <div class="selection-preview theme-preview neon"></div>
+              <div class="item-title">Neon Cyberpunk</div>
+              <div class="item-description">Futuristik neon ışıklı tema</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+            <div id="theme-gold" class="selection-item theme-item">
+              <div class="selection-preview theme-preview gold"></div>
+              <div class="item-title">Altın Saray</div>
+              <div class="item-description">Lüks altın rengi tema</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+            <div id="theme-silver" class="selection-item theme-item">
+              <div class="selection-preview theme-preview silver"></div>
+              <div class="item-title">Gümüş Elit</div>
+              <div class="item-description">Şık gümüş rengi tema</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+            <div id="theme-purple" class="selection-item theme-item">
+              <div class="selection-preview theme-preview purple"></div>
+              <div class="item-title">Mor Kraliyet</div>
+              <div class="item-description">Kraliyet moru tema</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+            <div id="theme-forest" class="selection-item theme-item">
+              <div class="selection-preview theme-preview forest"></div>
+              <div class="item-title">Yeşil Orman</div>
+              <div class="item-description">Doğal orman yeşili tema</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+            <div id="theme-ice" class="selection-item theme-item">
+              <div class="selection-preview theme-preview ice"></div>
+              <div class="item-title">Buz Mavisi</div>
+              <div class="item-description">Soğuk buz mavisi tema</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+            <div id="theme-sunset" class="selection-item theme-item">
+              <div class="selection-preview theme-preview sunset"></div>
+              <div class="item-title">Gün Batımı</div>
+              <div class="item-description">Sıcak turuncu gün batımı</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+            <div id="theme-rose" class="selection-item theme-item">
+              <div class="selection-preview theme-preview rose"></div>
+              <div class="item-title">Pembe Gül</div>
+              <div class="item-description">Romantik pembe gül teması</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <!-- South Park Teması -->
+            <div id="theme-southpark" class="selection-item theme-item">
+              <div class="selection-preview theme-preview southpark"></div>
+              <div class="item-title">Snow Town</div>
+              <div class="item-description">Mountain air and snowy breeze</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            
+
+            <!-- Futurama Teması -->
+            <div id="theme-futurama" class="selection-item theme-item">
+              <div class="selection-preview theme-preview futurama"></div>
+              <div class="item-title">Retro Bot</div>
+              <div class="item-description">Orange and cyan neon</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <!-- Avatar Teması -->
+            <div id="theme-avatar" class="selection-item theme-item">
+              <div class="selection-preview theme-preview avatar"></div>
+              <div class="item-title">Four Elements</div>
+              <div class="item-description">Fire, water, earth, air</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <!-- Pokémon Teması -->
+            <div id="theme-pokemon" class="selection-item theme-item">
+              <div class="selection-preview theme-preview pokemon"></div>
+              <div class="item-title">Pocket Ball</div>
+              <div class="item-description">Red-white ball theme</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <!-- Dragon Ball Teması -->
+            <div id="theme-dragonball" class="selection-item theme-item">
+              <div class="selection-preview theme-preview dragonball"></div>
+              <div class="item-title">Golden Dragon</div>
+              <div class="item-description">Golden aura with orange glow</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <!-- Naruto Teması -->
+            <div id="theme-naruto" class="selection-item theme-item">
+              <div class="selection-preview theme-preview naruto"></div>
+              <div class="item-title">Shadow Ninja</div>
+              <div class="item-description">Navy and coral tones</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <!-- One Piece Teması -->
+            <div id="theme-onepiece" class="selection-item theme-item">
+              <div class="selection-preview theme-preview onepiece"></div>
+              <div class="item-title">Pirate Wave</div>
+              <div class="item-description">Ocean blue with gold</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button id="backToThemeMenu" class="menu-btn secondary">
+          <i class="fas fa-arrow-left"></i>
+          <span data-lang="back">Geri</span>
+        </button>
+      </div>
+
+      <!-- Istaka Seçim Ekranı -->
+      <div id="cueScreen" class="screen hidden">
+        <div class="screen-header">
+          <h2 data-lang="selectCue">Istaka Seçin</h2>
+        </div>
+        <div class="selection-container">
+          <div class="selection-grid">
+            <!-- Anime İstakaları - İlk sırada -->
+            <div id="cue-rickmorty" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview rickmorty"></div>
+              </div>
+              <div class="item-title">Portal Cue</div>
+              <div class="item-description">Neon green portal texture</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <div id="cue-simpsons" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview simpsons"></div>
+              </div>
+              <div class="item-title">Golden Cue</div>
+              <div class="item-description">Yellow-orange gradient</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <div id="cue-southpark" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview southpark"></div>
+              </div>
+              <div class="item-title">Alpine Cue</div>
+              <div class="item-description">Orange and ice-blue tones</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            
+
+            <div id="cue-futurama" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview futurama"></div>
+              </div>
+              <div class="item-title">Retrobot Cue</div>
+              <div class="item-description">Metal, orange and cyan</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <div id="cue-avatar" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview avatar"></div>
+              </div>
+              <div class="item-title">Element Cue</div>
+              <div class="item-description">Red, blue, green, orange</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <!-- Klasik İstakalar -->
+            <div id="cue-classic" class="selection-item cue-item selected">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview classic"></div>
+              </div>
+              <div class="item-title">Klasik Ahşap</div>
+              <div class="item-description">Geleneksel ahşap istaka</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <div id="cue-carbon" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview carbon"></div>
+              </div>
+              <div class="item-title">Profesyonel Karbon</div>
+              <div class="item-description">Modern karbon fiber istaka</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <div id="cue-ebony" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview ebony"></div>
+              </div>
+              <div class="item-title">Lüks Abanoz</div>
+              <div class="item-description">Premium abanoz ağacı istaka</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <div id="cue-modern" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview modern"></div>
+              </div>
+              <div class="item-title">Modern Beyaz</div>
+              <div class="item-description">Şık beyaz tasarım istaka</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <div id="cue-maple" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview maple"></div>
+              </div>
+              <div class="item-title">Vintage Maple</div>
+              <div class="item-description">Klasik akçaağaç istaka</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <div id="cue-gold" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview gold"></div>
+              </div>
+              <div class="item-title">Altın Lüks</div>
+              <div class="item-description">Altın kaplama lüks istaka</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <div id="cue-silver" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview silver"></div>
+              </div>
+              <div class="item-title">Gümüş Elit</div>
+              <div class="item-description">Gümüş kaplama elit istaka</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <div id="cue-neon" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview neon"></div>
+              </div>
+              <div class="item-title">Neon Cyber</div>
+              <div class="item-description">Futuristik neon istaka</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <div id="cue-crystal" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview crystal"></div>
+              </div>
+              <div class="item-title">Kristal Cam</div>
+              <div class="item-description">Şeffaf kristal cam istaka</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <div id="cue-bamboo" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview bamboo"></div>
+              </div>
+              <div class="item-title">Bambu Doğal</div>
+              <div class="item-description">Ekolojik bambu istaka</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <div id="cue-metal" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview metal"></div>
+              </div>
+              <div class="item-title">Metal Çelik</div>
+              <div class="item-description">Sağlam çelik metal istaka</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <div id="cue-rainbow" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview rainbow"></div>
+              </div>
+              <div class="item-title">Gökkuşağı</div>
+              <div class="item-description">Renkli gökkuşağı istaka</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <div id="cue-fire" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview fire"></div>
+              </div>
+              <div class="item-title">Ateş Kızılı</div>
+              <div class="item-description">Ateş kızılı sıcak istaka</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <!-- Diğer anime istakalar -->
+            <div id="cue-pokemon" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview pokemon"></div>
+              </div>
+              <div class="item-title">Pocket Cue</div>
+              <div class="item-description">Red-white ball vibe</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <div id="cue-dragonball" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview dragonball"></div>
+              </div>
+              <div class="item-title">Golden Aura Cue</div>
+              <div class="item-description">Gold and orange flame gradient</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <div id="cue-naruto" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview naruto"></div>
+              </div>
+              <div class="item-title">Ninja Cue</div>
+              <div class="item-description">Deep navy and coral</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+
+            <div id="cue-onepiece" class="selection-item cue-item">
+              <div class="selection-preview cue-preview">
+                <div class="cue-stick-preview onepiece"></div>
+              </div>
+              <div class="item-title">Pirate Cue</div>
+              <div class="item-description">Ocean blue and gold</div>
+              <div class="selection-badge">
+                <i class="fas fa-check"></i>
+                <span data-lang="selected">Seçili</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button id="backToCueMenu" class="menu-btn secondary">
+          <i class="fas fa-arrow-left"></i>
+          <span data-lang="back">Geri</span>
+        </button>
+      </div>
+
+      <!-- Ayarlar Ekranı -->
+      <div id="settingsScreen" class="screen hidden">
+        <div class="screen-header">
+          <h2 data-lang="gameSettings">Oyun Ayarları</h2>
+        </div>
+        <div class="settings-content">
+          <div class="setting-item">
+            <div class="setting-header">
+              <i class="setting-icon fas fa-mouse-pointer"></i>
+              <span class="setting-label" data-lang="sensitivity"
+                >Hassasiyet</span
+              >
+            </div>
+            <div class="setting-control">
+              <input
+                type="range"
+                id="settingsSensitivitySlider"
+                class="setting-slider"
+                min="10"
+                max="100"
+                value="50"
+              />
+              <span id="settingsSensitivityValue" class="setting-value"
+                >50</span
+              >
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-header">
+              <i class="setting-icon fas fa-volume-up"></i>
+              <span class="setting-label" data-lang="volume">Ses Seviyesi</span>
+            </div>
+            <div class="setting-control">
+              <input
+                type="range"
+                id="settingsVolumeSlider"
+                class="setting-slider"
+                min="0"
+                max="100"
+                value="30"
+              />
+              <span id="settingsVolumeValue" class="setting-value">30</span>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-header">
+              <i class="setting-icon fas fa-music"></i>
+              <span class="setting-label" data-lang="soundToggle"
+                >Ses Aç/Kapat</span
+              >
+            </div>
+            <div class="setting-control">
+              <button id="soundToggleBtn" class="setting-toggle active">
+                <span data-lang="soundEnabled">Ses Açık</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <button id="backToSettingsMenu" class="menu-btn secondary">
+          <i class="fas fa-arrow-left"></i>
+          <span data-lang="back">Geri</span>
+        </button>
+      </div>
+
+      <!-- Nick Girme Ekranı -->
+      <div id="nicknameScreen" class="screen hidden">
+        <div class="screen-header">
+          <h2 data-lang="enterNickname">Oyuncu Adınızı Girin</h2>
+        </div>
+        <div class="nickname-content">
+          <div class="nickname-form">
+            <div class="input-group">
+              <label for="nicknameInput" data-lang="nickname"
+                >Oyuncu Adı:</label
+              >
+              <input
+                type="text"
+                id="nicknameInput"
+                class="nickname-input"
+                data-lang="nicknamePlaceholder"
+                placeholder="Adınızı yazın..."
+                maxlength="15"
+                autocomplete="off"
+              />
+            </div>
+            <div id="nicknameError" class="error-message hidden">
+              <i class="fas fa-exclamation-triangle"></i>
+              <span data-lang="invalidNickname"
+                >Lütfen geçerli bir ad girin (2-15 karakter)</span
+              >
+            </div>
+            <button id="continueToGame" class="menu-btn primary">
+              <i class="fas fa-arrow-right"></i>
+              <span data-lang="continueGame">Oyuna Devam Et</span>
+            </button>
+          </div>
+
+          <div class="nickname-tips">
+            <h3><i class="fas fa-lightbulb"></i> İpuçları</h3>
+            <ul>
+              <li>2-15 karakter arası olmalı</li>
+              <li>Türkçe karakterler kullanabilirsiniz</li>
+              <li>Boşluk ve özel karakterler geçerli</li>
+              <li>Bu isim oyun boyunca görünecek</li>
+            </ul>
+          </div>
+        </div>
+        <button id="backToNicknameMenu" class="menu-btn secondary">
+          <i class="fas fa-arrow-left"></i>
+          <span data-lang="back">Geri</span>
+        </button>
+      </div>
+
+      <!-- Zorluk Seçim Ekranı -->
+      <div id="difficultyScreen" class="screen hidden">
+        <div class="screen-header">
+          <h2 data-lang="selectDifficulty">Zorluk Seviyesi Seçin</h2>
+        </div>
+        <div class="difficulty-options">
+          <button id="easyMode" class="difficulty-btn easy">
+            <div class="difficulty-icon">
+              <i class="fas fa-seedling"></i>
+            </div>
+            <h3 data-lang="easy">Kolay</h3>
+            <p data-lang="easyDesc">AI yavaş ve basit vuruşlar yapar</p>
+          </button>
+          <button id="mediumMode" class="difficulty-btn medium">
+            <div class="difficulty-icon">
+              <i class="fas fa-balance-scale"></i>
+            </div>
+            <h3 data-lang="medium">Orta</h3>
+            <p data-lang="mediumDesc">AI orta seviye strateji kullanır</p>
+          </button>
+          <button id="hardMode" class="difficulty-btn hard">
+            <div class="difficulty-icon">
+              <i class="fas fa-fire"></i>
+            </div>
+            <h3 data-lang="hard">Zor</h3>
+            <p data-lang="hardDesc">AI profesyonel seviyede oynar</p>
+          </button>
+        </div>
+        <button id="backToDifficultyMenu" class="menu-btn secondary">
+          <i class="fas fa-arrow-left"></i>
+          <span data-lang="back">Geri</span>
+        </button>
+      </div>
+
+      <!-- Kurallar Ekranı -->
+      <div id="rulesScreen" class="screen hidden">
+        <div class="screen-header">
+          <h2 data-lang="gameRules">Oyun Kuralları</h2>
+        </div>
+        <div class="rules-content">
+          <div class="rule-item">
+            <i class="fas fa-circle-dot"></i>
+            <span data-lang="rule1">8-Ball Pool kurallarına göre oynanır</span>
+          </div>
+          <div class="rule-item">
+            <i class="fas fa-random"></i>
+            <span data-lang="rule2">İlk vuruş rastgele belirlenir</span>
+          </div>
+          <div class="rule-item">
+            <i class="fas fa-bullseye"></i>
+            <span data-lang="rule3">Topları cebe indirmeye çalışın</span>
+          </div>
+          <div class="rule-item">
+            <i class="fas fa-layer-group"></i>
+            <span data-lang="rule4"
+              >Kendi grubunuzu (tam/yarım) belirleyin</span
+            >
+          </div>
+          <div class="rule-item">
+            <i class="fas fa-trophy"></i>
+            <span data-lang="rule5">8 numaralı topu en son indirin</span>
+          </div>
+          <div class="rule-item">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span data-lang="rule6"
+              >Beyaz topu cebe indirirseniz sıra rakibe geçer</span
+            >
+          </div>
+        </div>
+        <button id="backToMenu" class="menu-btn secondary">
+          <i class="fas fa-arrow-left"></i>
+          <span data-lang="backToMenu">Ana Menüye Dön</span>
+        </button>
+      </div>
+
+      <!-- Oyun Ekranı -->
+      <div id="gameScreen" class="screen hidden">
+        <!-- Ana Oyun Container - Ortalanmış -->
+        <div class="game-container">
+          <!-- Sol Panel - Oyuncu Bilgileri -->
+          <div class="game-info-panel">
+            <div class="player-section">
+              <div class="player-header">
+                <div class="player-avatar">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div class="player-info">
+                  <h4 id="playerNickDisplay">Oyuncu</h4>
+                  <span
+                    id="playerGroup"
+                    class="group-info"
+                    data-lang="groupUndetermined"
+                    >Grup: Belirlenmedi</span
+                  >
+                </div>
+              </div>
+              <div id="playerBalls" class="balls-list"></div>
+            </div>
+
+            <div class="game-status">
+              <div class="turn-indicator">
+                <span id="currentPlayer">Sıra: Oyuncu</span>
+              </div>
+              <div class="status-message">
+                <span id="gameStatus" data-lang="gameStarted"
+                  >Oyun başladı!</span
+                >
+              </div>
+            </div>
+
+            <div class="player-section">
+              <div class="player-header">
+                <div class="player-avatar ai">
+                  <i class="fas fa-robot"></i>
+                </div>
+                <div class="player-info">
+                  <h4>AI</h4>
+                  <span
+                    id="aiGroup"
+                    class="group-info"
+                    data-lang="groupUndetermined"
+                    >Grup: Belirlenmedi</span
+                  >
+                </div>
+              </div>
+              <div id="aiBalls" class="balls-list"></div>
+            </div>
+          </div>
+
+          <!-- Game Board Container -->
+          <div class="game-board-container">
+            <div class="game-area">
+              <canvas id="gameCanvas" width="1200" height="600"></canvas>
+              <!-- Istaka Canvas - Game Area İçinde Ama En Üstte -->
+              <canvas id="cueCanvas" width="2200" height="1600"></canvas>
+              <div
+                id="cueBallPlacement"
+                class="cue-ball-placement hidden"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alt Kontroller -->
+        <div id="controls" class="game-controls">
+          <div id="powerMeter" class="power-section">
+            <label data-lang="power">Güç:</label>
+            <div id="powerBar">
+              <div id="powerFill"></div>
+              <div class="power-markers">
+                <span class="marker" style="left: 25%"></span>
+                <span class="marker" style="left: 50%"></span>
+                <span class="marker" style="left: 75%"></span>
+              </div>
+            </div>
+          </div>
+          <div class="control-buttons">
+            <button id="pauseGame" class="control-btn">
+              <i class="fas fa-pause"></i>
+              <span data-lang="pause">Duraklat</span>
+            </button>
+            <button id="quitGame" class="control-btn">
+              <i class="fas fa-times"></i>
+              <span data-lang="quit">Çıkış</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Pause Menü -->
+        <div id="pauseMenu" class="pause-menu hidden">
+          <div class="pause-content">
+            <h2 data-lang="gameMenu">Oyun Menüsü</h2>
+
+            <div class="pause-section">
+              <label data-lang="sensitivity">Hassasiyet:</label>
+              <div class="sensitivity-control">
+                <input
+                  type="range"
+                  id="sensitivitySlider"
+                  min="10"
+                  max="100"
+                  value="50"
+                />
+                <span id="sensitivityValue">50</span>
+              </div>
+            </div>
+
+            <div class="pause-section">
+              <label data-lang="volume">Ses Seviyesi:</label>
+              <div class="sensitivity-control">
+                <input
+                  type="range"
+                  id="volumeSlider"
+                  min="0"
+                  max="100"
+                  value="30"
+                />
+                <span id="volumeValue">30</span>
+              </div>
+            </div>
+
+            <div class="pause-buttons">
+              <button id="resumeGame" class="menu-btn primary">
+                <i class="fas fa-play"></i>
+                <span data-lang="resume">Devam Et</span>
+              </button>
+              <button id="pauseBackToMenu" class="menu-btn secondary">
+                <i class="fas fa-home"></i>
+                <span data-lang="backToMainMenu">Ana Menüye Dön</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Oyun Sonu Ekranı -->
+      <div id="gameOverScreen" class="screen hidden">
+        <div class="game-over-content">
+          <div class="result-icon">
+            <i id="resultIcon" class="fas fa-trophy"></i>
+          </div>
+          <h2 id="gameResult">Oyun Bitti!</h2>
+          <div id="finalScore" class="final-score"></div>
+          <div class="menu-buttons">
+            <button id="playAgain" class="menu-btn primary">
+              <i class="fas fa-redo"></i>
+              <span data-lang="playAgain">Tekrar Oyna</span>
+            </button>
+            <button id="backToMainMenu" class="menu-btn secondary">
+              <i class="fas fa-home"></i>
+              <span data-lang="mainMenu">Ana Menü</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/game.js"></script>
+    </div>
+
+    <script>
+      (function () {
+        const btn = document.getElementById("backToHub");
+        if (!btn) return;
+
+        btn.addEventListener("click", function (e) {
+          try {
+            e.preventDefault();
+          } catch (_) {}
+          window.location.href = "../index.html";
+        });
+      })();
+    </script>
+
+  </body>
+</html>

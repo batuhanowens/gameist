@@ -1,0 +1,37 @@
+{
+  "id": "/?app=wordlist",
+  "name": "Wordlist - Wordle Game",
+  "short_name": "Wordlist",
+  "description": "A localized Wordle-style word guessing game in Turkish and English.",
+  "dir": "ltr",
+  "lang": "tr-TR",
+  "start_url": "./?source=pwa",
+  "scope": ".",
+  "display": "standalone",
+  "display_override": ["standalone", "window-controls-overlay"],
+  "orientation": "portrait-primary",
+  "theme_color": "#121213",
+  "background_color": "#121213",
+  "scope_extensions": [ { "origin": "." } ],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "categories": ["games", "puzzle"],
+  "launch_handler": { "client_mode": "navigate-existing" },
+  "iarc_rating_id": "TBD-REPLACE-WITH-VALID-IARC-ID",
+  "screenshots": [
+    { "src": "screenshots/screen-1.png", "sizes": "1280x720", "type": "image/png", "label": "Gameplay" },
+    { "src": "screenshots/screen-2.png", "sizes": "1280x720", "type": "image/png", "label": "Menu" }
+  ],
+  "related_applications": [
+    {
+      "platform": "windows",
+      "url": "https://apps.microsoft.com/detail/9NKJHXN4Z4NC",
+      "id": "9NKJHXN4Z4NC"
+    }
+  ],
+  "prefer_related_applications": false
+}

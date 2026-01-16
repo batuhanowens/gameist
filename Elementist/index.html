@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Elementist - Yükleniyor...</title>
+  <!-- Immediate redirect to preserve all current behavior -->
+  <meta http-equiv="refresh" content="0;url=glowlings.html" />
+  <script>
+    // JS fallback (e.g., some browsers/extensions block meta refresh)
+    (function(){
+      var target = 'glowlings.html';
+      if (location.pathname.endsWith('/') || location.pathname.endsWith('index.html')) {
+        // Preserve any existing query/hash when redirecting
+        var q = location.search || '';
+        var h = location.hash || '';
+        window.location.replace(target + q + h);
+      }
+    })();
+  </script>
+  <noscript>
+    <meta http-equiv="refresh" content="0;url=glowlings.html" />
+  </noscript>
+  <style>
+    html,body{height:100%;margin:0;background:#000;color:#e5e7eb;display:grid;place-items:center;font-family:system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif}
+    .box{padding:16px;border:1px solid #334155;border-radius:10px;background:#0b1220;box-shadow:0 0 18px rgba(14,165,233,.25)}
+    a{color:#7dd3fc}
+  </style>
+</head>
+<body>
+  <div class="box">
+    Ana sayfa glowlings.html sayfasına yönlendiriliyor...
+    <br />
+    <small>Eğer yönlendirilmediyseniz, <a href="glowlings.html">buraya tıklayın</a>.</small>
+  </div>
+</body>
+</html>

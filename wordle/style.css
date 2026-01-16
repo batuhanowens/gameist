@@ -1,0 +1,1328 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  transition: background-color 0.3s ease, color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+:root {
+  /* Light Theme */
+  --primary-color: #35587c;
+  --secondary-color: #3498db;
+  --accent-color: #e74c3c;
+  --success-color: #27ae60;
+  --warning-color: #f39c12;
+  --background-color: #ecf0f1;
+  --surface-color: #ffffff;
+  --text-color: #2c3e50;
+  --text-secondary: #7f8c8d;
+  --border-color: #bdc3c7;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* --- DARK MODE TEMASI --- */
+[data-theme="dark"] {
+  --background-color: #121213;
+  --surface-color: #18181a;
+  --primary-color: #81c784; /* Daha belirgin bir renk */
+  --secondary-color: #fdd835;
+  --text-color: #f2f2f2;
+  --subtle-text-color: #a7a7a8;
+  --border-color: #3a3a3c;
+  --incorrect-color: #3a3a3c; /* Gri ton */
+  --misplaced-color: #b59f3b;
+  --correct-color: #538d4e;
+  --keyboard-bg-color: #3a3a3c;
+  --keyboard-key-color: #f2f2f2;
+  --keyboard-key-inactive-color: #818384;
+  --shadow-color: rgba(0, 0, 0, 0.7);
+}
+
+/* Karanlık modda doğru tahmin edilen harfler */
+[data-theme="dark"] .tile.correct {
+  background-color: var(--correct-color);
+  border-color: var(--correct-color);
+  color: var(--keyboard-key-color); /* Beyaz veya açık renk */
+}
+
+/* Karanlık modda yanlış yerde olan harfler */
+[data-theme="dark"] .tile.misplaced {
+  background-color: var(--misplaced-color);
+  border-color: var(--misplaced-color);
+  color: var(--keyboard-key-color); /* Beyaz veya açık renk */
+}
+
+/* Karanlık modda yanlış harfler */
+[data-theme="dark"] .tile.incorrect {
+  background-color: var(--incorrect-color);
+  border-color: var(--incorrect-color);
+  color: var(--keyboard-key-color); /* Beyaz veya açık renk */
+}
+/* --- Karanlık Modda Harf Kutucukları (Tile) Düzeltmesi --- */
+
+/* Karanlık modda, HENÜZ TAHMİN EDİLMEMİŞ boş kutucuklar */
+[data-theme="dark"] .tile {
+  background-color: var(--background-color); /* Arka planı koyu yapar */
+  border-color: var(--border-color); /* Kenarlık rengini temayla uyumlu yapar */
+  color: var(--text-color); /* Yazı rengini açık renk (beyaz) yapar */
+}
+
+/* Karanlık modda, içine harf YAZILMIŞ ama HENÜZ GÖNDERİLMEMİŞ kutucuk */
+[data-theme="dark"] .tile.filled {
+  border-color: var(--text-secondary); /* Daha belirgin bir kenarlık rengi */
+}
+header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin-top: 20px;
+  padding: 0 10px;
+}
+
+.header-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+/* Varsayılan olarak her iki reklamı da göster */
+.desktop-ad,
+.mobile-ad {
+  display: block;
+}
+
+/* Büyük ekranlar için ayar (Tablet ve Masaüstü) */
+@media (min-width: 769px) {
+  .desktop-ad {
+    display: block; /* Masaüstü ve tablet ekranlarında büyük reklamı göster */
+  }
+
+  .mobile-ad {
+    display: none; /* Mobil reklamı gizle */
+    width: 300px;
+    height: 300px;
+  }
+}
+
+/* Küçük ekranlar için ayar (Mobil cihazlar) */
+@media (max-width: 768px) {
+  .desktop-ad {
+    display: none; /* Masaüstü reklamı gizle */
+  }
+
+  .mobile-ad {
+    display: block; /* Mobil reklamı göster */
+    margin-top: 90px; /* Üstten biraz daha boşluk ekle */
+    margin-bottom: 0; /* Aşağıya olan boşluğu kaldır */
+    width: 300px;
+    height: 300px;
+    position: relative; /* Sabitleme yerine konumunu ayarlama */
+    left: 40%; /* Sola kaydırmak için */
+    transform: translateX(-50%); /* Ortalamak için */
+  }
+}
+
+iframe {
+  width: 728px;
+  height: 90px;
+}
+
+/* Küçük Ekranlar İçin Ayarlama */
+@media (max-width: 768px) {
+  iframe {
+    width: 100%;
+    height: 90px;
+    margin-top: 20%;
+  }
+}
+
+h2 {
+  color: #51ff00;
+  font-size: 24px;
+  text-align: center;
+  max-width: 100%;
+  line-height: 1.2;
+}
+
+footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: #222;
+  color: white;
+  padding: 10px 0;
+  font-size: 14px;
+}
+
+.footer-container {
+  text-align: center;
+  width: 100%;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(
+    135deg,
+    var(--background-color),
+    var(--surface-color)
+  );
+  color: var(--text-color);
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  display: flex; /* Eklendi */
+  align-items: center; /* Eklendi */
+  justify-content: center; /* Eklendi */
+}
+
+.container {
+  text-align: center;
+  padding: 20px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.menu-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--primary-color); /* <-- Renk artık temaya göre değişecek */
+  text-shadow: 2px 2px 4px var(--shadow-color);
+}
+#gameContainer {
+  width: 100%;
+  padding: 1rem;
+}
+#game-board {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 30px;
+}
+
+.row {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+}
+
+.tile {
+  width: var(--tile-size);
+  height: var(--tile-size);
+  border: 2px solid #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+  text-transform: uppercase;
+  background-color: white;
+  transition: all 0.3s;
+}
+#keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.keyboard-row {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  width: 100%;
+}
+
+#keyboard button {
+  font-family: inherit;
+  font-weight: bold;
+  border: 0;
+  padding: 0;
+  height: 58px;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1; /* Tuşların esnek büyümesi için */
+  min-width: 0;
+
+
+  /* Temalara uyumlu renkler */
+  background-color: var(--key-bg, #d3d6da);
+  color: var(--key-text-color, #1a1a1a);
+  /* Tuşa basma hissi için geçiş efekti */
+  transition: all 0.1s ease-in-out;
+}
+
+@media (max-width: 520px) {
+  #keyboard {
+    gap: 6px;
+  }
+
+  .keyboard-row {
+    gap: 5px;
+  }
+
+  #keyboard button {
+    height: 48px;
+    font-size: 13px;
+  }
+
+  .keyboard-row-wide {
+    flex-wrap: wrap;
+  }
+
+  .keyboard-row-wide .wide-button {
+    flex: 1 1 calc(50% - 6px);
+    min-width: 120px;
+  }
+}
+
+button:hover {
+  background-color: #bbbdc0;
+}
+
+.wide-button {
+  flex: 1.5; /* Diğer tuşlardan %50 daha geniş */
+  font-size: 0.8rem;
+  background-color: var(--key-special-bg, #adb5bd);
+  color: var(--key-special-text-color, #ffffff);
+}
+#keyboard button:active {
+  transform: scale(0.95);
+  filter: brightness(0.9);
+}
+
+#message {
+  position: fixed;
+  top: 70%; /* Ekranın ortasından biraz daha aşağıya */
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.85);
+  color: white;
+  font-size: 1.8rem;
+  padding: 25px 40px;
+  border-radius: 15px;
+  text-align: center;
+  max-width: 80%;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden; /* Başlangıçta gizli */
+  transition: opacity 0.5s ease, visibility 0s 0.5s; /* Yavaşça görünür hale gelsin */
+}
+
+#message.show {
+  visibility: visible; /* Görünür yapalım */
+  opacity: 1; /* Yavaşça görünür hale gelsin */
+  transition: opacity 0.5s ease;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.filled {
+  border-color: #878a8c;
+}
+
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-5px);
+  }
+  80% {
+    transform: translateX(5px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.shake {
+  animation: shake 0.5s;
+}
+
+.tile.filled {
+  transform: scale(1.1);
+  transition: transform 0.1s;
+}
+
+.tile.correct,
+.tile.present,
+.tile.absent {
+  transform: rotateX(360deg);
+}
+
+/* Renk sınıfları */
+.correct {
+  background-color: #6aaa64 !important;
+  color: white !important;
+  border-color: #6aaa64 !important;
+}
+
+.present {
+  background-color: #c9b458 !important;
+  color: white !important;
+  border-color: #c9b458 !important;
+}
+
+.absent {
+  background-color: #787c7e !important;
+  color: white !important;
+  border-color: #787c7e !important;
+}
+
+.all-wrong {
+  background-color: #ff4444 !important;
+  color: white !important;
+  border-color: #ff4444 !important;
+}
+
+/* Mobil klavye için gizli input */
+#mobile-input {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  z-index: -1;
+}
+.screen {
+  text-align: center;
+  width: 100%;
+  max-width: 800px; /* Menünün daha geniş olması için artırıldı */
+  margin: 0 auto;
+  padding: 20px;
+  animation: fadeIn 0.5s ease;
+}
+
+.hidden {
+  display: none !important;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Tasarım */
+@media screen and (max-width: 360px) {
+  :root {
+    --tile-size: 35px;
+    --keyboard-button-size: 25px;
+  }
+
+  header {
+    margin-top: 15px;
+  }
+
+  .header-container {
+    max-width: 300px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  .container {
+    padding: 10px;
+  }
+
+  button {
+    padding: 4px;
+    font-size: 0.7rem;
+  }
+
+  .wide-button {
+    min-width: 40px;
+  }
+
+  .tile {
+    font-size: 18px;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  :root {
+    --tile-size: 55px;
+    --keyboard-button-size: 40px;
+  }
+
+  .header-container {
+    max-width: 600px;
+  }
+
+  h2 {
+    font-size: 32px;
+  }
+
+  .container {
+    padding: 20px;
+  }
+
+  #keyboard button {
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  .wide-button {
+    min-width: 80px;
+  }
+
+  .tile {
+    font-size: 28px;
+  }
+}
+
+#keyboard {
+  margin-top: 20px;
+  padding-bottom: 80px;
+}
+
+@media (max-width: 768px) {
+  .tile {
+    width: 35px;
+    height: 35px;
+    font-size: 19px;
+  }
+  #keyboard button {
+    min-width: 30px;
+    height: 30px;
+    font-size: 0.9rem;
+  }
+}
+#reset-button {
+  width: 80px; /* Butonun genişliği */
+  height: 40px; /* Butonun yüksekliği */
+  font-size: 16px; /* Yazı boyutu */
+  font-weight: bold;
+  background-color: #d3d6da; /* Kırmızı arka plan */
+  color: rgb(0, 0, 0); /* Beyaz yazı */
+  border: 2px solid #ffffff; /* Hafif koyu kırmızı çerçeve */
+  border-radius: 8px; /* Köşeleri yuvarlat */
+  cursor: pointer;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#reset-button:hover {
+  background-color: #ffffff; /* Üzerine gelince daha koyu kırmızı */
+}
+
+#reset-button:active {
+  background-color: #ffffff; /* Basınca daha koyu kırmızı */
+  transform: scale(0.95); /* Hafif küçültme efekti */
+}
+/* --- BAŞLIK STİLLERİ --- */
+.screen-header h1,
+.screen-header h2 {
+  margin-bottom: 2rem;
+  color: var(--primary-color);
+  text-shadow: 2px 2px 4px var(--shadow-color);
+}
+
+.menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.menu-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+.menu-header h1 i {
+  color: var(--accent-color);
+  margin-right: 15px;
+}
+.menu-controls {
+  display: flex;
+  gap: 15px;
+}
+.control-icon {
+  background: var(--surface-color);
+  border: 2px solid var(--border-color);
+  padding: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--text-color);
+  font-size: 1.1rem;
+  position: relative;
+}
+.control-icon span {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--secondary-color);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- ANA MENÜ BUTONLARI --- */
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+  margin-bottom: 3rem;
+}
+.oyunicih1 {
+  color: wheat;
+}
+.menu-btn {
+  border: none;
+  padding: 18px 40px;
+  font-size: 1.2rem;
+  color: white;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 4px 15px var(--shadow-color);
+}
+
+.menu-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px var(--shadow-color);
+}
+
+.menu-btn.primary {
+  background: linear-gradient(135deg, var(--success-color), #229954);
+}
+.menu-btn.secondary {
+  background: linear-gradient(135deg, var(--text-secondary), #6c7b7d);
+}
+.menu-btn.theme {
+  background: linear-gradient(135deg, var(--warning-color), #e67e22);
+}
+.menu-btn.settings {
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+}
+#showgames {
+  background-color: rgb(155, 0, 0);
+  text-decoration: none;
+  font-weight: bold;
+}
+.games {
+  text-decoration: none;
+}
+
+/* --- SOSYAL MEDYA LİNKLERİ --- */
+.social-links {
+  margin-top: 2rem;
+}
+.social-links h3 {
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+.social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  color: white;
+  text-decoration: none;
+  font-size: 1.2rem;
+}
+.social-link.twitter {
+  background: #1da1f2;
+}
+.social-link.facebook {
+  background: #4267b2;
+}
+.social-link.youtube {
+  background: #ff0000;
+}
+.social-link.discord {
+  background: #7289da;
+}
+/*  */
+/* AYARLAR VE KURALLAR EKRANI İÇİN GEREKLİ TÜM STİLLER */
+
+/* Ekranların ana yapısı ve gizlenmesi */
+.screen {
+  text-align: center;
+  width: 100%;
+  max-width: 1400px;
+  padding: 20px;
+  animation: fadeIn 0.5s ease;
+}
+
+.hidden {
+  display: none !important;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Ekran başlığı */
+.screen-header h2 {
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  color: var(--primary-color);
+}
+
+/* Modern, tema uyumlu menü butonu (tüm ekran boyutları) */
+#menu-button {
+  background: linear-gradient(135deg, var(--primary-color), #2e6ea0);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+  gap: 10px;
+  letter-spacing: 0.3px;
+}
+#menu-button:hover { opacity: 0.95; }
+#menu-button i { font-size: 0.95rem; opacity: 0.95; }
+#menu-button span { font-weight: 700; }
+
+/* Geri butonu için */
+.menu-btn {
+  border: none;
+  padding: 18px 40px;
+  font-size: 1.2rem;
+  color: white;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 4px 15px var(--shadow-color);
+}
+.menu-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px var(--shadow-color);
+}
+.menu-btn.secondary {
+  background: linear-gradient(135deg, var(--text-secondary), #6c7b7d);
+}
+
+/* Ayarlar ve Kurallar içeriğinin kutusu */
+.settings-content,
+.rules-content {
+  background: var(--surface-color);
+  padding: 30px;
+  border-radius: 15px;
+  margin-bottom: 2rem;
+  text-align: left;
+  box-shadow: 0 4px 15px var(--shadow-color);
+  border: 1px solid var(--border-color);
+  max-width: 600px; /* Genişliği ayarlar */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Ayarlar içeriği */
+.setting-item {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: var(--background-color);
+  border-radius: 10px;
+}
+.setting-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.setting-icon {
+  color: var(--secondary-color);
+  font-size: 1.3rem;
+  min-width: 24px;
+}
+.setting-label {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+.setting-control {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  justify-content: center;
+}
+.setting-slider {
+  flex: 1;
+  max-width: 300px;
+  height: 8px;
+  background: var(--background-color);
+  border-radius: 5px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.setting-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--secondary-color);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 6px var(--shadow-color);
+}
+.setting-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--secondary-color);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 6px var(--shadow-color);
+}
+.setting-value {
+  background: var(--secondary-color);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  min-width: 50px;
+  text-align: center;
+}
+.setting-toggle {
+  background: var(--border-color);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 600;
+  min-width: 120px;
+}
+.setting-toggle.active {
+  background: var(--success-color);
+  color: rgb(0, 0, 0);
+}
+
+/* Kurallar içeriği */
+.rule-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  padding: 15px;
+  background: var(--background-color);
+  border-radius: 10px;
+}
+.rule-item i {
+  color: var(--secondary-color);
+  font-size: 1.2rem;
+  min-width: 20px;
+}
+/* AYARLAR VE KURALLAR EKRANI İÇİN GEREKLİ TÜM STİLLER */
+
+/* Ekran başlığı */
+.screen-header h2 {
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  color: var(--primary-color);
+}
+
+/* Ayarlar ve Kurallar içeriğinin kutusu */
+.settings-content,
+.rules-content {
+  background: var(--surface-color);
+  padding: 30px;
+  border-radius: 15px;
+  margin-bottom: 2rem;
+  text-align: left;
+  box-shadow: 0 4px 15px var(--shadow-color);
+  border: 1px solid var(--border-color);
+  max-width: 600px; /* Genişliği ayarlar */
+  margin-left: auto;
+  margin-right: auto;
+  color: var(--text-color); /* Metin rengini tema değişkeninden al */
+}
+
+.settings-content p,
+.rules-content p {
+  color: var(--text-color);
+}
+
+/* Ayarlar içeriği */
+.setting-item {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: var(--background-color);
+  border-radius: 10px;
+}
+.setting-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.setting-icon {
+  color: var(--secondary-color);
+  font-size: 1.3rem;
+  min-width: 24px;
+}
+.setting-label {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+.setting-control {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  justify-content: center;
+}
+.setting-slider {
+  flex: 1;
+  max-width: 300px;
+  height: 8px;
+  background: var(--background-color);
+  border-radius: 5px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.setting-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--secondary-color);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 6px var(--shadow-color);
+}
+.setting-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--secondary-color);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 6px var(--shadow-color);
+}
+.setting-value {
+  background: var(--secondary-color);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  min-width: 50px;
+  text-align: center;
+}
+.setting-toggle {
+  background: var(--border-color);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 600;
+  min-width: 120px;
+}
+.setting-toggle.active {
+  background: var(--success-color);
+  color: white;
+}
+
+/* Kurallar içeriği */
+.rule-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding: 15px;
+  background: var(--background-color);
+  border-radius: 10px;
+}
+.rule-item i {
+  color: var(--secondary-color);
+  font-size: 1.2rem;
+  min-width: 20px;
+}
+.rule-item p {
+  color: var(--primary-color);
+}
+
+/* Kural kutusunun içindeki kalın metinlerin de rengini ayarlar */
+.rule-item p b {
+  color: var(--primary-color);
+}
+
+/* Kurallar ekranındaki alt maddelerin İÇERİĞİNİ girintili yapar */
+.rule-sub-item {
+  padding-left: 50px; /* Normal 15px padding + 35px ekstra boşluk */
+}
+
+/* Kural ekranındaki renkli kutuların stilini düzenler */
+.rule-tile-display {
+  width: 30px;
+  height: 30px;
+  color: white !important;
+  border: none !important;
+  font-size: 1rem !important;
+  transform: none !important;
+  flex-shrink: 0; /* Kutunun küçülmesini engeller */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+/* Kurallar ekranındaki örnek kutular için net renk ataması (tema bağımsız) */
+#rulesScreen .rule-tile-display.correct {
+  background-color: var(--correct-color, #6aaa64) !important;
+  border-color: var(--correct-color, #6aaa64) !important;
+  color: #ffffff !important;
+}
+#rulesScreen .rule-tile-display.present {
+  background-color: var(--misplaced-color, #c9b458) !important;
+  border-color: var(--misplaced-color, #c9b458) !important;
+  color: #ffffff !important;
+}
+#rulesScreen .rule-tile-display.absent {
+  background-color: var(--incorrect-color, #787c7e) !important;
+  border-color: var(--incorrect-color, #787c7e) !important;
+  color: #ffffff !important;
+}
+/* <CHANGE> Klavyedeki menü ve yenile butonlarını görünür yap */
+.keyboard-control-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 8px 12px !important;
+  border: none !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  min-width: 80px !important;
+  margin: 2px !important;
+}
+
+.keyboard-control-btn.menu {
+  background: #6aaa64 !important;
+  color: white !important;
+}
+
+.keyboard-control-btn.reset {
+  background: #e74c3c !important;
+  color: white !important;
+}
+
+.keyboard-control-btn:hover {
+  opacity: 0.8 !important;
+}
+
+/* <CHANGE> Mobil için klavye butonlarını responsive yap */
+@media screen and (max-width: 768px) {
+  .keyboard-control-btn {
+    font-size: 11px !important;
+    padding: 6px 10px !important;
+    min-width: 70px !important;
+  }
+} /* --- OYUN İÇİ DURAKLATMA MENÜSÜ (MODAL) --- */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s 0.3s;
+}
+
+.modal.open {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease;
+}
+
+.modal-content {
+  background: #1e1e1e; /* Force contrast to ensure visibility */
+  color: #ffffff;       /* High-contrast text */
+  padding: 30px 40px;
+  border-radius: 20px;
+  text-align: center;
+  position: relative;
+  z-index: 100000; /* İçerik her şeyin üstünde */
+  min-width: 320px;
+  max-width: 400px;
+  width: 90%;
+  min-height: 220px;
+  display: block;
+  pointer-events: auto;
+  border: 2px solid rgba(255,255,255,0.2);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+  opacity: 1;
+}
+
+.modal.open .modal-content {
+  transform: scale(1);
+}
+
+.modal-content h3 {
+  margin-bottom: 25px;
+  color: var(--primary-color);
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+/* Ensure modal buttons are visible clearly */
+.modal .menu-btn.primary {
+  background: #6aaa64;
+  color: #fff;
+}
+.modal .menu-btn.secondary {
+  background: #e74c3c;
+  color: #fff;
+}
+
+/* Modal içerisindeki ayar kutusu */
+.settings-content-modal {
+  background: transparent;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  margin-bottom: 25px;
+}
+
+.settings-content-modal .setting-item {
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  margin-bottom: 15px;
+}
+
+/* Modal içerisindeki butonlar */
+.modal-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.modal-content .menu-btn {
+  width: 100%;
+  margin: 0;
+}
+
+/* --- Ana Menü: Oyunu Kapat butonu varyantı --- */
+.menu-btn.danger {
+  background: #e74c3c;
+  color: #ffffff;
+}
+.menu-btn.danger:hover {
+  filter: brightness(0.95);
+}
+
+/* --- Ana Menü: 242 Games Marka Bloğu --- */
+.brand {
+  margin-top: 24px;
+  text-align: center;
+}
+.brand-name {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+.brand-accent {
+  color: var(--primary-color, #6aaa64);
+}
+.brand-tagline {
+  margin: 6px 0 0;
+  opacity: 0.8;
+  font-size: 14px;
+}
+/* --- MODAL İÇERİSİNDEKİ SES AÇ/KAPAT BUTONU --- */
+#modalSoundToggleBtn {
+  background-color: var(--background-color); /* Menü arka plan rengi */
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+#modalSoundToggleBtn.active {
+  background-color: var(
+    --border-color /* Aktif olduğunda farklı bir renk verebilirsiniz */
+  ); /* Aktif olduğunda farklı bir renk verebilirsiniz */
+  color: var(--keyboard-key-color);
+}
+
+#modalSoundToggleBtn:hover {
+  background-color: var(--surface-color); /* Menü yüzey rengi */
+}
+/* --- RESPONSIVE KLAVYE VE KONTROL YÖNETİMİ --- */
+
+/* Varsayılan olarak (mobil ve tablette) masaüstü tuşlarını GİZLE */
+#desktop-controls {
+  display: none;
+}
+
+/* Masaüstü kontrol tuşlarının stilini belirleyelim */
+#desktop-controls {
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  max-width: 400px;
+  margin: 2rem auto 0;
+}
+#desktop-controls .wide-button {
+  flex: 1;
+  height: 50px;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  background-color: var(--key-special-bg, #adb5bd);
+  color: var(--key-special-text-color, #ffffff);
+  cursor: pointer;
+  border: none;
+}
+#desktop-controls .wide-button:hover {
+  opacity: 0.8;
+}
+
+/* --- SADECE BÜYÜK MASAÜSTÜ EKRANLARI İÇİN --- */
+/* 1024px, tabletleri dışarıda bırakıp sadece laptop/masaüstü hedefler */
+@media (min-width: 1024px) {
+  /* Masaüstünde klavye GÖRÜNSÜN (menü butonu burada) */
+  #keyboard {
+    display: flex;
+    max-width: 400px; /* game-board ile hizala */
+    margin: 0 auto;   /* ortala */
+  }
+
+  /* Tüm tuşları gizle, sadece Menü görünsün */
+  #keyboard .keyboard-row button {
+    display: none;
+  }
+  /* Reset butonu masaüstünde tamamen gizli */
+  #reset-button {
+    display: none !important;
+  }
+  /* Menü butonunu göster ve ortala */
+  #menu-button {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;            /* game board genişliğiyle aynı */
+    padding: 0 16px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary-color), #2e6ea0);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    letter-spacing: 0.3px;
+  }
+  #menu-button:hover { opacity: 0.9; }
+
+  /* Icon alignment for menu button */
+  #menu-button i { font-size: 0.95rem; opacity: 0.95; }
+  #menu-button span { font-weight: 700; }
+
+  /* Active/Focus states */
+  #menu-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    filter: brightness(0.98);
+  }
+  #menu-button:focus { outline: 2px solid rgba(255,255,255,0.2); outline-offset: 2px; }
+
+  /* Satırları ortala ki tek buton düzgün dursun */
+  #keyboard .keyboard-row {
+    display: flex;
+    justify-content: center;
+  }
+
+  /* Masaüstü için olan kontrol tuşları opsiyonel; HTML'de yoksa görünmez kalır */
+  #desktop-controls {
+    display: none;
+  }
+
+  /* Oyun tahtasını masaüstünde ortala */
+  #game-board {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}

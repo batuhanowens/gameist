@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gameist | Elementist, 2048, Wordlist, Bilardist - Ücretsiz Online Oyun Hub'ı</title>
+    <meta
+      name="description"
+      content="Gameist: Elementist, 2048, Wordlist ve Bilardist gibi oyunları tek yerde toplayan premium oyun hub'ı. Hemen oyna!"
+    />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="./index.html" />
+    <meta property="og:site_name" content="Gameist" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Gameist - Premium Oyun Deneyimi" />
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-57L2NFVJYL"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', 'G-57L2NFVJYL');
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9478711342689131"
+         crossorigin="anonymous"></script>
+    <meta
+      property="og:description"
+      content="Elementist, 2048, Wordlist ve Bilardist: hepsi Gameist ana menüsünde."
+    />
+    <meta property="og:url" content="./index.html" />
+    <meta property="og:image" content="./2048/logo.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Gameist - Premium Oyun Deneyimi" />
+    <meta
+      name="twitter:description"
+      content="Elementist, 2048, Wordlist ve Bilardist oyunlarına tek yerden ulaş."
+    />
+    <meta name="twitter:image" content="./2048/logo.png" />
+    <link rel="icon" href="ico.png" type="image/png" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Gameist",
+        "url": "https://gameist.fun/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://gameist.fun/?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "Gameist Games",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Elementist",
+            "url": "https://gameist.fun/Elementist/glowlings.html"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "2048",
+            "url": "https://gameist.fun/2048/index.html"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Wordlist",
+            "url": "https://gameist.fun/wordle/index.html"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "name": "Bilardist",
+            "url": "https://gameist.fun/bilardo/index.html"
+          }
+        ]
+      }
+    </script>
+    <link rel="stylesheet" href="giris_stili.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+    <link
+      rel="preload"
+      as="style"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      />
+    </noscript>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Gameist",
+        "url": "./index.html",
+        "inLanguage": "tr",
+        "description": "Oyunları tek hub içinde toplayan Gameist ana menüsü.",
+        "hasPart": [
+          {
+            "@type": "WebPage",
+            "name": "Elementist",
+            "url": "./Elementist/glowlings.html"
+          },
+          {
+            "@type": "WebPage",
+            "name": "2048",
+            "url": "./2048/index.html"
+          },
+          {
+            "@type": "WebPage",
+            "name": "Wordlist",
+            "url": "./wordle/index.html"
+          },
+          {
+            "@type": "WebPage",
+            "name": "Bilardist",
+            "url": "./bilardo/index.html"
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <!-- Animated Background -->
+    <div class="animated-bg">
+      <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+        <div class="shape shape-5"></div>
+      </div>
+    </div>
+
+    <!-- Rick & Morty Easter Egg -->
+    <!-- <div class="rick-morty-container">
+      <div class="rick-wrapper">
+        <img src="rick.gif" alt="Rick" class="rick-gif" id="rickGif" />
+        <div class="speech-bubble" id="speechBubble">
+          <span>Doğru yerdesin Morty!</span>
+        </div>
+        <audio id="rickAudio" src="ricklaugh.mp3"></audio>
+      </div>
+    </div> -->
+
+    <!-- Main Container -->
+    <div class="main-container">
+      <!-- Header Section -->
+      <header class="hero-section">
+        <div class="hero-content">
+          <div class="lang-switch" aria-label="Language selector">
+            <label class="lang-switch-label" for="gameistLangSelect" data-i18n="lang_label">Language</label>
+            <select id="gameistLangSelect" class="lang-switch-select">
+              <option value="tr">TR</option>
+              <option value="en">EN</option>
+            </select>
+          </div>
+          <div class="logo-container">
+            <div class="logo-icon">
+              <i class="fas fa-gamepad"></i>
+            </div>
+            <h1 class="brand-title">
+              <span class="brand-main">Gameist</span>
+              <span class="brand-sub" data-i18n="brand_sub">Premium Gaming Hub</span>
+            </h1>
+          </div>
+
+       
+        </div>
+      </header>
+
+      <!-- Games Section -->
+      <section class="games-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <i class="fas fa-fire"></i>
+            <span data-i18n="section_popular_games">Popüler Oyunlar</span>
+          </h3>
+          <p class="section-subtitle" data-i18n="section_popular_subtitle">
+            Hemen oynamaya başla ve eğlenceyi keşfet!
+          </p>
+        </div>
+
+        <div class="games-grid">
+           <a href="Elementist/glowlings.html"  class="game-card featured">
+            <div class="card-header">
+            
+              <div class="game-badge">
+                <i class="fas fa-crown"></i>
+                <span data-i18n="badge_popular">Popüler</span>
+              </div>
+              <div class="card-actions">
+                <button class="action-btn favorite">
+                  <i class="far fa-heart"></i>
+                </button>
+                <button class="action-btn share">
+                  <i class="fas fa-share"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="card-image">
+              <img src="Elementist/elementistlogo.png" alt="Elementist - Roguelite" loading="lazy" decoding="async" />
+              <div class="play-overlay">
+                <div class="play-button">
+                  <i class="fas fa-play"></i>
+                </div>
+              </div>
+            </div>
+   <!-- Batak Game Card -->
+            <div class="card-content">
+              <div class="game-title">
+                <h4 data-i18n="game_elementist_title">Elementist</h4>
+                <span class="game-icon">🃏</span>
+              </div>
+              <p class="game-description" data-i18n="game_elementist_desc">
+              Elementlerin gücünü keşfet, düşmanları alt et ve hayatta kalabileceğin en zorlu arenada savaş!
+              </p>
+              <div class="game-features">
+                <span class="feature-tag">
+                  <i class="fas fa-lightbulb"></i>
+                <span data-i18n="tag_roguelite">Roguelite</span>
+                </span>
+                <span class="feature-tag">
+                  <i class="fas fa-language"></i>
+                  TR / EN / DE / ES / PT-BR / JA / HI / ZH
+                </span>
+              </div>
+              <div class="card-footer">
+               <div class="rating">
+                  <div class="stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                  </div>
+                  <span class="rating-text">5.0</span>
+                </div>
+                <div class="play-count">
+                  <i class="fas fa-users"></i>
+                  <span>1.2K+ oyuncu</span>
+                </div>
+              </div>
+            </div>
+          </a>
+          <!-- Bilardo Game Card -->
+          <a href="2048/index.html" class="game-card">
+            <div class="card-header">
+              <div class="game-badge tas">
+                <i class="fas fa-brain"></i>
+                <span data-i18n="badge_classic">Klasik</span>
+              </div>
+              <div class="card-actions">
+                <button class="action-btn favorite">
+                  <i class="far fa-heart"></i>
+                </button>
+                <button class="action-btn share">
+                  <i class="fas fa-share"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="card-image">
+              <img
+                src="2048/logo.png"
+                alt="2048 - Sayıları Birleştir"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="play-overlay">
+                <div class="play-button">
+                  <i class="fas fa-play"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-content">
+              <div class="game-title">
+                <h4 data-i18n="game_2048_title">2048</h4>
+                <span class="game-icon">🔢</span>
+              </div>
+              <p class="game-description" data-i18n="game_2048_desc">
+              Sayıları birleştir, stratejini kur ve 2048'e ulaş!
+              </p>
+              <div class="game-features">
+                <span class="feature-tag">
+                  <i class="fas fa-lightbulb"></i>
+                 <span data-i18n="tag_strategy">Strateji</span>
+                </span>
+                <span class="feature-tag">
+                  <i class="fas fa-language"></i>
+                  TR / EN / DE
+                </span>
+              </div>
+              <div class="card-footer">
+                <div class="rating">
+                  <div class="stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                  </div>
+                  <span class="rating-text">5.0</span>
+                </div>
+                <div class="play-count">
+                  <i class="fas fa-users"></i>
+                  <span>5K+ oyuncu</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Wordle Game Card -->
+          <a href="wordle/index.html" class="game-card">
+            <div class="card-header">
+              <div class="game-badge brain">
+                <i class="fas fa-brain"></i>
+                <span data-i18n="badge_brain">Zeka</span>
+              </div>
+              <div class="card-actions">
+                <button class="action-btn favorite">
+                  <i class="far fa-heart"></i>
+                </button>
+                <button class="action-btn share">
+                  <i class="fas fa-share"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="card-image">
+              <img src="wordle/wordlist.png" alt="Wordlist - Kelime Oyunu" loading="lazy" decoding="async" />
+              <div class="play-overlay">
+                <div class="play-button">
+                  <i class="fas fa-play"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-content">
+              <div class="game-title">
+                <h4 data-i18n="game_wordlist_title">Wordlist</h4>
+                <span class="game-icon">🧠</span>
+              </div>
+              <p class="game-description" data-i18n="game_wordlist_desc">
+                Kelime ustası ol! Harfleri birleştir, gizli kelimeleri bul.
+                Beyin gelişimi ve jimnastiği için mükemmel bir deneyim.
+              </p>
+              <div class="game-features">
+                <span class="feature-tag">
+                  <i class="fas fa-lightbulb"></i>
+                  <span data-i18n="tag_brain_training">Zeka Geliştirici</span>
+                </span>
+                <span class="feature-tag">
+                  <i class="fas fa-language"></i>
+                  TR / EN
+                </span>
+              </div>
+              <div class="card-footer">
+                <div class="rating">
+                  <div class="stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                  </div>
+                  <span class="rating-text">4.9</span>
+                </div>
+                <div class="play-count">
+                  <i class="fas fa-users"></i>
+                  <span>850+ oyuncu</span>
+                </div>
+              </div>
+            </div>
+          </a>
+          <!-- Wordle Game Card -->
+         
+          <!-- Okey Game Card -->
+          <a href="bilardo/index.html" class="game-card">
+            <div class="card-header">
+              <div class="game-badge card">
+                <i class="fas fa-brain"></i>
+                <span data-i18n="badge_pool">Rick'in uğrak alanı</span>
+              </div>
+              <div class="card-actions">
+                <button class="action-btn favorite">
+                  <i class="far fa-heart"></i>
+                </button>
+                <button class="action-btn share">
+                  <i class="fas fa-share"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="card-image">
+              <img
+                src="bilardo/img/bilardist.png"
+                alt="Bilardist - Premium Bilardo Oyunu"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="play-overlay">
+                <div class="play-button">
+                  <i class="fas fa-play"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-content">
+              <div class="game-title">
+                <h4 data-i18n="game_bilardist_title">Bilardist</h4>
+                <span class="game-icon">🎱</span>
+              </div>
+              <p class="game-description" data-i18n="game_bilardist_desc">
+                Uzaydan gelen premium bilardo deneyimi. Gerçekçi fizik motoru ve
+                muhteşem grafiklerle bilardo oynamanın keyfini çıkar!
+              </p>
+              <div class="game-features">
+                <span class="feature-tag">
+                  <i class="fas fa-magic"></i>
+                  <span data-i18n="tag_realistic_physics">Gerçekçi Fizik</span>
+                </span>
+                <span class="feature-tag">
+                  <i class="fas fa-language"></i>
+                  TR / EN
+                </span>
+              </div>
+              <div class="card-footer">
+                <div class="rating">
+                  <div class="stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                  </div>
+                  <span class="rating-text">4.9</span>
+                </div>
+                <div class="play-count">
+                  <i class="fas fa-users"></i>
+                  <span>900+ oyuncu</span>
+                </div>
+              </div>
+            </div>
+          </a>
+          
+        </div>
+      </section>
+
+      <!-- Call to Action -->
+      <section class="cta-section">
+        <div class="cta-content">
+          <h3 class="cta-title" data-i18n="cta_title">Bizi takip et!</h3>
+          <p class="cta-description" data-i18n="cta_description">
+            Yeni oyunlar ve özellikler üzerinde çalışıyoruz. Güncellemeler için
+            takipte kalın!
+          </p>
+        <div class="social-icons">
+            <a
+              href="https://www.instagram.com/batuhanberk.space/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="social-link instagram"
+            ><i class="fab fa-instagram" style="color:#E1306C;"></i></a>
+            <a
+              href="https://discord.gg/EnzpuEYXFb"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="social-link discord"
+            >
+              <i class="fab fa-discord"></i>
+            </a>
+          </div>
+          <div style="margin-top:12px; display:flex; flex-direction:column; gap:6px; align-items:center; text-align:center;">
+            <div style="display:inline-block; padding:6px 10px; background:rgba(0,0,0,0.22); border:1px solid rgba(255,255,255,0.10); border-radius:12px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); font-size:12px; font-weight:500; opacity:0.92;">
+              <span data-i18n="footer_copyright">© 2026 Gameist by Batuhan Berk – Antalya</span>
+            </div>
+            <div style="display:inline-block; padding:6px 10px; background:rgba(0,0,0,0.18); border:1px solid rgba(255,255,255,0.08); border-radius:12px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); font-size:12px; font-weight:500; opacity:0.90;">
+              <span data-i18n="footer_contact">İletişim: DM @batuhanberk.space | batuhanberk.space</span>
+            </div>
+          </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Coming Soon Modal -->
+    <!-- <div class="modal-overlay" id="comingSoonModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4>🚀 Yakında Geliyor!</h4>
+          <button class="modal-close" onclick="hideComingSoon()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>
+           
+          </p>
+          <div class="upcoming-features">
+            <div class="feature-item">
+              <i class="fas fa-chess"></i>
+              <span>Satranç Oyunu</span>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-puzzle-piece"></i>
+              <span>Puzzle Oyunları</span>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-trophy"></i>
+              <span>Liderlik Tablosu</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> -->
+
+    <footer style="position:fixed; left:0; right:0; bottom:10px; text-align:center; font-size:12px; font-weight:500; opacity:0.85; z-index:9999; pointer-events:none;">
+      <span style="display:inline-block; padding:5px 9px; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.10); border-radius:999px; pointer-events:none;">
+        <span style="pointer-events:none;">Made by </span>
+        <a href="https://batuhanberk.space" target="_blank" rel="noopener noreferrer" style="color:inherit; text-decoration:underline; pointer-events:auto;">BatuhanBerk</a>
+      </span>
+    </footer>
+
+    <script src="main.js" defer></script>
+    <script src="hub-i18n.js" defer></script>
+  </body>
+</html>

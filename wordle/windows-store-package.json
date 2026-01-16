@@ -1,0 +1,20 @@
+{
+  "productIdentity": {
+    "displayName": "Wordlist - Wordle Game",
+    "storeId": "9NKJHXN4Z4NC",
+    "pfn": "242games.Wordlist-WordleGame_b3dab5yt027hc",
+    "sid": "S-1-15-2-1530928963-1571168616-1130812563-2145700475-4110462982-287562816-1712333420",
+    "storeUrl": "https://apps.microsoft.com/detail/9NKJHXN4Z4NC",
+    "protocolLink": "ms-windows-store://pdp/?productid=9NKJHXN4Z4NC",
+    "msaAppId": "dd353650-8ff3-40a3-ae91-f697842aa129"
+  },
+  "packageManifest": {
+    "identity": {
+      "name": "242games.Wordlist-WordleGame",
+      "publisher": "CN=9F3EFCE2-6602-4484-A333-F5B47B756556"
+    },
+    "properties": {
+      "publisherDisplayName": "242 games"
+    }
+  }
+}
