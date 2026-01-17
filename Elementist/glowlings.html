@@ -415,27 +415,70 @@
         }
 
 
+        @keyframes playBreath {
+            0%, 100% {
+              transform: scale(1);
+              filter: brightness(1) hue-rotate(0deg);
+              box-shadow: 0 0 0 rgba(0,255,255,0);
+              background-position: 0% 50%;
+            }
+            50% {
+              transform: scale(1.03);
+              filter: brightness(1.08) hue-rotate(20deg);
+              box-shadow: 0 0 26px rgba(0,255,255,0.45), 0 0 38px rgba(255,0,255,0.18);
+              background-position: 100% 50%;
+            }
+        }
+
         #startBtn {
-            padding: clamp(7px, 1.4vw, 10px) clamp(10px, 2.2vw, 18px);
-            background: linear-gradient(45deg, #00ffff, #ff00ff);
-            border: none;
-            border-radius: 10px;
+            padding: clamp(12px, 1.8vw, 16px) clamp(18px, 3vw, 28px);
+            background: linear-gradient(90deg, #00ffff, #ff00ff, #7c3aed, #00ffff);
+            background-size: 300% 300%;
+            border: 2px solid rgba(0,255,255,0.65);
+            border-radius: 14px;
             color: white;
-            font-size: clamp(14px, 2vw, 18px);
-            font-weight: bold;
+            font-size: clamp(16px, 2.4vw, 22px);
+            font-weight: 800;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.15s ease;
             display: block;
-            width: clamp(140px, 38vw, 180px);
+            width: clamp(190px, 58vw, 320px);
             margin: 0 auto;
             white-space: nowrap;
             text-align: center;
             box-sizing: border-box;
+            text-shadow: 0 0 10px rgba(0,255,255,0.25);
+            box-shadow: 0 0 18px rgba(0,255,255,0.22);
+            animation: playBreath 2.8s ease-in-out infinite;
+            will-change: transform;
+        }
+
+        /* Mobile: make Play button the most dominant element */
+        @media (hover: none) and (pointer: coarse) {
+            #startBtn {
+                width: min(94vw, 520px);
+                font-size: clamp(19px, 5.6vw, 26px);
+                padding: 18px 24px;
+                border-radius: 16px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            #startBtn {
+                width: min(96vw, 520px);
+                font-size: clamp(20px, 6.2vw, 26px);
+                padding: 18px 22px;
+            }
         }
 
         #startBtn:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 25px #00ffff;
+            box-shadow: 0 0 34px rgba(0,255,255,0.55), 0 0 18px rgba(255,0,255,0.22);
+        }
+
+        #startBtn:active {
+            transform: scale(0.99);
+            filter: brightness(1.10);
         }
 
         /* Primary action style reused for other buttons */
@@ -1097,7 +1140,7 @@
         #shopTitle{ font-size: 16px !important; }
         #shopWaveLabel{ font-size: 11px !important; }
         /* Bottom action buttons smaller */
-        #rerollBtn, #lockBtn{ padding: 5px 9px !important; font-size: 12px !important; }
+        #lockBtn{ padding: 5px 9px !important; font-size: 12px !important; }
         #startWaveBtn{ padding: 7px 11px !important; font-size: 13px !important; }
         #consumableBar{ bottom: calc(8px + env(safe-area-inset-bottom)); transform: translateX(-50%) scale(.82); padding:8px 14px; gap:10px; }
         /* Also constrain overlay container itself */
@@ -1593,8 +1636,8 @@
     <!-- Weapon Selection Overlay (shown after Wave 3, before Shop) -->
     <div id="weaponOverlay" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(3px); z-index: 10001;">
         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(92vw, 720px); max-height: 80vh; overflow: auto; background: rgba(10,10,20,0.95); border: 2px solid #00ffff; border-radius: 14px; box-shadow: 0 0 30px rgba(0,255,255,0.4); padding: 18px 20px; color: #fff;">
-            <h2 style="margin: 0 0 10px 0; text-align: center; letter-spacing: 1px;">🔧 Silahını Seç</h2>
-            <p style="margin: 0 0 14px 0; text-align: center; opacity: 0.8;">Wave 4 başlamadan önce bir silah seçmelisin.</p>
+            <h2 style="margin: 0 0 10px 0; text-align: center; letter-spacing: 1px;" data-lang="weaponSelectTitle">🔧 Choose Your Weapon</h2>
+            <p style="margin: 0 0 14px 0; text-align: center; opacity: 0.8;" data-lang="weaponSelectDesc">Before Wave 4 starts, pick a weapon.</p>
             <div id="weaponItems" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;"></div>
         </div>
     </div>
@@ -2005,6 +2048,7 @@
             <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(0,0,0,0.92); border:2px solid #00ffff; box-shadow:0 0 30px #00ffff; border-radius:18px; padding:22px 20px; width:min(520px, 92vw); text-align:center;">
                 <h2 id="gameOverTitle" data-lang="gameOverTitle" style="color:#00ffff; margin:0 0 8px 0; letter-spacing:1px;">YOU DIED</h2>
                 <div id="finalStats" style="color:#e5e7eb; font-size:14px; line-height:1.6; margin-bottom:14px;"></div>
+                <div id="deathHint" data-lang="deathHint" style="color:#b6c2d1; font-size:13px; margin: -6px 0 14px 0; opacity:0.95;"></div>
                 <div style="display:flex; gap:12px; justify-content:center;">
                     <button id="restartBtn" data-lang="restartBtn" style="padding:10px 16px; border-radius:10px; border:2px solid #22c55e; background:#052e1f; color:#22c55e; cursor:pointer; font-weight:700;">RETRY</button>
                     <button id="backToMenuBtn" data-lang="backToMenuBtn" style="padding:10px 16px; border-radius:10px; border:2px solid #0ea5e9; background:#042433; color:#0ea5e9; cursor:pointer; font-weight:700;">BACK TO MENU</button>
@@ -2112,7 +2156,6 @@
         </div>
         <div style="display:flex; justify-content:space-between; margin-top:14px;">
           <div style="display:flex; gap:8px;">
-            <button id="rerollBtn" data-lang="rerollBtn" style="padding:8px 12px; background:#0f172a; color:#fff; border:1px solid #334155; border-radius:6px;">Reroll (5)</button>
             <button id="lockBtn" data-lang="lockBtn" style="padding:8px 12px; background:#0f172a; color:#fff; border:1px solid #334155; border-radius:6px;">Lock</button>
           </div>
           <button id="startWaveBtn" style="padding:10px 16px; background:#047857; color:#fff; border:none; border-radius:6px; font-weight:700;" data-lang="startWaveBtn">Start Next Wave</button>
@@ -2122,6 +2165,340 @@
     </div>
 
     <script src="Vector2.js"></script>
+    <script>
+      (function(){
+        const DEFAULT_LANG = 'en';
+        const LANG_KEY = 'lang';
+        const dict = {
+          en: {
+            close: 'CLOSE',
+            settingsTitle: 'Settings',
+            appearance: 'Appearance',
+            sound: 'Sound',
+            music: 'Music',
+            volume: 'Volume',
+            language: 'Language',
+            credits: 'Credits',
+            creditsText: 'Thanks to the Elementist developer team and contributors.',
+            weaponSelectTitle: '🔧 Choose Your Weapon',
+            weaponSelectDesc: 'Before Wave 4 starts, pick a weapon.',
+            weapon_turrets_name: 'Turrets',
+            weapon_turrets_desc: 'Two turrets orbit near you and fire automatically. Medium range, balanced damage.',
+            weapon_electro_name: 'Electro Shock Generator',
+            weapon_electro_desc: 'Two electric orbs rotate around you. Every 1.5s, chain lightning strikes the nearest target and briefly paralyzes enemies.',
+            weapon_gravity_name: 'Gravity Orb',
+            weapon_gravity_desc: 'Every 2.6s, creates a pull for 0.65s (240px). Applies small DOT inside the inner ring; then explodes into 6 shards and slows nearby enemies.',
+            costLabel: 'Cost:',
+            backToMenuBtn: 'Back to Menu',
+            resumeBtn: 'Resume',
+            tabOffers: 'Rewards',
+            tabItems: 'Items',
+            tabUpgrades: 'Upgrades',
+            tabSpecial: 'Special',
+            shopTitle: 'Shop - Intermission',
+            wavePrefix: 'Wave',
+            weaponUpgrades: 'WEAPON UPGRADES',
+            deathHint_tryElement: 'Try a different element next run.',
+            deathHint_fire: 'Fire builds favor area damage.',
+            deathHint_lightning: 'Lightning works well with crit builds.',
+            deathHint: 'Try a different element next run.',
+            onboarding1: 'Your character moves automatically. You control dodging and positioning.',
+            onboarding2: 'Enemies come in waves. Survive each wave to unlock upgrades.',
+            onboarding3: 'Elements change how your build plays. Experiment — no run is the same.',
+            lockLabel: 'Lock',
+            unlockLabel: 'Unlock'
+          },
+          tr: {
+            close: 'KAPAT',
+            settingsTitle: 'Ayarlar',
+            appearance: 'Görünüm',
+            sound: 'Ses',
+            music: 'Müzik',
+            volume: 'Ses',
+            language: 'Dil',
+            credits: 'Emeği Geçenler',
+            creditsText: 'Elementist geliştirici ekibi ve katkıda bulunanlara teşekkürler.',
+            weaponSelectTitle: '🔧 Silahını Seç',
+            weaponSelectDesc: 'Wave 4 başlamadan önce bir silah seçmelisin.',
+            weapon_turrets_name: 'Taretler',
+            weapon_turrets_desc: 'Oyuncunun yanında iki taret dolaşır ve otomatik ateş eder. Orta menzil, dengeli hasar.',
+            weapon_electro_name: 'Elektro Şok Jeneratörü',
+            weapon_electro_desc: 'Karakterin etrafında iki elektrik küresi döner. Her 1.5 sn’de en yakındaki hedefe zincirli yıldırım atar, kısa sersemletir.',
+            weapon_gravity_name: 'Yerçekimi Küresi',
+            weapon_gravity_desc: '2.6 sn’de bir 0.65 sn boyunca çekim (240px). İç halkada küçük DOT uygular; bitişte patlayıp 6 parça en yakın düşmanlara fırlar ve yavaşlatır.',
+            costLabel: 'Maliyet:',
+            backToMenuBtn: 'MENÜYE DÖN',
+            resumeBtn: 'OYUNA DÖN',
+            tabOffers: 'Ödüller',
+            tabItems: 'Eşyalar',
+            tabUpgrades: 'Yükseltmeler',
+            tabSpecial: 'Özel',
+            shopTitle: 'Dükkan - Ara',
+            wavePrefix: 'Dalga',
+            weaponUpgrades: 'SİLAH YÜKSELTMELERİ',
+            deathHint_tryElement: 'Sonraki rund farklı element dene.',
+            deathHint_fire: 'Ateş buildleri alan hasarında güçlüdür.',
+            deathHint_lightning: 'Yıldırım kritik buildleriyle iyi çalışır.',
+            deathHint: 'Sonraki rund farklı element dene.',
+            onboarding1: 'Karakterin otomatik hareket eder. Sen dash ve konumlanmayı kontrol edersin.',
+            onboarding2: 'Düşmanlar dalgalar halinde gelir. Her dalgadan sonra yükseltme seç.',
+            onboarding3: 'Elementler buildini değiştirir. Dene — her run farklıdır.',
+            lockLabel: 'Kilit',
+            unlockLabel: 'Kilidi Aç'
+          }
+        };
+
+        function normalizeLang(l){ return (l === 'tr') ? 'tr' : 'en'; }
+
+        function getLang(){
+          try{
+            const saved = localStorage.getItem(LANG_KEY);
+            if(saved) return saved;
+          }catch(_){ }
+          return DEFAULT_LANG;
+        }
+
+        function setLang(lang){
+          const l = lang || DEFAULT_LANG;
+          try{ localStorage.setItem(LANG_KEY, l); }catch(_){ }
+          try{ document.documentElement.setAttribute('lang', l); }catch(_){ }
+          applyLang(l);
+        }
+
+        function t(key, fallback){
+          const lang = normalizeLang(getLang());
+          const table = dict[lang] || dict[DEFAULT_LANG] || {};
+          if(key && Object.prototype.hasOwnProperty.call(table, key)) return table[key];
+          const base = dict[DEFAULT_LANG] || {};
+          if(key && Object.prototype.hasOwnProperty.call(base, key)) return base[key];
+          // If caller passed null explicitly, treat as "no translation" and return null
+          if (fallback === null) return null;
+          return fallback != null ? fallback : key;
+        }
+
+        function applyLang(lang){
+          try{
+            const norm = normalizeLang(lang);
+            const table = dict[norm] || dict[DEFAULT_LANG] || {};
+            document.querySelectorAll('[data-lang]').forEach(el=>{
+              const key = el.getAttribute('data-lang');
+              const val = t(key, el.textContent);
+              if(typeof val === 'string') el.textContent = val;
+            });
+            // Also normalize dynamic weapon overlay cards that may be injected with hardcoded strings
+            scheduleWeaponOverlayNormalize();
+          }catch(_){ }
+        }
+
+        let __weaponNormalizeScheduled = false;
+        let __weaponNormalizeRunning = false;
+        function scheduleWeaponOverlayNormalize(){
+          if(__weaponNormalizeScheduled) return;
+          __weaponNormalizeScheduled = true;
+          requestAnimationFrame(()=>{
+            __weaponNormalizeScheduled = false;
+            if(__weaponNormalizeRunning) return;
+            __weaponNormalizeRunning = true;
+            try{ applyWeaponOverlayText(); }catch(_){ }
+            __weaponNormalizeRunning = false;
+          });
+        }
+
+        function applyWeaponOverlayText(){
+          try{
+            const wrap = document.getElementById('weaponOverlay');
+            const items = document.getElementById('weaponItems');
+            if(!wrap || !items) return;
+            const visible = window.getComputedStyle(wrap).display !== 'none';
+            if(!visible) return;
+
+            const lang = normalizeLang(getLang());
+            // Only rewrite TEXT nodes so we don't destroy icons/emojis/spans inside cards
+            const walker = document.createTreeWalker(items, NodeFilter.SHOW_TEXT, null);
+            const textNodes = [];
+            while(walker.nextNode()) textNodes.push(walker.currentNode);
+
+            function replacePrefix(s, fromRe, to){
+              if(!fromRe.test(s)) return s;
+              return s.replace(fromRe, to);
+            }
+
+            // Translate known weapon titles/descriptions if they are hardcoded
+            const mappings = [
+              {
+                trName: 'Taretler',
+                enName: t('weapon_turrets_name','Turrets'),
+                trDescPrefix: 'Oyuncunun yanında iki taret',
+                enDesc: t('weapon_turrets_desc',''),
+                trDesc: t('weapon_turrets_desc','')
+              },
+              {
+                trName: 'Elektro Şok Jeneratörü',
+                enName: t('weapon_electro_name','Electro Shock Generator'),
+                trDescPrefix: 'Karakterin etrafında iki elektrik',
+                enDesc: t('weapon_electro_desc',''),
+                trDesc: t('weapon_electro_desc','')
+              },
+              {
+                trName: 'Yerçekimi Küresi',
+                enName: t('weapon_gravity_name','Gravity Orb'),
+                trDescPrefix: '2.6 sn',
+                enDesc: t('weapon_gravity_desc',''),
+                trDesc: t('weapon_gravity_desc','')
+              }
+            ];
+
+            textNodes.forEach(n=>{
+              const raw = n.nodeValue || '';
+              const trimmed = raw.trim();
+              if(!trimmed) return;
+
+              // Cost label
+              if(lang === 'tr'){
+                n.nodeValue = replacePrefix(raw, /^\s*Cost\s*:/i, 'Maliyet:');
+              } else {
+                n.nodeValue = replacePrefix(raw, /^\s*Maliyet\s*:/i, 'Cost:');
+              }
+
+              // Weapon title/desc replacements
+              mappings.forEach(m=>{
+                if(lang === 'tr'){
+                  if(raw.includes(m.enName)) n.nodeValue = raw.replace(m.enName, m.trName);
+                  if(m.enDesc && trimmed === m.enDesc) n.nodeValue = m.trDesc;
+                } else {
+                  if(raw.includes(m.trName)) n.nodeValue = raw.replace(m.trName, m.enName);
+                  if(m.trDescPrefix && trimmed.includes(m.trDescPrefix) && m.enDesc) n.nodeValue = m.enDesc;
+                }
+              });
+            });
+          }catch(_){ }
+        }
+
+        // Expose translation to other inline scripts
+        window.__i18n = { t, setLang, getLang, applyLang };
+
+        // Init and bind language dropdown
+        document.addEventListener('DOMContentLoaded', function(){
+          const sel = document.getElementById('languageSelect');
+          const cur = getLang();
+          if(sel){
+            try{ sel.value = cur; }catch(_){ }
+            sel.addEventListener('change', function(){ setLang(sel.value); });
+          }
+          setLang(cur);
+        });
+
+        // Watch weapon overlay for dynamic content injection and re-apply language
+        document.addEventListener('DOMContentLoaded', function(){
+          try{
+            const wrap = document.getElementById('weaponOverlay');
+            const items = document.getElementById('weaponItems');
+            if(!wrap || !items) return;
+            const obs = new MutationObserver(function(){ scheduleWeaponOverlayNormalize(); });
+            // Avoid characterData observation: too chatty and can freeze on Wave transitions.
+            obs.observe(items, { childList: true, subtree: true });
+            obs.observe(wrap, { attributes: true, attributeFilter: ['style','class'] });
+          }catch(_){ }
+        });
+
+        // Onboarding (first run only, 30–60 seconds, non-blocking)
+        document.addEventListener('DOMContentLoaded', function(){
+          const key = 'elementist_onboarding_shown_v1';
+          let shown = false;
+          try{ shown = localStorage.getItem(key) === 'true'; }catch(_){ }
+          if(shown) return;
+          let box = document.getElementById('onboardingHints');
+          if(!box){
+            box = document.createElement('div');
+            box.id = 'onboardingHints';
+            box.style.position = 'fixed';
+            box.style.left = '50%';
+            box.style.top = '14px';
+            box.style.transform = 'translateX(-50%)';
+            box.style.zIndex = '2147483600';
+            box.style.maxWidth = 'min(720px, 92vw)';
+            box.style.padding = '10px 12px';
+            box.style.borderRadius = '12px';
+            box.style.border = '1px solid rgba(56,189,248,0.45)';
+            box.style.background = 'rgba(2,6,23,0.72)';
+            box.style.backdropFilter = 'blur(6px)';
+            box.style.color = '#e2e8f0';
+            box.style.fontSize = '13px';
+            box.style.lineHeight = '1.35';
+            box.style.boxShadow = '0 0 18px rgba(0,255,255,0.18)';
+            box.style.opacity = '0';
+            box.style.transition = 'opacity 320ms ease';
+            box.style.pointerEvents = 'none';
+            document.body.appendChild(box);
+          }
+
+          const msgs = ['onboarding1','onboarding2','onboarding3'];
+          let i = 0;
+          function showNext(){
+            if(i >= msgs.length){
+              box.style.opacity = '0';
+              setTimeout(()=>{ try{ box.remove(); }catch(_){ } }, 450);
+              try{ localStorage.setItem(key, 'true'); }catch(_){ }
+              return;
+            }
+            box.textContent = t(msgs[i], '');
+            box.style.opacity = '1';
+            const visibleMs = (i===0) ? 5200 : 4500;
+            setTimeout(()=>{ box.style.opacity = '0'; }, visibleMs);
+            setTimeout(()=>{ i++; showNext(); }, visibleMs + 700);
+          }
+
+          // Start when gameplay begins (start wave click)
+          const startWaveBtn = document.getElementById('startWaveBtn');
+          if(startWaveBtn){
+            const handler = function(){
+              if(document.body.classList.contains('playing')){
+                startWaveBtn.removeEventListener('click', handler);
+                setTimeout(showNext, 450);
+              }
+            };
+            startWaveBtn.addEventListener('click', handler);
+          }
+        });
+
+        // Death screen retention hint (set a contextual line when game over becomes visible)
+        document.addEventListener('DOMContentLoaded', function(){
+          const screen = document.getElementById('gameOverScreen');
+          const hintEl = document.getElementById('deathHint');
+          if(!screen || !hintEl) return;
+          const hints = ['deathHint_tryElement','deathHint_fire','deathHint_lightning'];
+          const obs = new MutationObserver(function(){
+            try{
+              const visible = window.getComputedStyle(screen).display !== 'none';
+              if(!visible) return;
+              const pick = hints[Math.floor(Math.random()*hints.length)];
+              hintEl.textContent = t(pick, t('deathHint',''));
+            }catch(_){ }
+          });
+          try{ obs.observe(screen, { attributes: true, attributeFilter: ['style','class'] }); }catch(_){ }
+        });
+
+        // Cutscene warm-up: keep it non-invasive to avoid breaking video loads.
+        // Only hint preload early; never force play/pause or mute.
+        document.addEventListener('DOMContentLoaded', function(){
+          const v = document.getElementById('cutsceneVideo');
+          if(!v) return;
+          let primed = false;
+          function prime(){
+            if(primed) return;
+            primed = true;
+            try{
+              v.preload = 'auto';
+              // Only call load() if a source is already set; otherwise let game code set src first.
+              const hasSrc = !!(v.currentSrc || v.getAttribute('src'));
+              if(hasSrc && typeof v.load === 'function') v.load();
+            }catch(_){ }
+          }
+          window.addEventListener('pointerdown', prime, { once: true, passive: true });
+          window.addEventListener('touchstart', prime, { once: true, passive: true });
+        });
+      })();
+    </script>
     <script src="glowlings.js"></script>
     <!-- Enhanced hooks after core game -->
     <script src="glowlings-enhanced.js"></script>
@@ -2414,7 +2791,6 @@
           DMG: el('statDMG'), ATK: el('statATK'), SPD: el('statSPD'), ARM: el('statARM'),
           DODGE: el('statDODGE'), HP: el('statHP'), REGEN: el('statREGEN'), BURN: el('statBURN'), SLOW: el('statSLOW')
         };
-        const rerollBtn = el('rerollBtn');
         const lockBtn = el('lockBtn');
         const activeBuffsList = el('activeBuffsList');
         const shopOverlay = el('shopOverlay');
@@ -2495,69 +2871,80 @@
         const C = {
           // Items (Consumables)
           items: [
-            { id:'blood_draught', name:'Blood Draught', icon:'🩸', cost:9, rarity:'uncommon', desc:'4s: Hasarın %40’ı HP’ye döner. Bittiğinde Max HP %5 kayıp.', tag:'consum' },
-            { id:'flame_syrup', name:'Flame Syrup', icon:'🔥', cost:8, rarity:'uncommon', desc:'3s: Saldırıların burn uygular, burn hasarının %20’si HP’ye döner. -%20 hareket hızı.', tag:'consum' },
-            { id:'mist_tonic', name:'Mist Tonic', icon:'🌫️', cost:10, rarity:'rare', desc:'3s: İlk 3 saldırı yok sayılır, hasarın %30’u HP olur. Görüş -%50.', tag:'consum' },
-            { id:'stone_infusion', name:'Stone Infusion', icon:'🪨', cost:8, rarity:'common', desc:'5s: +3 armor. Heal yok, sadece alınan hasarın %30’u geri iade. Hız düşer.', tag:'consum' },
-            { id:'heal_potion', name:'Heal Potion', icon:'🧪', cost:7, rarity:'common', desc:'Anında %25 HP iyileştirmesi. (CD 12s)', tag:'consum' },
-            { id:'buy_hearts', name:'Extra Hearts', icon:'❤️', cost:10, rarity:'common', desc:'Tüm paranı harca (min 10). Toplam kalbin 2 olur. (Sadece 4/9/14/19/24/29. dalgalarda alınabilir)', tag:'life' },
+            { id:'blood_draught', name:'Blood Draught', icon:'🩸', cost:9, rarity:'uncommon', desc:'4s: Convert 40% of damage dealt into HP. After it ends, lose 5% Max HP.', tag:'consum' },
+            { id:'flame_syrup', name:'Flame Syrup', icon:'🔥', cost:8, rarity:'uncommon', desc:'3s: Your attacks apply burn; 20% of burn damage converts to HP. -20% move speed.', tag:'consum' },
+            { id:'mist_tonic', name:'Mist Tonic', icon:'🌫️', cost:10, rarity:'rare', desc:'3s: The next 3 hits are ignored; 30% of prevented damage is converted to HP. Vision -50%.', tag:'consum' },
+            { id:'stone_infusion', name:'Stone Infusion', icon:'🪨', cost:8, rarity:'common', desc:'5s: +3 armor. No healing; reflect 30% of damage taken. Move speed reduced.', tag:'consum' },
+            { id:'heal_potion', name:'Heal Potion', icon:'🧪', cost:7, rarity:'common', desc:'Instantly heal 25% HP. (CD 12s)', tag:'consum' },
+            { id:'buy_hearts', name:'Extra Hearts', icon:'❤️', cost:10, rarity:'common', desc:'Spend all your money (min 10). Your total hearts become 2. (Only available on Waves 4/9/14/19/24/29)', tag:'life' },
           ],
           // Upgrades (Permanent stat trades)
           upgrades: [
-            { id:'sharp_crystal', name:'Sharpened Crystal', icon:'🗡️', cost:7, rarity:'common', desc:'+3 DMG, -%3 hareket hızı', tag:'stat' },
-            { id:'light_core', name:'Lightweight Core', icon:'🏃', cost:7, rarity:'common', desc:'+%6 hareket hızı, -1 armor', tag:'stat' },
-            { id:'iron_husk', name:'Iron Husk', icon:'🛡️', cost:8, rarity:'common', desc:'+2 armor, -%4 hareket hızı', tag:'stat' },
-            { id:'vital_shard', name:'Vital Shard', icon:'💗', cost:10, rarity:'rare', desc:'+1 max kalp; her satın alım sonrası +8 maliyet artışı', tag:'stat', priceScale:8 },
+            { id:'sharp_crystal', name:'Sharpened Crystal', icon:'🗡️', cost:7, rarity:'common', desc:'+3 DMG, -3% move speed', tag:'stat' },
+            { id:'light_core', name:'Lightweight Core', icon:'🏃', cost:7, rarity:'common', desc:'+6% move speed, -1 armor', tag:'stat' },
+            { id:'iron_husk', name:'Iron Husk', icon:'🛡️', cost:8, rarity:'common', desc:'+2 armor, -4% move speed', tag:'stat' },
+            { id:'vital_shard', name:'Vital Shard', icon:'💗', cost:10, rarity:'rare', desc:'+1 max heart; each purchase increases cost by +8', tag:'stat', priceScale:8 },
             // Base weapon upgrades (affect starting weapon stats)
-            { id:'base_overclocker', name:'Overclocker', icon:'⏩', cost:13, rarity:'uncommon', desc:'Atış hızı +%15', tag:'stat', max:1 },
-            { id:'base_reinforced_slugs', name:'Reinforced Slugs', icon:'💥', cost:13, rarity:'uncommon', desc:'Hasar +%12', tag:'stat', max:1 },
-            { id:'base_calibrated_sight', name:'Calibrated Sight', icon:'🎯', cost:12, rarity:'uncommon', desc:'Menzil +%10', tag:'stat', max:1 },
-            { id:'base_kinetic_rounds', name:'Kinetic Rounds', icon:'🚀', cost:12, rarity:'uncommon', desc:'Mermi hızı +%12', tag:'stat', max:1 },
-            { id:'base_quickstep', name:'Quickstep Harness', icon:'🦶', cost:12, rarity:'uncommon', desc:'Hareket +%8', tag:'stat', max:1 },
+            { id:'base_overclocker', name:'Overclocker', icon:'⏩', cost:13, rarity:'uncommon', desc:'Fire rate +15%', tag:'stat', max:1 },
+            { id:'base_reinforced_slugs', name:'Reinforced Slugs', icon:'💥', cost:13, rarity:'uncommon', desc:'Damage +12%', tag:'stat', max:1 },
+            { id:'base_calibrated_sight', name:'Calibrated Sight', icon:'🎯', cost:12, rarity:'uncommon', desc:'Range +10%', tag:'stat', max:1 },
+            { id:'base_kinetic_rounds', name:'Kinetic Rounds', icon:'🚀', cost:12, rarity:'uncommon', desc:'Bullet speed +12%', tag:'stat', max:1 },
+            { id:'base_quickstep', name:'Quickstep Harness', icon:'🦶', cost:12, rarity:'uncommon', desc:'Move speed +8%', tag:'stat', max:1 },
             // Weapon-specific upgrades (filtered by chosen weapon)
-            { id:'wep_turret_damage', name:'Turret Calibration', icon:'🔧', cost:11, rarity:'uncommon', desc:'Taret hasarı +%15', tag:'weapon', type:'turrets', priceScale:3, max:1 },
-            { id:'wep_turret_speed', name:'Auto-loader', icon:'⚙️', cost:11, rarity:'uncommon', desc:'Taret ateş hızı +%12', tag:'weapon', type:'turrets', priceScale:3, max:1 },
-            { id:'wep_turret_range', name:'Extended Barrels', icon:'📏', cost:10, rarity:'uncommon', desc:'Taret menzili +%15', tag:'weapon', type:'turrets', priceScale:3, max:1 },
-            { id:'wep_elec_damage', name:'Overcharge Coils', icon:'⚡', cost:13, rarity:'rare', desc:'Elektrik hasarı +%15', tag:'weapon', type:'electro', priceScale:4, max:1 },
-            { id:'wep_elec_speed', name:'Pulse Optimizer', icon:'🔋', cost:13, rarity:'rare', desc:'Elektrik atış hızı +%12', tag:'weapon', type:'electro', priceScale:4, max:1 },
-            { id:'wep_elec_chain', name:'Extra Node', icon:'🪫', cost:11, rarity:'uncommon', desc:'Zincir sayısı +1', tag:'weapon', type:'electro', priceScale:3, max:1 },
-            { id:'wep_elec_range', name:'Long Arc', icon:'📶', cost:10, rarity:'uncommon', desc:'Elektrik menzili +%10', tag:'weapon', type:'electro', priceScale:3, max:1 },
-            { id:'wep_grav_damage', name:'Dense Core', icon:'🌀', cost:13, rarity:'rare', desc:'Yerçekimi çekirdeği hasarı +%15', tag:'weapon', type:'gravity', priceScale:4, max:1 },
-            { id:'wep_grav_speed', name:'Phase Cycler', icon:'⏱️', cost:13, rarity:'rare', desc:'Yerçekimi periyodu -%12 (daha sık)', tag:'weapon', type:'gravity', priceScale:4, max:1 },
-            { id:'wep_grav_radius', name:'Event Horizon', icon:'🌓', cost:11, rarity:'uncommon', desc:'Yerçekimi yarıçapı +%12', tag:'weapon', type:'gravity', priceScale:3, max:1 },
-            { id:'wep_grav_shrapnel', name:'Fragment Bloom', icon:'💥', cost:11, rarity:'uncommon', desc:'Parçacık sayısı +2', tag:'weapon', type:'gravity', priceScale:3, max:1 },
+            { id:'wep_turret_damage', name:'Turret Calibration', icon:'🔧', cost:11, rarity:'uncommon', desc:'Turret damage +15%', tag:'weapon', type:'turrets', priceScale:3, max:1 },
+            { id:'wep_turret_speed', name:'Auto-loader', icon:'⚙️', cost:11, rarity:'uncommon', desc:'Turret fire rate +12%', tag:'weapon', type:'turrets', priceScale:3, max:1 },
+            { id:'wep_turret_range', name:'Extended Barrels', icon:'📏', cost:10, rarity:'uncommon', desc:'Turret range +15%', tag:'weapon', type:'turrets', priceScale:3, max:1 },
+            { id:'wep_elec_damage', name:'Overcharge Coils', icon:'⚡', cost:13, rarity:'rare', desc:'Electric damage +15%', tag:'weapon', type:'electro', priceScale:4, max:1 },
+            { id:'wep_elec_speed', name:'Pulse Optimizer', icon:'🔋', cost:13, rarity:'rare', desc:'Electric fire rate +12%', tag:'weapon', type:'electro', priceScale:4, max:1 },
+            { id:'wep_elec_chain', name:'Extra Node', icon:'🪫', cost:11, rarity:'uncommon', desc:'Chain +1', tag:'weapon', type:'electro', priceScale:3, max:1 },
+            { id:'wep_elec_range', name:'Long Arc', icon:'📶', cost:10, rarity:'uncommon', desc:'Electric range +10%', tag:'weapon', type:'electro', priceScale:3, max:1 },
+            { id:'wep_grav_damage', name:'Dense Core', icon:'🌀', cost:13, rarity:'rare', desc:'Gravity core damage +15%', tag:'weapon', type:'gravity', priceScale:4, max:1 },
+            { id:'wep_grav_speed', name:'Phase Cycler', icon:'⏱️', cost:13, rarity:'rare', desc:'Gravity period -12% (more frequent)', tag:'weapon', type:'gravity', priceScale:4, max:1 },
+            { id:'wep_grav_radius', name:'Event Horizon', icon:'🌓', cost:11, rarity:'uncommon', desc:'Gravity radius +12%', tag:'weapon', type:'gravity', priceScale:3, max:1 },
+            { id:'wep_grav_shrapnel', name:'Fragment Bloom', icon:'💥', cost:11, rarity:'uncommon', desc:'Shrapnel +2', tag:'weapon', type:'gravity', priceScale:3, max:1 },
           ],
           // Special (Elemental + Utility/Economy)
           special: [
             // Fire
-            { id:'cinder_ring', name:'Cinder Ring', icon:'💍', cost:9, rarity:'uncommon', desc:'Yakınındaki düşmanlar 0.5 DPS yanar (stacklenmez).', tag:'fire' },
-            { id:'burning_claw', name:'Burning Claw', icon:'🦴', cost:10, rarity:'rare', desc:'%10 crit chance, kritikler %30 daha az vurur.', tag:'fire' },
-            { id:'molten_core', name:'Molten Core', icon:'🌋', cost:11, rarity:'epic', desc:'Burn süresi +0.5s, kendi HP regen -1.', tag:'fire' },
+            { id:'cinder_ring', name:'Cinder Ring', icon:'💍', cost:9, rarity:'uncommon', desc:'Nearby enemies burn for 0.5 DPS (does not stack).', tag:'fire' },
+            { id:'burning_claw', name:'Burning Claw', icon:'🦴', cost:10, rarity:'rare', desc:'+10% crit chance, but crits deal 30% less damage.', tag:'fire' },
+            { id:'molten_core', name:'Molten Core', icon:'🌋', cost:11, rarity:'epic', desc:'Burn duration +0.5s, your HP regen -1.', tag:'fire' },
             // Water
-            { id:'frozen_veil', name:'Frozen Veil', icon:'🧊', cost:9, rarity:'uncommon', desc:'%10 yavaşlatma aurası; aura içindeyken sen de %5 yavaşsın.', tag:'water' },
-            { id:'abyss_pearl', name:'Abyss Pearl', icon:'🪼', cost:10, rarity:'rare', desc:'+1 armor, +%5 yavaşlatma; -%5 attack speed.', tag:'water' },
-            { id:'tidecaller', name:'Tidecaller', icon:'🌊', cost:9, rarity:'uncommon', desc:'Her dalga sonunda +5 materyal; wave başlangıcında 2s daha yavaşsın.', tag:'water' },
+            { id:'frozen_veil', name:'Frozen Veil', icon:'🧊', cost:9, rarity:'uncommon', desc:'10% slow aura; you are also 5% slower while inside the aura.', tag:'water' },
+            { id:'abyss_pearl', name:'Abyss Pearl', icon:'🪼', cost:10, rarity:'rare', desc:'+1 armor, +5% slow; -5% attack speed.', tag:'water' },
+            { id:'tidecaller', name:'Tidecaller', icon:'🌊', cost:9, rarity:'uncommon', desc:'+5 materials after each wave; at wave start you are slower for 2s.', tag:'water' },
             // Air
-            { id:'tempest_feather', name:'Tempest Feather', icon:'🪶', cost:9, rarity:'uncommon', desc:'+%15 hareket hızı; -%10 damage.', tag:'air' },
-            { id:'storm_eye', name:'Storm Eye', icon:'🌀', cost:10, rarity:'rare', desc:'%10 attack speed; projectile range -%10.', tag:'air' },
-            { id:'cyclone_fragment', name:'Cyclone Fragment', icon:'🌪️', cost:10, rarity:'rare', desc:'Dash varsa CD -%20; dash sonrası kısa süre -1 armor.', tag:'air' },
+            { id:'tempest_feather', name:'Tempest Feather', icon:'🪶', cost:9, rarity:'uncommon', desc:'+15% move speed; -10% damage.', tag:'air' },
+            { id:'storm_eye', name:'Storm Eye', icon:'🌀', cost:10, rarity:'rare', desc:'+10% attack speed; projectile range -10%.', tag:'air' },
+            { id:'cyclone_fragment', name:'Cyclone Fragment', icon:'🌪️', cost:10, rarity:'rare', desc:'If you have dash: cooldown -20%; after dashing, -1 armor briefly.', tag:'air' },
             // Utility / Economy
-            { id:'amber_coin', name:'Amber Coin', icon:'🪙', cost:9, rarity:'uncommon', desc:'Her dalga başında +5 materyal; düşman HP +%5.', tag:'util' },
-            { id:'lucky_charm', name:'Lucky Charm', icon:'🍀', cost:8, rarity:'uncommon', desc:'+%10 drop; damage -%5.', tag:'util' },
-            { id:'time_relic', name:'Time Relic', icon:'⏳', cost:11, rarity:'rare', desc:'Wave süresi -5s; ödül +10 materyal.', tag:'util' },
+            { id:'amber_coin', name:'Amber Coin', icon:'🪙', cost:9, rarity:'uncommon', desc:'+5 materials at the start of each wave; enemy HP +5%.', tag:'util' },
+            { id:'lucky_charm', name:'Lucky Charm', icon:'🍀', cost:8, rarity:'uncommon', desc:'+10% drop chance; -5% damage.', tag:'util' },
+            { id:'time_relic', name:'Time Relic', icon:'⏳', cost:11, rarity:'rare', desc:'Wave duration -5s; reward +10 materials.', tag:'util' },
           ],
         };
 
         function rarityClass(r){
           return 'rarity-'+(r||'common');
         }
-        // Simple translation helper that uses game's t(key) if present
+        // Simple translation helper
+        // For non-TR languages, avoid game.t() to prevent Turkish text bleed.
         function T(key, fallback){
           try{
-            const g = (typeof window!=='undefined') ? window.game : null;
-            if(g && typeof g.t === 'function'){
-              const v = g.t(key);
-              if(v && v !== key) return v;
+            const sel = (window.__i18n && typeof window.__i18n.getLang === 'function') ? window.__i18n.getLang() : (localStorage.getItem('lang') || 'en');
+            const norm = (sel === 'tr') ? 'tr' : 'en';
+            const it = window.__i18n && typeof window.__i18n.t === 'function' ? window.__i18n.t : null;
+            if(it){
+              const v = it(key, null);
+              // Do NOT accept raw keys as "translations"; fallback to provided text.
+              if(v != null && v !== key && !/^shop_item_/.test(v) && v !== 'costLabel') return v;
+            }
+            if(norm === 'tr'){
+              const g = (typeof window!=='undefined') ? window.game : null;
+              if(g && typeof g.t === 'function'){
+                const v2 = g.t(key);
+                if(v2 && v2 !== key) return v2;
+              }
             }
           }catch(_){ }
           return (fallback!=null) ? fallback : key;
@@ -2687,7 +3074,18 @@
               const clone = {
                 ...it,
                 cost: dyn,
-                desc: 'Tüm paranı harca (min 10). Toplam kalbin 2 olur. (Sadece 4/9/14/19/24/29. dalgalarda alınabilir)'
+                desc: (function(){
+                  // Always keep description consistent with selected language
+                  const key = 'shop_item_buy_hearts_desc';
+                  const fallbackEn = 'Spend all your money (min 10). Your total hearts become 2. (Only available on Waves 4/9/14/19/24/29)';
+                  const fallbackTr = 'Tüm paranı harca (min 10). Toplam kalbin 2 olur. (Sadece 4/9/14/19/24/29. dalgalarda alınabilir)';
+                  try{
+                    const sel = window.__i18n?.getLang ? window.__i18n.getLang() : (localStorage.getItem('lang') || 'en');
+                    const norm = (sel === 'tr') ? 'tr' : 'en';
+                    const fb = (norm === 'tr') ? fallbackTr : fallbackEn;
+                    return T(key, fb);
+                  }catch(_){ return fallbackEn; }
+                })()
               };
               return clone;
             }
@@ -3181,20 +3579,22 @@
         };
 
         // Basic buttons placeholder
-        rerollBtn?.addEventListener('click', ()=>{
-          // Visual feedback only for now
-          shopItemsEl.classList.add('shake');
-          setTimeout(()=>shopItemsEl.classList.remove('shake'), 200);
-        });
-
         // Do not auto-switch to Offers on first open; render depends on explicit tab clicks.
         lockBtn?.addEventListener('click', ()=>{
-          lockBtn.textContent = lockBtn.textContent.includes('Kil') ? 'Kilidi Aç' : 'Kilit';
+          try{
+            const cur = (lockBtn.getAttribute('data-locked') === 'true');
+            const next = !cur;
+            lockBtn.setAttribute('data-locked', next ? 'true' : 'false');
+            const tr = window.__i18n?.t;
+            if(typeof tr === 'function'){
+              lockBtn.textContent = tr(next ? 'unlockLabel' : 'lockLabel', lockBtn.textContent);
+            }
+          }catch(_){ }
         });
 
-        // CSS micro-anim for reroll
+        // CSS micro-anim
         const style = document.createElement('style');
-        style.textContent = `.shake{animation:shk .18s ease;} @keyframes shk{0%{transform:translateX(0)}30%{transform:translateX(-2px)}60%{transform:translateX(2px)}100%{transform:translateX(0)}} .offers-locked .shop-item{opacity:0.5; pointer-events:none; filter:grayscale(0.2);}`;
+        style.textContent = `.offers-locked .shop-item{opacity:0.5; pointer-events:none; filter:grayscale(0.2);}`;
         document.head.appendChild(style);
 
         // Initial render and interactions
