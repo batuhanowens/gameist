@@ -2432,7 +2432,9 @@
           const key = 'elementist_onboarding_shown_v1';
           let shown = false;
           try{ shown = localStorage.getItem(key) === 'true'; }catch(_){ }
-          if(shown) return;
+          // On mobile/touch, always show the quick info at wave start (players rely on it).
+          const isTouch = document.body.classList.contains('touch') || (window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches);
+          if(shown && !isTouch) return;
           let box = document.getElementById('onboardingHints');
           if(!box){
             box = document.createElement('div');
@@ -2464,7 +2466,7 @@
             if(i >= msgs.length){
               box.style.opacity = '0';
               setTimeout(()=>{ try{ box.remove(); }catch(_){ } }, 450);
-              try{ localStorage.setItem(key, 'true'); }catch(_){ }
+              try{ if(!isTouch) localStorage.setItem(key, 'true'); }catch(_){ }
               return;
             }
             box.textContent = t(msgs[i], '');
@@ -2474,17 +2476,24 @@
             setTimeout(()=>{ i++; showNext(); }, visibleMs + 700);
           }
 
-          // Start when gameplay begins (start wave click)
-          const startWaveBtn = document.getElementById('startWaveBtn');
-          if(startWaveBtn){
-            const handler = function(){
-              if(document.body.classList.contains('playing')){
-                startWaveBtn.removeEventListener('click', handler);
-                setTimeout(showNext, 450);
-              }
-            };
-            startWaveBtn.addEventListener('click', handler);
+          // Start when gameplay actually begins (body gets 'playing')
+          function startIfPlaying(){
+            if(document.body.classList.contains('playing')){
+              try{ if(!isTouch) localStorage.setItem(key, 'true'); }catch(_){ }
+              setTimeout(showNext, 450);
+              return true;
+            }
+            return false;
           }
+          if(startIfPlaying()) return;
+          try{
+            const mo = new MutationObserver(function(){
+              try{
+                if(startIfPlaying()) mo.disconnect();
+              }catch(_){ }
+            });
+            mo.observe(document.body, { attributes:true, attributeFilter:['class'] });
+          }catch(_){ }
         });
 
         // Death screen retention hint (set a contextual line when game over becomes visible)
