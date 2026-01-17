@@ -460,6 +460,9 @@
                 font-size: clamp(19px, 5.6vw, 26px);
                 padding: 18px 24px;
                 border-radius: 16px;
+                border-width: 3px;
+                box-shadow: 0 0 46px rgba(0,255,255,0.55), 0 0 30px rgba(255,0,255,0.28);
+                text-shadow: 0 0 16px rgba(255,255,255,0.18), 0 0 18px rgba(0,255,255,0.35);
             }
         }
 
@@ -2496,6 +2499,68 @@
           }
           window.addEventListener('pointerdown', prime, { once: true, passive: true });
           window.addEventListener('touchstart', prime, { once: true, passive: true });
+        });
+
+        // Cutscene UX: on mobile, show a short loading overlay and trigger playback ASAP.
+        document.addEventListener('DOMContentLoaded', function(){
+          const overlay = document.getElementById('cutsceneOverlay');
+          const holder = document.getElementById('cutsceneHolder');
+          const v = document.getElementById('cutsceneVideo');
+          if(!overlay || !holder || !v) return;
+
+          const isMobile = (window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches);
+          let loadingEl = null;
+
+          function ensureLoading(){
+            if(loadingEl) return loadingEl;
+            const d = document.createElement('div');
+            d.style.position = 'absolute';
+            d.style.inset = '0';
+            d.style.display = 'flex';
+            d.style.alignItems = 'center';
+            d.style.justifyContent = 'center';
+            d.style.background = '#000';
+            d.style.color = '#7dd3fc';
+            d.style.fontWeight = '800';
+            d.style.letterSpacing = '0.5px';
+            d.style.fontSize = '14px';
+            d.style.textShadow = '0 0 18px rgba(0,255,255,0.35)';
+            d.textContent = 'Loading...';
+            holder.appendChild(d);
+            loadingEl = d;
+            return d;
+          }
+
+          function showLoading(){ try{ ensureLoading().style.display = 'flex'; }catch(_){ } }
+          function hideLoading(){ try{ if(loadingEl) loadingEl.style.display = 'none'; }catch(_){ } }
+
+          // Hide loader as soon as we have frames
+          v.addEventListener('loadeddata', hideLoading, { passive:true });
+          v.addEventListener('canplay', hideLoading, { passive:true });
+          v.addEventListener('playing', hideLoading, { passive:true });
+          v.addEventListener('error', ()=>{ try{ if(loadingEl) loadingEl.textContent = 'Failed to load'; }catch(_){ } }, { passive:true });
+
+          // When overlay is shown, render loader immediately and try to start decode/play.
+          const obs = new MutationObserver(function(){
+            try{
+              const visible = window.getComputedStyle(overlay).display !== 'none';
+              if(!visible) return;
+              showLoading();
+              if(isMobile){
+                // On mobile, autoplay often requires muted. Try muted start, then unmute best-effort.
+                const hasSrc = !!(v.currentSrc || v.getAttribute('src'));
+                if(hasSrc){
+                  v.preload = 'auto';
+                  v.muted = true;
+                  const p = v.play && v.play();
+                  if(p && typeof p.then === 'function'){
+                    p.then(()=>{ setTimeout(()=>{ try{ v.muted = false; }catch(_){ } }, 350); }).catch(()=>{});
+                  }
+                }
+              }
+            }catch(_){ }
+          });
+          try{ obs.observe(overlay, { attributes:true, attributeFilter:['style','class'] }); }catch(_){ }
         });
       })();
     </script>
