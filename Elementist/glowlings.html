@@ -2288,6 +2288,12 @@
               const val = t(key, el.textContent);
               if(typeof val === 'string') el.textContent = val;
             });
+            // Some buttons get their labels overwritten by core game scripts at runtime (esp. mobile).
+            // Re-assert critical labels explicitly.
+            try{
+              const hub = document.getElementById('backToHubBtn');
+              if(hub) hub.textContent = t('backToMenuBtn', hub.textContent);
+            }catch(_){ }
             // Also normalize dynamic weapon overlay cards that may be injected with hardcoded strings
             scheduleWeaponOverlayNormalize();
           }catch(_){ }
@@ -2389,6 +2395,23 @@
             sel.addEventListener('change', function(){ setLang(sel.value); });
           }
           setLang(cur);
+        });
+
+        // Keep "Back to Menu" button label consistent even if core scripts overwrite it.
+        document.addEventListener('DOMContentLoaded', function(){
+          try{
+            const hub = document.getElementById('backToHubBtn');
+            if(!hub) return;
+            const apply = ()=>{
+              try{
+                const desired = t('backToMenuBtn', hub.textContent);
+                if(typeof desired === 'string' && desired && hub.textContent !== desired) hub.textContent = desired;
+              }catch(_){ }
+            };
+            apply();
+            const mo = new MutationObserver(function(){ apply(); });
+            mo.observe(hub, { characterData:true, childList:true, subtree:true });
+          }catch(_){ }
         });
 
         // Watch weapon overlay for dynamic content injection and re-apply language
