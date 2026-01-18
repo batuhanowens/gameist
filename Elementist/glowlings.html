@@ -611,9 +611,9 @@
         /* On mobile, keep perfect centering and adjust spacing/typography instead of scaling */
         body.touch #inGameMenu {
             transform: translate(-50%, -50%);
-            padding: 8px;
-            width: min(300px, 84vw);
-            max-height: min(82vh, 520px);
+            padding: 6px;
+            width: min(280px, 90vw);
+            max-height: min(68vh, 420px);
             overflow: auto;
         }
         body.touch #inGameMenu .menu-btn { padding: 4px 8px; font-size: 11px; }
@@ -2457,7 +2457,6 @@
           const wasShownThisRun = ()=>{
             try{ return String(sessionStorage.getItem(shownKey) || '') === String(getRunId()); }catch(_){ return false; }
           };
-          if(wasShownThisRun()) return;
           let box = document.getElementById('onboardingHints');
           if(!box){
             box = document.createElement('div');
