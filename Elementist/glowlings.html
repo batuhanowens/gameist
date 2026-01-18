@@ -7,20 +7,20 @@
     <meta http-equiv="Expires" content="0" />
     
     <title>Elementist - Neon Universe Battle</title>
-    <meta name="description" content="Elementist: Elementlerin gücünü kullan, düşmanları alt et ve zorlu arenada hayatta kal. Gameist içinde oynanabilir aksiyon oyunu." />
+    <meta name="description" content="Elementist: Use the power of elements, defeat your enemies, and survive in a neon arena. Action game playable on Gameist." />
     <meta name="robots" content="index,follow" />
     <link rel="canonical" href="./glowlings.html" />
     <meta property="og:site_name" content="Gameist" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Elementist - Neon Universe Battle" />
-    <meta property="og:description" content="Elementlerin gücünü kullan, düşmanları alt et ve arenada hayatta kal." />
+    <meta property="og:description" content="Use the power of elements, defeat your enemies, and survive in the arena." />
     <meta property="og:url" content="./glowlings.html" />
     <meta property="og:image" content="../2048/logo.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Elementist - Gameist" />
     <meta
       name="twitter:description"
-      content="Elementist: Elementlerin gücünü keşfet, düşmanları alt et ve hayatta kal!"
+      content="Elementist: Discover the power of elements, defeat your enemies, and survive!"
     />
     <meta name="twitter:image" content="../2048/logo.png" />
     <script type="application/ld+json">
@@ -232,10 +232,22 @@
             position: absolute; bottom: 34px; right: 128px;
             width: 73px; height: 73px; border-radius: 50%;
             background: rgba(2,6,23,0.55);
-            color: #e5e7eb; font-weight: 800; letter-spacing: 0.5px;
-            border: 2px solid #00ffff; box-shadow: 0 0 18px rgba(0,255,255,0.45);
-            pointer-events: all; touch-action: manipulation; cursor: pointer;
+            border: 2px solid rgba(0,255,255,0.85);
+            color: #67e8f9;
+            font-weight: 900;
+            letter-spacing: 1px;
+            box-shadow: 0 0 14px rgba(0,255,255,0.25);
+            pointer-events: all;
+            touch-action: manipulation;
+            cursor: pointer;
         }
+
+        /* Touch QoL: slightly larger HUD controls on touch devices */
+        body.touch #joystick { width: 122px; height: 122px; bottom: 22px; left: 18px; }
+        body.touch #joystickNub { width: 48px; height: 48px; }
+        body.touch #skillBtn { width: 86px; height: 86px; bottom: 28px; right: 22px; }
+        body.touch #dodgeBtn { width: 86px; height: 86px; bottom: 28px; right: 130px; }
+        body.touch #pauseBtnMobile { width: 52px !important; height: 52px !important; }
 
         /* Landscape enforcement: show rotate overlay on portrait */
         #rotateOverlay { display:none; position: fixed; inset: 0; background: #000; color:#fff; z-index: 99999; align-items: center; justify-content: center; text-align: center; padding: 24px; }
@@ -1552,21 +1564,21 @@
     <div id="settingsOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter: blur(3px); z-index:10003;">
       <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:min(92vw,820px); max-height:82vh; overflow:auto; background:#0b1220; color:#e5e7eb; border:2px solid #00ffff; border-radius:14px; box-shadow:0 0 30px rgba(0,255,255,0.35); padding:18px 20px;">
         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-          <h2 style="margin:0; color:#67e8f9;" data-lang="settingsTitle">Ayarlar</h2>
-          <button id="settingsCloseBtn" class="menu-btn" style="width:auto; padding:6px 10px;" data-lang="close">KAPAT / CLOSE</button>
+          <h2 style="margin:0; color:#67e8f9;" data-lang="settingsTitle">Settings</h2>
+          <button id="settingsCloseBtn" class="menu-btn" style="width:auto; padding:6px 10px;" data-lang="close">CLOSE</button>
         </div>
         <!-- Tabs -->
         <div id="settingsTabs" style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
-          <button class="menu-btn settings-tab-btn active" data-tab="appearance" onclick="window.__switchSettingsTab && window.__switchSettingsTab('appearance')" style="width:auto; padding:6px 10px;" data-lang="appearance">Görünüm</button>
-          <button class="menu-btn settings-tab-btn" data-tab="audio" onclick="window.__switchSettingsTab && window.__switchSettingsTab('audio')" style="width:auto; padding:6px 10px;" data-lang="sound">Ses</button>
-          <button class="menu-btn settings-tab-btn" data-tab="language" onclick="window.__switchSettingsTab && window.__switchSettingsTab('language')" style="width:auto; padding:6px 10px;" data-lang="language">Dil</button>
-          <button class="menu-btn settings-tab-btn" data-tab="credits" onclick="window.__switchSettingsTab && window.__switchSettingsTab('credits')" style="width:auto; padding:6px 10px;" data-lang="credits">Emeği Geçenler</button>
+          <button class="menu-btn settings-tab-btn active" data-tab="appearance" onclick="window.__switchSettingsTab && window.__switchSettingsTab('appearance')" style="width:auto; padding:6px 10px;" data-lang="appearance">Appearance</button>
+          <button class="menu-btn settings-tab-btn" data-tab="audio" onclick="window.__switchSettingsTab && window.__switchSettingsTab('audio')" style="width:auto; padding:6px 10px;" data-lang="sound">Sound</button>
+          <button class="menu-btn settings-tab-btn" data-tab="language" onclick="window.__switchSettingsTab && window.__switchSettingsTab('language')" style="width:auto; padding:6px 10px;" data-lang="language">Language</button>
+          <button class="menu-btn settings-tab-btn" data-tab="credits" onclick="window.__switchSettingsTab && window.__switchSettingsTab('credits')" style="width:auto; padding:6px 10px;" data-lang="credits">Credits</button>
         </div>
         <!-- Tab Panels -->
         <div id="settingsPanels" style="margin-top:12px; display:block;">
           <!-- Görünüm -->
           <div id="settingsTab-appearance" class="settings-panel" style="display:block;">
-            <h3 style="margin:0 0 6px; color:#93c5fd;" data-lang="appearance">Görünüm</h3>
+            <h3 style="margin:0 0 6px; color:#93c5fd;" data-lang="appearance">Appearance</h3>
             <div style="display:grid; gap:8px;">
               <div style="display:flex; gap:8px; align-items:center;">
                 <button id="fullscreenToggleBtn" class="menu-btn" style="width:auto; padding:6px 10px;" aria-pressed="false" onclick="window.__toggleFullscreen && window.__toggleFullscreen()" data-lang="fullscreen">Fullscreen</button>
@@ -1575,40 +1587,40 @@
               <div style="display:flex; gap:8px; align-items:center;">
               </div>
               <div style="display:flex; gap:8px; align-items:center;">
-                <button id="fpsInfoToggleBtn" class="menu-btn" style="width:auto; padding:6px 10px;" aria-pressed="false" onclick="window.__toggleFpsInfo && window.__toggleFpsInfo()" data-lang="fpsInfo">FPS Bilgisi</button>
+                <button id="fpsInfoToggleBtn" class="menu-btn" style="width:auto; padding:6px 10px;" aria-pressed="false" onclick="window.__toggleFpsInfo && window.__toggleFpsInfo()" data-lang="fpsInfo">FPS Info</button>
                 <span id="fpsInfoState" class="state-chip" style="padding:2px 8px;">Off</span>
               </div>
             </div>
           </div>
           <!-- Ses -->
           <div id="settingsTab-audio" class="settings-panel" style="display:none;">
-            <h3 style="margin:0 0 6px; color:#93c5fd;" data-lang="sound">Ses</h3>
+            <h3 style="margin:0 0 6px; color:#93c5fd;" data-lang="sound">Sound</h3>
             <div style="display:flex; gap:8px; align-items:center;">
               <button id="soundToggleBtn" class="menu-btn" style="width:auto; padding:6px 10px; display:flex; gap:8px; align-items:center;" aria-pressed="false">
-                <span data-lang="sound">Ses</span>
+                <span data-lang="sound">Sound</span>
                 <span id="soundState" class="state-chip" style="padding:2px 8px; border:1px solid #334155; border-radius:999px; font-size:12px; opacity:.9;">Off</span>
               </button>
-              <label for="masterVolume" style="min-width:90px; color:#e5e7eb;" data-lang="volume">Ses: </label>
+              <label for="masterVolume" style="min-width:90px; color:#e5e7eb;" data-lang="volume">Volume: </label>
               <input id="masterVolume" type="range" min="0" max="1" step="0.01" style="flex:1;" />
               <span id="masterVolumeVal" style="min-width:40px; text-align:right;">100%</span>
             </div>
-            <h3 style="margin:12px 0 6px; color:#93c5fd;" data-lang="music">Müzik</h3>
+            <h3 style="margin:12px 0 6px; color:#93c5fd;" data-lang="music">Music</h3>
             <div style="display:flex; gap:8px; align-items:center;">
               <button id="musicToggleBtn" class="menu-btn" style="width:auto; padding:6px 10px; display:flex; gap:8px; align-items:center;" aria-pressed="false">
-                <span data-lang="music">Müzik</span>
+                <span data-lang="music">Music</span>
                 <span id="musicState" class="state-chip" style="padding:2px 8px; border:1px solid #334155; border-radius:999px; font-size:12px; opacity:.9;">Off</span>
               </button>
-              <label for="musicVolume" style="min-width:90px; color:#e5e7eb;" data-lang="volume">Ses: </label>
+              <label for="musicVolume" style="min-width:90px; color:#e5e7eb;" data-lang="volume">Volume: </label>
               <input id="musicVolume" type="range" min="0" max="1" step="0.01" value="0.15" style="flex:1;" />
               <span id="musicVolumeVal" style="min-width:40px; text-align:right;">15%</span>
             </div>
           </div>
           <!-- Dil -->
           <div id="settingsTab-language" class="settings-panel" style="display:none;">
-            <h3 style="margin-bottom:6px; color:#93c5fd;" data-lang="language">Dil</h3>
+            <h3 style="margin-bottom:6px; color:#93c5fd;" data-lang="language">Language</h3>
             <label for="languageSelect" class="sr-only" aria-hidden="true">Language</label>
             <select id="languageSelect" style="width:100%; padding:10px; background:#0a101f; color:#e5e7eb; border:1px solid #00ffff; border-radius:8px;">
-              <option value="tr">Türkçe</option>
+              <option value="tr">Turkish</option>
               <option value="en">English</option>
               <option value="de">Deutsch</option>
               <option value="ja">日本語</option>
@@ -1620,9 +1632,9 @@
           </div>
           <!-- Emeği Geçenler -->
           <div id="settingsTab-credits" class="settings-panel" style="display:none;">
-            <h3 style="margin-bottom:6px; color:#93c5fd;" data-lang="credits">Emeği Geçenler</h3>
+            <h3 style="margin-bottom:6px; color:#93c5fd;" data-lang="credits">Credits</h3>
             <div class="stat" style="padding:12px;">
-              <p style="margin:0; color:#b6c2d1;" data-lang="creditsText">Elementist geliştirici ekibi ve katkıda bulunanlara teşekkürler.</p>
+              <p style="margin:0; color:#b6c2d1;" data-lang="creditsText">Thanks to the Elementist developer team and contributors.</p>
             </div>
           </div>
         </div>
@@ -1651,7 +1663,7 @@
       <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:min(92vw,820px); max-height:82vh; overflow:auto; background:#0b1220; color:#e5e7eb; border:2px solid #00ffff; border-radius:14px; box-shadow:0 0 30px rgba(0,255,255,0.35); padding:18px 20px;">
         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
           <h2 style="margin:0; color:#67e8f9;" data-lang="howToTitle">How to Play</h2>
-          <button id="howToCloseBtn" class="menu-btn" style="width:auto; padding:6px 10px;" data-lang="close">KAPAT / CLOSE</button>
+          <button id="howToCloseBtn" class="menu-btn" style="width:auto; padding:6px 10px;" data-lang="close">CLOSE</button>
         </div>
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap:14px; margin-top:12px;">
           <div class="stat" style="padding:12px;">
@@ -1679,79 +1691,79 @@
     <div id="charactersOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:10050; align-items:center; justify-content:center;">
       <div class="card" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(0,0,0,0.95); padding:26px; border-radius:16px; border:2px solid #00ffff; box-shadow:0 0 30px #00ffff; width:min(880px, 96vw); max-height:86vh; overflow:auto;">
         <div class="header" style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px;">
-          <h1 data-lang="charactersTitle" style="color:#00ffff; margin:0;">Karakterler</h1>
-          <button type="button" id="closeCharactersBtn" class="btn" style="background:#0ea5e9; color:#001018; border:none; border-radius:10px; padding:8px 12px; font-weight:700; cursor:pointer;" data-lang="close">Kapat</button>
+          <h1 data-lang="charactersTitle" style="color:#00ffff; margin:0;">Characters</h1>
+          <button type="button" id="closeCharactersBtn" class="btn" style="background:#0ea5e9; color:#001018; border:none; border-radius:10px; padding:8px 12px; font-weight:700; cursor:pointer;" data-lang="close">Close</button>
         </div>
-        <p class="sub" data-lang="charactersSubtitle" style="color:#b6c2d1; margin: 0 0 12px 0; text-align:center;">Temelden zora tüm düşman arketiplerinin görseli ve açıklaması.</p>
+        <p class="sub" data-lang="charactersSubtitle" style="color:#b6c2d1; margin: 0 0 12px 0; text-align:center;">Visuals and short descriptions of enemy archetypes.</p>
         <div id="charactersList" style="display:grid; grid-template-columns: repeat(1, 1fr); gap:10px;">
           <div class="char-item" style="display:flex; align-items:center; gap:12px; padding:10px; border:1px solid #334155; border-radius:10px; background:#0b1220;">
             <canvas class="char-icon" width="80" height="80" data-role="rush" data-shape="circle"></canvas>
             <div>
-              <div class="shop-name" style="font-weight:700; color:#e2e8f0;" data-lang="enemy_rush_circle_title">Rush (Daire)</div>
-              <div class="shop-desc" style="color:#94a3b8; font-size:14px;" data-lang="enemy_rush_circle_desc">En temel yakıncı; ateş etmez. Doğrudan kovalar, sürekli basınç kurar.</div>
+              <div class="shop-name" style="font-weight:700; color:#e2e8f0;" data-lang="enemy_rush_circle_title">Rush (Circle)</div>
+              <div class="shop-desc" style="color:#94a3b8; font-size:14px;" data-lang="enemy_rush_circle_desc">Basic melee chaser; does not shoot. Follows directly and applies constant pressure.</div>
             </div>
           </div>
           <div class="char-item" style="display:flex; align-items:center; gap:12px; padding:10px; border:1px solid #334155; border-radius:10px; background:#0b1220;">
             <canvas class="char-icon" width="80" height="80" data-role="rush" data-shape="triangle"></canvas>
             <div>
-              <div class="shop-name" style="font-weight:700; color:#e2e8f0;" data-lang="enemy_rush_triangle_title">Rush (Üçgen)</div>
-              <div class="shop-desc" style="color:#94a3b8; font-size:14px;" data-lang="enemy_rush_triangle_desc">Keskin dönüş alır; kısa patlamalarla hızlanıp üstüne kapanır.</div>
+              <div class="shop-name" style="font-weight:700; color:#e2e8f0;" data-lang="enemy_rush_triangle_title">Rush (Triangle)</div>
+              <div class="shop-desc" style="color:#94a3b8; font-size:14px;" data-lang="enemy_rush_triangle_desc">Sharp turns; accelerates in short bursts and closes the gap.</div>
             </div>
           </div>
           <div class="char-item" style="display:flex; align-items:center; gap:12px; padding:10px; border:1px solid #334155; border-radius:10px; background:#0b1220;">
             <canvas class="char-icon" width="80" height="80" data-role="shooter" data-shape="circle"></canvas>
             <div>
               <div class="shop-name" style="font-weight:700; color:#e2e8f0;" data-lang="enemy_shooter_title">Shooter</div>
-              <div class="shop-desc" style="color:#94a3b8; font-size:14px;" data-lang="enemy_shooter_desc">Orta-uzak mesafeden periyodik enerji mermisi atar; sabit ritim, orta hız.</div>
+              <div class="shop-desc" style="color:#94a3b8; font-size:14px;" data-lang="enemy_shooter_desc">Fires periodic energy shots from mid-range; steady rhythm, medium speed.</div>
             </div>
           </div>
           <div class="char-item" style="display:flex; align-items:center; gap:12px; padding:10px; border:1px solid #334155; border-radius:10px; background:#0b1220;">
             <canvas class="char-icon" width="80" height="80" data-role="sniper" data-shape="triangle"></canvas>
             <div>
               <div class="shop-name" style="font-weight:700; color:#e2e8f0;" data-lang="enemy_sniper_title">Sniper</div>
-              <div class="shop-desc" style="color:#94a3b8; font-size:14px;" data-lang="enemy_sniper_desc">Çok uzakta bekler; nişan alıp gecikmeli fakat yüksek hasarlı atış yapar.</div>
+              <div class="shop-desc" style="color:#94a3b8; font-size:14px;" data-lang="enemy_sniper_desc">Stays far away; aims, then fires a delayed but high-damage shot.</div>
             </div>
           </div>
           <div class="char-item" style="display:flex; align-items:center; gap:12px; padding:10px; border:1px solid #334155; border-radius:10px; background:#0b1220;">
             <canvas class="char-icon" width="80" height="80" data-role="charger" data-shape="circle"></canvas>
             <div>
               <div class="shop-name" style="font-weight:700; color:#e2e8f0;" data-lang="enemy_charger_title">Charger</div>
-              <div class="shop-desc" style="color:#94a3b8; font-size:14px;" data-lang="enemy_charger_desc">Kısa telegraph sonrası düz bir hatta aşırı hızlanır ve çarpar.</div>
+              <div class="shop-desc" style="color:#94a3b8; font-size:14px;" data-lang="enemy_charger_desc">After a short telegraph, surges in a straight line and rams you.</div>
             </div>
           </div>
           <div class="char-item" style="display:flex; align-items:center; gap:12px; padding:10px; border:1px solid #334155; border-radius:10px; background:#0b1220;">
             <canvas class="char-icon" width="80" height="80" data-role="brute" data-shape="triangle"></canvas>
             <div>
               <div class="shop-name" style="font-weight:700; color:#e2e8f0;" data-lang="enemy_brute_title">Brute</div>
-              <div class="shop-desc" style="color:#94a3b8; font-size:14px;" data-lang="enemy_brute_desc">Yüksek can ve kütle; yakın temasta güçlü itiş uygular, yavaş ama ısrarlı.</div>
+              <div class="shop-desc" style="color:#94a3b8; font-size:14px;" data-lang="enemy_brute_desc">High HP and mass; strong shove on contact. Slow but relentless.</div>
             </div>
           </div>
           <div class="char-item" style="display:flex; align-items:center; gap:12px; padding:10px; border:1px solid #334155; border-radius:10px; background:#0b1220;">
             <canvas class="char-icon" width="80" height="80" data-role="assassin" data-shape="triangle"></canvas>
             <div>
               <div class="shop-name" style="font-weight:700; color:#e2e8f0;" data-lang="enemy_assassin_title">Assassin</div>
-              <div class="shop-desc" style="color:#94a3b8; font-size:14px;" data-lang="enemy_assassin_desc">Görünürlük arasında geçiş yapar; pusu kurup ani yaklaşır.</div>
+              <div class="shop-desc" style="color:#94a3b8; font-size:14px;" data-lang="enemy_assassin_desc">Shifts in and out of visibility; ambushes and closes in suddenly.</div>
             </div>
           </div>
           <div class="char-item" style="display:flex; align-items:center; gap:12px; padding:10px; border:1px solid #334155; border-radius:10px; background:#0b1220;">
             <canvas class="char-icon" width="80" height="80" data-role="juggernaut" data-shape="circle"></canvas>
             <div>
               <div class="shop-name" style="font-weight:700; color:#e2e8f0;" data-lang="enemy_juggernaut_title">Juggernaut</div>
-              <div class="shop-desc" style="color:#94a3b8; font-size:14px;" data-lang="enemy_juggernaut_desc">Önde dönen kalkanla mermileri bloklar; yavaş ilerleyen ağır tank.</div>
+              <div class="shop-desc" style="color:#94a3b8; font-size:14px;" data-lang="enemy_juggernaut_desc">Blocks bullets with a rotating front shield; a heavy tank that advances slowly.</div>
             </div>
           </div>
           <div class="char-item" style="display:flex; align-items:center; gap:12px; padding:10px; border:1px solid #334155; border-radius:10px; background:#0b1220;">
             <canvas class="char-icon" width="80" height="80" data-role="parasite" data-shape="circle"></canvas>
             <div>
               <div class="shop-name" style="font-weight:700; color:#e2e8f0;" data-lang="enemy_parasite_title">Parasite</div>
-              <div class="shop-desc" style="color:#94a3b8; font-size:14px;" data-lang="enemy_parasite_desc">Temasta zayıflatma uygular; yakın kalarak yıpratır.</div>
+              <div class="shop-desc" style="color:#94a3b8; font-size:14px;" data-lang="enemy_parasite_desc">Applies a debuff on contact and wears you down by staying close.</div>
             </div>
           </div>
           <div class="char-item" style="display:flex; align-items:center; gap:12px; padding:10px; border:1px solid #334155; border-radius:10px; background:#0b1220;">
             <canvas class="char-icon" width="80" height="80" data-role="mutant" data-shape="triangle"></canvas>
             <div>
               <div class="shop-name" style="font-weight:700; color:#e2e8f0;" data-lang="enemy_mutant_title">Mutant</div>
-              <div class="shop-desc" style="color:#94a3b8; font-size:14px;" data-lang="enemy_mutant_desc">Dalga ilerledikçe biçim ve davranış değiştirir; tahmin etmesi zordur.</div>
+              <div class="shop-desc" style="color:#94a3b8; font-size:14px;" data-lang="enemy_mutant_desc">Changes form and behavior as waves progress; hard to predict.</div>
             </div>
           </div>
         </div>
@@ -1763,44 +1775,44 @@
       <div class="card" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(0,0,0,0.95); padding:26px; border-radius:16px; border:2px solid #00ffff; box-shadow:0 0 30px #00ffff; width:min(980px, 96vw); max-height:86vh; overflow:auto;">
         <div class="header" style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px;">
           <h1 data-lang="buildersTitle" style="color:#00ffff; margin:0;">Builds</h1>
-          <button type="button" id="closeBuildsBtn" class="btn" style="background:#0ea5e9; color:#001018; border:none; border-radius:10px; padding:8px 12px; font-weight:700; cursor:pointer;" data-lang="close">Kapat</button>
+          <button type="button" id="closeBuildsBtn" class="btn" style="background:#0ea5e9; color:#001018; border:none; border-radius:10px; padding:8px 12px; font-weight:700; cursor:pointer;" data-lang="close">Close</button>
         </div>
-        <p class="sub" data-lang="buildersSubtitle" style="color:#b6c2d1; margin: 0 0 12px 0; text-align:center;">3 element için önerilen build’ler ve kısa açıklamalar.</p>
+        <p class="sub" data-lang="buildersSubtitle" style="color:#b6c2d1; margin: 0 0 12px 0; text-align:center;">Recommended builds for each element (quick reference).</p>
         <div class="tabs" style="display:flex; gap:8px; justify-content:center; margin: 12px 0 16px 0; flex-wrap:wrap;">
-          <button class="tab-btn active" data-tab="fire" style="background:#0b1220; border:1px solid #334155; color:#e2e8f0; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:700;"><span data-lang="elFire">🔥 Ateş</span></button>
-          <button class="tab-btn" data-tab="water" style="background:#0b1220; border:1px solid #334155; color:#e2e8f0; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:700;"><span data-lang="elWater">💧 Su</span></button>
-          <button class="tab-btn" data-tab="air" style="background:#0b1220; border:1px solid #334155; color:#e2e8f0; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:700;"><span data-lang="elAir">🌬️ Hava</span></button>
+          <button class="tab-btn active" data-tab="fire" style="background:#0b1220; border:1px solid #334155; color:#e2e8f0; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:700;"><span data-lang="elFire">🔥 Fire</span></button>
+          <button class="tab-btn" data-tab="water" style="background:#0b1220; border:1px solid #334155; color:#e2e8f0; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:700;"><span data-lang="elWater">💧 Water</span></button>
+          <button class="tab-btn" data-tab="air" style="background:#0b1220; border:1px solid #334155; color:#e2e8f0; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:700;"><span data-lang="elAir">🌬️ Air</span></button>
         </div>
         <section id="tab-fire" class="section" style="display:block;">
           <div class="grid" style="display:grid; grid-template-columns: repeat(1, 1fr); gap:12px;">
             <div class="build" style="background:#0b1220; border:1px solid #334155; border-radius:10px; padding:12px;">
-              <h3 style="margin:0 0 6px 0; color:#e2e8f0;" data-lang="build_fire_crit_title">Yanıcı Krit</h3>
-              <small style="color:#94a3b8; display:block; margin-bottom:8px;" data-lang="build_fire_crit_desc">Yüksek hasar, alan etkili patlamalar</small>
+              <h3 style="margin:0 0 6px 0; color:#e2e8f0;" data-lang="build_fire_crit_title">Burn Crit</h3>
+              <small style="color:#94a3b8; display:block; margin-bottom:8px;" data-lang="build_fire_crit_desc">High damage with explosive AoE</small>
               <ul style="margin:0; padding-left:18px; color:#94a3b8;">
-                <li data-lang="build_fire_crit_i1">Alev Dansı</li>
-                <li data-lang="build_fire_crit_i2">Kızıl Çiy</li>
-                <li data-lang="build_fire_crit_i3">Ateş Halkası</li>
-                <li data-lang="build_fire_crit_i4">Kritik Alev</li>
+                <li data-lang="build_fire_crit_i1">Flame Dance</li>
+                <li data-lang="build_fire_crit_i2">Crimson Dew</li>
+                <li data-lang="build_fire_crit_i3">Fire Ring</li>
+                <li data-lang="build_fire_crit_i4">Critical Flame</li>
               </ul>
             </div>
             <div class="build" style="background:#0b1220; border:1px solid #334155; border-radius:10px; padding:12px;">
-              <h3 style="margin:0 0 6px 0; color:#e2e8f0;" data-lang="build_fire_layers_title">Yanma Üstüne Yanma</h3>
-              <small style="color:#94a3b8; display:block; margin-bottom:8px;" data-lang="build_fire_layers_desc">Yanma katmanlarıyla sürekli DPS</small>
+              <h3 style="margin:0 0 6px 0; color:#e2e8f0;" data-lang="build_fire_layers_title">Stacking Burns</h3>
+              <small style="color:#94a3b8; display:block; margin-bottom:8px;" data-lang="build_fire_layers_desc">Sustained DPS via burn layers</small>
               <ul style="margin:0; padding-left:18px; color:#94a3b8;">
-                <li data-lang="build_fire_layers_i1">Süregelen Yanış</li>
-                <li data-lang="build_fire_layers_i2">Köz İzi</li>
-                <li data-lang="build_fire_layers_i3">Isı Dalgası</li>
-                <li data-lang="build_fire_layers_i4">Kömür Kalp</li>
+                <li data-lang="build_fire_layers_i1">Lingering Burn</li>
+                <li data-lang="build_fire_layers_i2">Ember Trail</li>
+                <li data-lang="build_fire_layers_i3">Heat Wave</li>
+                <li data-lang="build_fire_layers_i4">Charred Heart</li>
               </ul>
             </div>
             <div class="build" style="background:#0b1220; border:1px solid #334155; border-radius:10px; padding:12px;">
-              <h3 style="margin:0 0 6px 0; color:#e2e8f0;" data-lang="build_fire_explosive_title">Patlayıcı</h3>
-              <small style="color:#94a3b8; display:block; margin-bottom:8px;" data-lang="build_fire_explosive_desc">Temas sonrası mini patlamalar</small>
+              <h3 style="margin:0 0 6px 0; color:#e2e8f0;" data-lang="build_fire_explosive_title">Explosive</h3>
+              <small style="color:#94a3b8; display:block; margin-bottom:8px;" data-lang="build_fire_explosive_desc">Mini explosions on contact</small>
               <ul style="margin:0; padding-left:18px; color:#94a3b8;">
-                <li data-lang="build_fire_explosive_i1">Kıvılcım Yükü</li>
-                <li data-lang="build_fire_explosive_i2">Volatil Alev</li>
-                <li data-lang="build_fire_explosive_i3">Basınçlı Çekirdek</li>
-                <li data-lang="build_fire_explosive_i4">Yanardağ</li>
+                <li data-lang="build_fire_explosive_i1">Spark Charge</li>
+                <li data-lang="build_fire_explosive_i2">Volatile Flame</li>
+                <li data-lang="build_fire_explosive_i3">Pressurized Core</li>
+                <li data-lang="build_fire_explosive_i4">Volcano</li>
               </ul>
             </div>
           </div>
@@ -1808,33 +1820,33 @@
         <section id="tab-water" class="section" style="display:none;">
           <div class="grid" style="display:grid; grid-template-columns: repeat(1, 1fr); gap:12px;">
             <div class="build" style="background:#0b1220; border:1px solid #334155; border-radius:10px; padding:12px;">
-              <h3 style="margin:0 0 6px 0; color:#e2e8f0;" data-lang="build_water_waves_title">Dalgasavar</h3>
-              <small style="color:#94a3b8; display:block; margin-bottom:8px;" data-lang="build_water_waves_desc">Alan kontrolü ve yavaşlatma</small>
+              <h3 style="margin:0 0 6px 0; color:#e2e8f0;" data-lang="build_water_waves_title">Wavebreaker</h3>
+              <small style="color:#94a3b8; display:block; margin-bottom:8px;" data-lang="build_water_waves_desc">Area control and slows</small>
               <ul style="margin:0; padding-left:18px; color:#94a3b8;">
-                <li data-lang="build_water_waves_i1">Gelgit Halkası</li>
-                <li data-lang="build_water_waves_i2">Soğuk Akım</li>
-                <li data-lang="build_water_waves_i3">Yoğun Sis</li>
-                <li data-lang="build_water_waves_i4">Derin Basınç</li>
+                <li data-lang="build_water_waves_i1">Tide Ring</li>
+                <li data-lang="build_water_waves_i2">Cold Current</li>
+                <li data-lang="build_water_waves_i3">Dense Mist</li>
+                <li data-lang="build_water_waves_i4">Deep Pressure</li>
               </ul>
             </div>
             <div class="build" style="background:#0b1220; border:1px solid #334155; border-radius:10px; padding:12px;">
-              <h3 style="margin:0 0 6px 0; color:#e2e8f0;" data-lang="build_water_flow_title">Akış Ustası</h3>
-              <small style="color:#94a3b8; display:block; margin-bottom:8px;" data-lang="build_water_flow_desc">Hareketlilik + iyileşme</small>
+              <h3 style="margin:0 0 6px 0; color:#e2e8f0;" data-lang="build_water_flow_title">Flow Master</h3>
+              <small style="color:#94a3b8; display:block; margin-bottom:8px;" data-lang="build_water_flow_desc">Mobility + healing</small>
               <ul style="margin:0; padding-left:18px; color:#94a3b8;">
-                <li data-lang="build_water_flow_i1">Canlandıran Damlalar</li>
-                <li data-lang="build_water_flow_i2">Çiseleyen Perde</li>
-                <li data-lang="build_water_flow_i3">Akışkan Zırh</li>
-                <li data-lang="build_water_flow_i4">Nehrin Ritmi</li>
+                <li data-lang="build_water_flow_i1">Reviving Drops</li>
+                <li data-lang="build_water_flow_i2">Drizzle Veil</li>
+                <li data-lang="build_water_flow_i3">Fluid Armor</li>
+                <li data-lang="build_water_flow_i4">River Rhythm</li>
               </ul>
             </div>
             <div class="build" style="background:#0b1220; border:1px solid #334155; border-radius:10px; padding:12px;">
-              <h3 style="margin:0 0 6px 0; color:#e2e8f0;" data-lang="build_water_ice_title">Buz Dondurucu</h3>
-              <small style="color:#94a3b8; display:block; margin-bottom:8px;" data-lang="build_water_ice_desc">Düşük hız, yüksek kontrol</small>
+              <h3 style="margin:0 0 6px 0; color:#e2e8f0;" data-lang="build_water_ice_title">Ice Control</h3>
+              <small style="color:#94a3b8; display:block; margin-bottom:8px;" data-lang="build_water_ice_desc">Lower speed, higher control</small>
               <ul style="margin:0; padding-left:18px; color:#94a3b8;">
-                <li data-lang="build_water_ice_i1">Donma Noktası</li>
-                <li data-lang="build_water_ice_i2">Buz Pulu</li>
-                <li data-lang="build_water_ice_i3">Kırağı Dokunuşu</li>
-                <li data-lang="build_water_ice_i4">Kutup Sessizliği</li>
+                <li data-lang="build_water_ice_i1">Freezing Point</li>
+                <li data-lang="build_water_ice_i2">Ice Flake</li>
+                <li data-lang="build_water_ice_i3">Frost Touch</li>
+                <li data-lang="build_water_ice_i4">Polar Silence</li>
               </ul>
             </div>
           </div>
@@ -1842,33 +1854,33 @@
         <section id="tab-air" class="section" style="display:none;">
           <div class="grid" style="display:grid; grid-template-columns: repeat(1, 1fr); gap:12px;">
             <div class="build" style="background:#0b1220; border:1px solid #334155; border-radius:10px; padding:12px;">
-              <h3 style="margin:0 0 6px 0; color:#e2e8f0;" data-lang="build_air_crit_title">Krit Fırtınası</h3>
-              <small style="color:#94a3b8; display:block; margin-bottom:8px;" data-lang="build_air_crit_desc">Yüksek crit, hızlı oyun</small>
+              <h3 style="margin:0 0 6px 0; color:#e2e8f0;" data-lang="build_air_crit_title">Crit Storm</h3>
+              <small style="color:#94a3b8; display:block; margin-bottom:8px;" data-lang="build_air_crit_desc">High crit, fast gameplay</small>
               <ul style="margin:0; padding-left:18px; color:#94a3b8;">
-                <li data-lang="build_air_crit_i1">Fırtına Öfkesi</li>
-                <li data-lang="build_air_crit_i2">Yükselen Basınç</li>
-                <li data-lang="build_air_crit_i3">Gök Gürültüsü</li>
-                <li data-lang="build_air_crit_i4">Sonsuz Esinti</li>
+                <li data-lang="build_air_crit_i1">Storm Fury</li>
+                <li data-lang="build_air_crit_i2">Rising Pressure</li>
+                <li data-lang="build_air_crit_i3">Thunderclap</li>
+                <li data-lang="build_air_crit_i4">Endless Breeze</li>
               </ul>
             </div>
             <div class="build" style="background:#0b1220; border:1px solid #334155; border-radius:10px; padding:12px;">
               <h3 style="margin:0 0 6px 0; color:#e2e8f0;" data-lang="build_air_dodger_title">Dodger</h3>
-              <small style="color:#94a3b8; display:block; margin-bottom:8px;" data-lang="build_air_dodger_desc">Kaçınma ve hayatta kalma</small>
+              <small style="color:#94a3b8; display:block; margin-bottom:8px;" data-lang="build_air_dodger_desc">Dodging and survival</small>
               <ul style="margin:0; padding-left:18px; color:#94a3b8;">
-                <li data-lang="build_air_dodger_i1">Hafif Adımlar</li>
-                <li data-lang="build_air_dodger_i2">Fırtına Zırhı</li>
-                <li data-lang="build_air_dodger_i3">Rüzgar Kalkanı</li>
-                <li data-lang="build_air_dodger_i4">Hafiflik Büyüsü</li>
+                <li data-lang="build_air_dodger_i1">Light Steps</li>
+                <li data-lang="build_air_dodger_i2">Storm Armor</li>
+                <li data-lang="build_air_dodger_i3">Wind Shield</li>
+                <li data-lang="build_air_dodger_i4">Feather Charm</li>
               </ul>
             </div>
             <div class="build" style="background:#0b1220; border:1px solid #334155; border-radius:10px; padding:12px;">
-              <h3 style="margin:0 0 6px 0; color:#e2e8f0;" data-lang="build_air_assassin_title">Assassin Hızı</h3>
-              <small style="color:#94a3b8; display:block; margin-bottom:8px;" data-lang="build_air_assassin_desc">Hareket hızı ve ani saldırı</small>
+              <h3 style="margin:0 0 6px 0; color:#e2e8f0;" data-lang="build_air_assassin_title">Assassin Speed</h3>
+              <small style="color:#94a3b8; display:block; margin-bottom:8px;" data-lang="build_air_assassin_desc">Move speed and burst damage</small>
               <ul style="margin:0; padding-left:18px; color:#94a3b8;">
-                <li data-lang="build_air_assassin_i1">Rüzgar Çizmeleri</li>
-                <li data-lang="build_air_assassin_i2">Jet Akımı</li>
-                <li data-lang="build_air_assassin_i3">Tüy Tetik</li>
-                <li data-lang="build_air_assassin_i4">Fırtına Hücumu</li>
+                <li data-lang="build_air_assassin_i1">Wind Boots</li>
+                <li data-lang="build_air_assassin_i2">Jet Stream</li>
+                <li data-lang="build_air_assassin_i3">Feather Trigger</li>
+                <li data-lang="build_air_assassin_i4">Storm Rush</li>
               </ul>
             </div>
           </div>
@@ -1970,10 +1982,10 @@
             <button id="shopBtn" class="primary-btn" style="margin-top:10px;" data-lang="shop">SHOP</button>
             <button id="buildsBtn" class="primary-btn" style="margin-top:10px;" data-lang="builders">BUILDS</button>
             <div style="display:block; margin-top:10px;">
-                <button id="closeGameBtn" class="primary-btn" data-lang="close">KAPAT / CLOSE</button>
+                <button id="closeGameBtn" class="primary-btn" data-lang="close">CLOSE</button>
             </div>
             <div style="display:block; margin-top:10px;">
-                <button id="backToHubBtn" class="primary-btn" data-lang="backToMenuBtn">Ana Menüye Dön</button>
+                <button id="backToHubBtn" class="primary-btn" data-lang="backToMenuBtn">BACK TO MENU</button>
             </div>
             <div class="social-links">
                 <h3 class="brand-242" data-lang="followUs">242 Games</h3>
@@ -1987,27 +1999,27 @@
                 <div id="characterSelect" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:10px; margin-bottom:14px;">
                     <button class="char-btn" data-char="berserker" style="padding:10px; border:1px solid #ef4444; border-radius:10px; background:#1a0b0b; color:#fca5a5; cursor:pointer; text-align:left;">
                         <div id="charName_berserker" style="font-weight:800; color:#ef4444;" data-lang="char_berserker_name">Berserker</div>
-                        <small id="charDesc_berserker" data-lang="char_berserker_desc">+Hasar, +Saldırı Hızı, -Zırh</small>
+                        <small id="charDesc_berserker" data-lang="char_berserker_desc">+Damage, +Attack Speed, -Armor</small>
                     </button>
                     <button class="char-btn" data-char="guardian" style="padding:10px; border:1px solid #3b82f6; border-radius:10px; background:#0b1020; color:#93c5fd; cursor:pointer; text-align:left;">
                         <div id="charName_guardian" style="font-weight:800; color:#3b82f6;" data-lang="char_guardian_name">Guardian</div>
-                        <small id="charDesc_guardian" data-lang="char_guardian_desc">+HP, +Zırh, -Hız</small>
+                        <small id="charDesc_guardian" data-lang="char_guardian_desc">+HP, +Armor, -Speed</small>
                     </button>
                     <button class="char-btn" data-char="ranger" style="padding:10px; border:1px solid #22c55e; border-radius:10px; background:#0b1a12; color:#86efac; cursor:pointer; text-align:left;">
                         <div id="charName_ranger" style="font-weight:800; color:#22c55e;" data-lang="char_ranger_name">Ranger</div>
-                        <small id="charDesc_ranger" data-lang="char_ranger_desc">+Menzil, +Mermi Hızı</small>
+                        <small id="charDesc_ranger" data-lang="char_ranger_desc">+Range, +Bullet Speed</small>
                     </button>
                     <button class="char-btn" data-char="engineer" style="padding:10px; border:1px solid #eab308; border-radius:10px; background:#1a1606; color:#fde68a; cursor:pointer; text-align:left;">
                         <div id="charName_engineer" style="font-weight:800; color:#eab308;" data-lang="char_engineer_name">Engineer</div>
-                        <small id="charDesc_engineer" data-lang="char_engineer_desc">+Kule Sinerjisi, +Malzeme</small>
+                        <small id="charDesc_engineer" data-lang="char_engineer_desc">+Turret Synergy, +Materials</small>
                     </button>
                     <button class="char-btn" data-char="rogue" style="padding:10px; border:1px solid #a855f7; border-radius:10px; background:#160b1f; color:#d8b4fe; cursor:pointer; text-align:left;">
                         <div id="charName_rogue" style="font-weight:800; color:#a855f7;" data-lang="char_rogue_name">Rogue</div>
-                        <small id="charDesc_rogue" data-lang="char_rogue_desc">+Hız, +Crit</small>
+                        <small id="charDesc_rogue" data-lang="char_rogue_desc">+Speed, +Crit</small>
                     </button>
                 </div>
-                <h2 id="elementOverlayTitle" style="color:#00ffff; margin-bottom:10px;" data-lang="elementOverlayTitle">Elementini Seç</h2>
-                <p id="elementOverlayDesc" style="opacity:0.8; margin-bottom:16px;" data-lang="elementOverlayDesc">Space ile kullanabileceğin özel yeteneği belirler. Cooldown: 10s</p>
+                <h2 id="elementOverlayTitle" style="color:#00ffff; margin-bottom:10px;" data-lang="elementOverlayTitle">Choose Your Element</h2>
+                <p id="elementOverlayDesc" style="opacity:0.8; margin-bottom:16px;" data-lang="elementOverlayDesc">Your element defines your special ability. Cooldown: 10s</p>
                 <div class="element-selection" style="margin-top:12px;">
                     <button id="chooseFire" class="element-btn fire" data-element="fire" data-lang="elFire">🔥 Fire</button>
                     <button id="chooseWater" class="element-btn water" data-element="water" data-lang="elWater">💧 Water</button>
@@ -2060,31 +2072,31 @@
             </div>
         </div>
         <div id="inGameMenu">
-            <h3 id="inGameMenuTitle">OYUN MENÜSÜ</h3>
-            <button id="resumeBtn" class="menu-btn" data-lang="resumeBtn">OYUNA DÖN</button>
+            <h3 id="inGameMenuTitle" data-lang="inGameMenuTitle">PAUSE MENU</h3>
+            <button id="resumeBtn" class="menu-btn" data-lang="resumeBtn">RESUME</button>
             <button id="howToIngameBtn" class="menu-btn" data-lang="howTo">HOW TO PLAY</button>
             <!-- In-game audio controls: use unique IDs to avoid conflicts with settings panel -->
             <button id="soundToggleIngame" class="menu-btn" aria-pressed="false" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-                <span data-lang="sound">Ses</span>
+                <span data-lang="sound">Sound</span>
                 <span id="soundStateIngame" class="state-chip" style="padding:2px 8px; border:1px solid #334155; border-radius:999px; font-size:12px; opacity:.9;">—</span>
             </button>
             <button id="musicToggleIngame" class="menu-btn" aria-pressed="false" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-                <span data-lang="music">Müzik</span>
+                <span data-lang="music">Music</span>
                 <span id="musicStateIngame" class="state-chip" style="padding:2px 8px; border:1px solid #334155; border-radius:999px; font-size:12px; opacity:.9;">—</span>
             </button>
-            <button id="backToMenuIngameBtn" class="menu-btn" data-lang="backToMenuBtn">MENÜYE DÖN</button>
+            <button id="backToMenuIngameBtn" class="menu-btn" data-lang="backToMenuBtn">BACK TO MENU</button>
             <div style="margin-top:14px; text-align:left;">
                 <div id="sensitivityRow">
-                    <label for="sensitivityRange" style="display:block; margin:8px 0 4px; color:#7dd3fc;"><span id="sensitivityLabel" data-lang="mouseSensitivity">Mouse Hassasiyeti</span>: <span id="sensitivityValue">1.00x</span></label>
+                    <label for="sensitivityRange" style="display:block; margin:8px 0 4px; color:#7dd3fc;"><span id="sensitivityLabel" data-lang="mouseSensitivity">Mouse Sensitivity</span>: <span id="sensitivityValue">1.00x</span></label>
                     <input id="sensitivityRange" type="range" min="0.5" max="2.0" step="0.05" value="1.00" style="width:100%;" />
                 </div>
                 <div id="fovRow" style="display:none;">
-                    <label for="fovRange" style="display:block; margin:12px 0 4px; color:#7dd3fc;">FOV (Yakın/Uzak): <span id="fovValue">1.00x</span></label>
+                    <label for="fovRange" style="display:block; margin:12px 0 4px; color:#7dd3fc;">FOV (Near/Far): <span id="fovValue">1.00x</span></label>
                     <input id="fovRange" type="range" min="0.7" max="1.5" step="0.05" value="1.00" style="width:100%;" />
                 </div>
-                <label for="volumeRange" data-lang="volume" style="display:block; margin:12px 0 4px; color:#7dd3fc;">Ses Seviyesi: <span id="volumeValue">100%</span></label>
+                <label for="volumeRange" data-lang="volume" style="display:block; margin:12px 0 4px; color:#7dd3fc;">Volume: <span id="volumeValue">100%</span></label>
                 <input id="volumeRange" type="range" min="0" max="1" step="0.01" value="1" style="width:100%; pointer-events:auto; position:relative; z-index:1;" />
-                <label for="musicVolumeRange" data-lang="music" style="display:block; margin:12px 0 4px; color:#7dd3fc;">Müzik Seviyesi: <span id="musicVolumeValueIngame">30%</span></label>
+                <label for="musicVolumeRange" data-lang="music" style="display:block; margin:12px 0 4px; color:#7dd3fc;">Music: <span id="musicVolumeValueIngame">30%</span></label>
                 <input id="musicVolumeRange" type="range" min="0" max="1" step="0.01" value="0.3" style="width:100%;" />
             </div>
         </div>
@@ -2129,7 +2141,7 @@
         </div>
         <!-- Tabs -->
         <div id="shopTabs" style="display:flex; gap:8px; margin-bottom:10px;">
-          <button id="tabOffersBtn" class="menu-btn" style="display:none; width:auto; padding:6px 10px; border-color:#f59e0b; color:#f59e0b;" data-lang="tabOffers">Ödüller</button>
+          <button id="tabOffersBtn" class="menu-btn" style="display:none; width:auto; padding:6px 10px; border-color:#f59e0b; color:#f59e0b;" data-lang="tabOffers">Rewards</button>
           <button id="tabItemsBtn" class="menu-btn" style="width:auto; padding:6px 10px; border-color:#38bdf8; color:#38bdf8;" data-lang="tabItems">Items</button>
           <button id="tabUpgradesBtn" class="menu-btn" style="width:auto; padding:6px 10px; border-color:#a78bfa; color:#a78bfa;" data-lang="tabUpgrades">Upgrades</button>
           <button id="tabSpecialBtn" class="menu-btn" style="width:auto; padding:6px 10px; border-color:#34d399; color:#34d399;" data-lang="tabSpecial">Special</button>
@@ -2177,6 +2189,7 @@
         const dict = {
           en: {
             close: 'CLOSE',
+            inGameMenuTitle: 'PAUSE MENU',
             settingsTitle: 'Settings',
             appearance: 'Appearance',
             sound: 'Sound',
@@ -2185,6 +2198,7 @@
             language: 'Language',
             credits: 'Credits',
             creditsText: 'Thanks to the Elementist developer team and contributors.',
+            fpsInfo: 'FPS Info',
             weaponSelectTitle: '🔧 Choose Your Weapon',
             weaponSelectDesc: 'Before Wave 4 starts, pick a weapon.',
             weapon_turrets_name: 'Turrets',
@@ -2215,11 +2229,12 @@
           },
           tr: {
             close: 'KAPAT',
+            inGameMenuTitle: 'OYUN MENÜSÜ',
             settingsTitle: 'Ayarlar',
             appearance: 'Görünüm',
             sound: 'Ses',
             music: 'Müzik',
-            volume: 'Ses',
+            volume: 'Ses Seviyesi',
             language: 'Dil',
             credits: 'Emeği Geçenler',
             creditsText: 'Elementist geliştirici ekibi ve katkıda bulunanlara teşekkürler.',
