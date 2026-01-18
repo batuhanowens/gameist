@@ -3037,6 +3037,28 @@
                   if(typeof window.render === 'function'){ window.render(); }
                 }
               } catch(_) {}
+
+              // Mobile: ensure the shop opens at the TOP (avoid starting scrolled to bottom)
+              try{
+                const isTouch = (document.body && document.body.classList.contains('touch')) || (window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches);
+                if(isTouch){
+                  const resetScroll = ()=>{
+                    try{ shop.scrollTop = 0; }catch(_){ }
+                    try{
+                      const box = document.querySelector('.shop-box') || shop.querySelector('div');
+                      if(box){
+                        try{ box.scrollTop = 0; }catch(_){ }
+                        try{ box.scrollIntoView({ block:'center', inline:'nearest' }); }catch(__){ }
+                      }
+                    }catch(_){ }
+                  };
+                  // Run a couple times to beat layout/paint timing
+                  resetScroll();
+                  try{ requestAnimationFrame(resetScroll); }catch(_){ setTimeout(resetScroll, 0); }
+                  setTimeout(resetScroll, 60);
+                }
+              }catch(_){ }
+
               // Place the consumable bar just under the shop box
               positionBarUnderShop();
             } else {
