@@ -487,8 +487,8 @@
         /* Primary action style reused for other buttons */
         .primary-btn {
             padding: clamp(7px, 1.4vw, 10px) clamp(10px, 2.2vw, 18px);
-            background: linear-gradient(45deg, #00ffff, #ff00ff);
-            border: none;
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid rgba(56, 189, 248, 0.55);
             border-radius: 10px;
             color: white;
             font-size: clamp(14px, 2vw, 18px);
@@ -502,7 +502,7 @@
             text-align: center;
             box-sizing: border-box;
         }
-        .primary-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px #00ffff; }
+        .primary-btn:hover { transform: scale(1.03); box-shadow: 0 0 18px rgba(56,189,248,0.35); background: rgba(15, 23, 42, 0.98); }
 
         /* Force CLOSE/KAPAT labels to render in uppercase regardless of language mapping */
         .menu-btn[data-lang="close"],
@@ -2061,6 +2061,7 @@
         <div id="inGameMenu">
             <h3 id="inGameMenuTitle">OYUN MENÜSÜ</h3>
             <button id="resumeBtn" class="menu-btn" data-lang="resumeBtn">OYUNA DÖN</button>
+            <button id="howToIngameBtn" class="menu-btn" data-lang="howTo">HOW TO PLAY</button>
             <!-- In-game audio controls: use unique IDs to avoid conflicts with settings panel -->
             <button id="soundToggleIngame" class="menu-btn" aria-pressed="false" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
                 <span data-lang="sound">Ses</span>
@@ -2427,21 +2428,21 @@
           }catch(_){ }
         });
 
-        // Onboarding (first run only, 30–60 seconds, non-blocking)
+        // Onboarding (wave-start tips) - per tab session
         document.addEventListener('DOMContentLoaded', function(){
-          const key = 'elementist_onboarding_shown_v1';
+          const key = 'elementist_onboarding_session_v1';
           let shown = false;
-          try{ shown = localStorage.getItem(key) === 'true'; }catch(_){ }
-          // On mobile/touch, always show the quick info at wave start (players rely on it).
+          try{ shown = sessionStorage.getItem(key) === 'true'; }catch(_){ }
           const isTouch = document.body.classList.contains('touch') || (window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches);
-          if(shown && !isTouch) return;
+          if(shown) return;
           let box = document.getElementById('onboardingHints');
           if(!box){
             box = document.createElement('div');
             box.id = 'onboardingHints';
+            box.className = 'onboarding-hints';
             box.style.position = 'fixed';
             box.style.left = '50%';
-            box.style.top = '14px';
+            box.style.top = isTouch ? '28px' : '76px';
             box.style.transform = 'translateX(-50%)';
             box.style.zIndex = '2147483600';
             box.style.maxWidth = 'min(720px, 92vw)';
@@ -2451,12 +2452,28 @@
             box.style.background = 'rgba(2,6,23,0.72)';
             box.style.backdropFilter = 'blur(6px)';
             box.style.color = '#e2e8f0';
-            box.style.fontSize = '13px';
+            box.style.fontSize = isTouch ? '13px' : '15px';
+            box.style.fontWeight = '800';
             box.style.lineHeight = '1.35';
             box.style.boxShadow = '0 0 18px rgba(0,255,255,0.18)';
             box.style.opacity = '0';
             box.style.transition = 'opacity 320ms ease';
             box.style.pointerEvents = 'none';
+            try{
+              if(!document.getElementById('onboardingHintsStyle')){
+                const st = document.createElement('style');
+                st.id = 'onboardingHintsStyle';
+                st.textContent = `
+                  @keyframes onboardingHintSheen {
+                    0% { box-shadow: 0 0 18px rgba(0,255,255,0.14), 0 0 0 1px rgba(56,189,248,0.18) inset; border-color: rgba(56,189,248,0.38); }
+                    50% { box-shadow: 0 0 28px rgba(0,255,255,0.22), 0 0 16px rgba(255,0,255,0.10), 0 0 0 1px rgba(255,0,255,0.12) inset; border-color: rgba(255,0,255,0.30); }
+                    100% { box-shadow: 0 0 18px rgba(0,255,255,0.14), 0 0 0 1px rgba(56,189,248,0.18) inset; border-color: rgba(56,189,248,0.38); }
+                  }
+                  .onboarding-hints { animation: onboardingHintSheen 2.8s ease-in-out infinite; }
+                `;
+                document.head.appendChild(st);
+              }
+            }catch(_){ }
             document.body.appendChild(box);
           }
 
@@ -2466,33 +2483,218 @@
             if(i >= msgs.length){
               box.style.opacity = '0';
               setTimeout(()=>{ try{ box.remove(); }catch(_){ } }, 450);
-              try{ if(!isTouch) localStorage.setItem(key, 'true'); }catch(_){ }
+              try{ sessionStorage.setItem(key, 'true'); }catch(_){ }
               return;
             }
             box.textContent = t(msgs[i], '');
             box.style.opacity = '1';
-            const visibleMs = (i===0) ? 5200 : 4500;
+            const visibleMs = (i===0) ? 5200 : 4300;
             setTimeout(()=>{ box.style.opacity = '0'; }, visibleMs);
             setTimeout(()=>{ i++; showNext(); }, visibleMs + 700);
           }
 
-          // Start when gameplay actually begins (body gets 'playing')
-          function startIfPlaying(){
-            if(document.body.classList.contains('playing')){
-              try{ if(!isTouch) localStorage.setItem(key, 'true'); }catch(_){ }
-              setTimeout(showNext, 450);
-              return true;
-            }
-            return false;
-          }
-          if(startIfPlaying()) return;
+          // Start after the first time the shop has been opened, and the player presses Start Next Wave.
+          let shopOpenedOnce = false;
           try{
+            const shop = document.getElementById('shopOverlay');
+            if(shop){
+              const moShop = new MutationObserver(function(){
+                try{
+                  const visible = window.getComputedStyle(shop).display !== 'none';
+                  if(visible) shopOpenedOnce = true;
+                }catch(_){ }
+              });
+              moShop.observe(shop, { attributes:true, attributeFilter:['style','class'] });
+            }
+          }catch(_){ }
+
+          const startWaveBtn = document.getElementById('startWaveBtn');
+          if(startWaveBtn){
+            const handler = function(){
+              try{
+                if(!shopOpenedOnce) return;
+                startWaveBtn.removeEventListener('click', handler);
+                setTimeout(showNext, 550);
+              }catch(_){ }
+            };
+            startWaveBtn.addEventListener('click', handler);
+          }
+        });
+
+        // Tutorial overlay (4 slides) - show once per run
+        document.addEventListener('DOMContentLoaded', function(){
+          const runKey = 'elementist_run_id_v1';
+          const shownKey = 'elementist_tutorial_shown_run_v1';
+          let runId = 0;
+          try{ runId = parseInt(sessionStorage.getItem(runKey) || '0', 10) || 0; }catch(_){ runId = 0; }
+
+          const slides = [
+            'WASD or Arrows to move (auto-movement active).',
+            'Space to dodge (choose direction freely) – hold for dash!',
+            'Shift for ability, collect drops to upgrade.',
+            'Survive waves, shop in intermission.'
+          ];
+          let idx = 0;
+
+          function build(){
+            const overlay = document.createElement('div');
+            overlay.id = 'tutorialOverlay';
+            overlay.style.position = 'fixed';
+            overlay.style.inset = '0';
+            overlay.style.display = 'none';
+            overlay.style.alignItems = 'center';
+            overlay.style.justifyContent = 'center';
+            overlay.style.background = 'rgba(0,0,0,0.72)';
+            overlay.style.backdropFilter = 'blur(3px)';
+            overlay.style.zIndex = '2147483602';
+
+            const card = document.createElement('div');
+            card.style.width = 'min(560px, 92vw)';
+            card.style.background = 'rgba(2,6,23,0.92)';
+            card.style.border = '2px solid rgba(56,189,248,0.65)';
+            card.style.borderRadius = '16px';
+            card.style.boxShadow = '0 0 28px rgba(0,255,255,0.22)';
+            card.style.padding = '16px 16px 12px 16px';
+            card.style.color = '#e5e7eb';
+
+            const title = document.createElement('div');
+            title.style.fontWeight = '800';
+            title.style.color = '#7dd3fc';
+            title.style.marginBottom = '8px';
+            title.textContent = 'Quick Tutorial';
+
+            const body = document.createElement('div');
+            body.id = 'tutorialBody';
+            body.style.fontSize = '14px';
+            body.style.lineHeight = '1.45';
+            body.style.margin = '6px 0 12px 0';
+
+            const footer = document.createElement('div');
+            footer.style.display = 'flex';
+            footer.style.gap = '8px';
+            footer.style.justifyContent = 'space-between';
+            footer.style.alignItems = 'center';
+
+            const left = document.createElement('div');
+            left.style.opacity = '0.85';
+            left.style.fontSize = '12px';
+            left.id = 'tutorialStep';
+
+            const right = document.createElement('div');
+            right.style.display = 'flex';
+            right.style.gap = '8px';
+
+            const skip = document.createElement('button');
+            skip.className = 'menu-btn';
+            skip.style.width = 'auto';
+            skip.style.padding = '6px 10px';
+            skip.style.borderColor = '#ef4444';
+            skip.style.color = '#ef4444';
+            skip.style.background = 'rgba(127,29,29,0.18)';
+            skip.textContent = 'Skip';
+
+            const next = document.createElement('button');
+            next.className = 'menu-btn';
+            next.style.width = 'auto';
+            next.style.padding = '6px 10px';
+            next.textContent = 'Next';
+
+            const got = document.createElement('button');
+            got.className = 'menu-btn';
+            got.style.width = 'auto';
+            got.style.padding = '6px 10px';
+            got.style.borderColor = '#22c55e';
+            got.style.color = '#22c55e';
+            got.textContent = 'Got it';
+
+            function close(){
+              try{ sessionStorage.setItem(shownKey, String(runId)); }catch(_){ }
+              try{ overlay.remove(); }catch(_){ }
+            }
+            function render(){
+              const bodyEl = overlay.querySelector('#tutorialBody');
+              const stepEl = overlay.querySelector('#tutorialStep');
+              if(bodyEl) bodyEl.textContent = slides[idx];
+              if(stepEl) stepEl.textContent = `Step ${idx+1} / ${slides.length}`;
+              next.style.display = (idx < slides.length - 1) ? 'inline-block' : 'none';
+              got.style.display = (idx >= slides.length - 1) ? 'inline-block' : 'none';
+            }
+
+            skip.addEventListener('click', close);
+            next.addEventListener('click', ()=>{ idx = Math.min(slides.length-1, idx+1); render(); });
+            got.addEventListener('click', close);
+
+            // User requested: swap Next and Skip positions
+            right.appendChild(next);
+            right.appendChild(skip);
+            right.appendChild(got);
+            footer.appendChild(left);
+            footer.appendChild(right);
+            card.appendChild(title);
+            card.appendChild(body);
+            card.appendChild(footer);
+            overlay.appendChild(card);
+            document.body.appendChild(overlay);
+            render();
+            return overlay;
+          }
+
+          const overlay = build();
+
+          function show(){
+            try{ overlay.style.display = 'flex'; }catch(_){ }
+          }
+
+          function wasShownThisRun(){
+            try{ return String(sessionStorage.getItem(shownKey) || '') === String(runId); }catch(_){ return false; }
+          }
+
+          // Increment runId on new game start so tutorial shows every new run
+          function bumpRun(){
+            try{
+              runId = (runId|0) + 1;
+              sessionStorage.setItem(runKey, String(runId));
+            }catch(_){ }
+          }
+          try{
+            const sb = document.getElementById('startBtn');
+            if(sb) sb.addEventListener('click', bumpRun, { capture:true });
+          }catch(_){ }
+          try{
+            const rb = document.getElementById('restartBtn');
+            if(rb) rb.addEventListener('click', bumpRun, { capture:true });
+          }catch(_){ }
+
+          // Show only after cutscene, when the shop first opens.
+          // This prevents showing during element selection or other pre-run overlays.
+          try{
+            const shop = document.getElementById('shopOverlay');
+            if(!shop) return;
+            const isShopVisible = ()=>{
+              try{ return window.getComputedStyle(shop).display !== 'none'; }catch(_){ return false; }
+            };
+            const isShopOpen = ()=>{
+              try{ return document.body && document.body.classList.contains('shop-open'); }catch(_){ return false; }
+            };
+            const tryShow = ()=>{
+              try{
+                if(wasShownThisRun()) return true;
+                if(isShopOpen() || isShopVisible()){
+                  setTimeout(show, 180);
+                  return true;
+                }
+              }catch(_){ }
+              return false;
+            };
+            if(tryShow()) return;
             const mo = new MutationObserver(function(){
               try{
-                if(startIfPlaying()) mo.disconnect();
+                if(!tryShow()) return;
+                mo.disconnect();
               }catch(_){ }
             });
             mo.observe(document.body, { attributes:true, attributeFilter:['class'] });
+            mo.observe(shop, { attributes:true, attributeFilter:['style','class'] });
           }catch(_){ }
         });
 
@@ -2651,6 +2853,39 @@
           }, true);
           restartBtn.__bound = true;
         }
+
+        // How To Play overlay open/close (main menu + in-game pause menu)
+        (function(){
+          try{
+            const howToOverlay = document.getElementById('howToOverlay');
+            const howToBtn = document.getElementById('howToBtn');
+            const howToIngameBtn = document.getElementById('howToIngameBtn');
+            const howToCloseBtn = document.getElementById('howToCloseBtn');
+            if(!howToOverlay) return;
+            const open = ()=>{ try{ howToOverlay.style.display = 'block'; }catch(_){ } };
+            const close = ()=>{ try{ howToOverlay.style.display = 'none'; }catch(_){ } };
+
+            if(howToBtn && !howToBtn.__bound){
+              howToBtn.addEventListener('click', function(e){ try{ e.preventDefault(); }catch(_){ } open(); }, true);
+              howToBtn.__bound = true;
+            }
+            if(howToIngameBtn && !howToIngameBtn.__bound){
+              howToIngameBtn.addEventListener('click', function(e){ try{ e.preventDefault(); }catch(_){ } open(); }, true);
+              howToIngameBtn.__bound = true;
+            }
+            if(howToCloseBtn && !howToCloseBtn.__bound){
+              howToCloseBtn.addEventListener('click', function(e){ try{ e.preventDefault(); }catch(_){ } close(); }, true);
+              howToCloseBtn.__bound = true;
+            }
+            // Close on backdrop click
+            if(!howToOverlay.__bound){
+              howToOverlay.addEventListener('click', function(e){
+                try{ if(e.target === howToOverlay) close(); }catch(_){ }
+              }, true);
+              howToOverlay.__bound = true;
+            }
+          }catch(_){ }
+        })();
 
         const makeSlot = (i) => ({
           idx: i,
