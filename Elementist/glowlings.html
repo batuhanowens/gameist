@@ -1353,6 +1353,291 @@
         syncStats();
       })();
     </script>
+    <script>
+      (function(){
+        const STORAGE_KEY = 'elementist_run_stats_v1';
+        const LB_KEY = 'elementist_leaderboard_v1';
+        const MAX_RUNS = 10;
+
+        const el = (id)=>document.getElementById(id);
+        const bestWaveEl = el('statsBestWave');
+        const bestScoreEl = el('statsBestScore');
+        const lastRunsEl = el('statsLastRuns');
+        const resetBtn = el('resetStatsBtn');
+        const gameOverScreen = el('gameOverScreen');
+        const finalStats = el('finalStats');
+
+        function safeParse(json, fb){
+          try{ return JSON.parse(json); }catch(_){ return fb; }
+        }
+        function loadStats(){
+          const fb = { bestWave: 0, bestScore: 0, totalPlaytimeMs: 0 };
+          try{ return safeParse(localStorage.getItem(STORAGE_KEY)||'', fb) || fb; }catch(_){ return fb; }
+        }
+        function saveStats(s){
+          try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(s||{})); }catch(_){ }
+        }
+        function loadLB(){
+          try{ return safeParse(localStorage.getItem(LB_KEY)||'', []) || []; }catch(_){ return []; }
+        }
+        function saveLB(list){
+          try{ localStorage.setItem(LB_KEY, JSON.stringify(Array.isArray(list)?list:[])); }catch(_){ }
+        }
+        function formatMs(ms){
+          const t = Math.max(0, ms|0);
+          const s = Math.floor(t/1000);
+          const m = Math.floor(s/60);
+          const r = s%60;
+          return `${m}:${String(r).padStart(2,'0')}`;
+        }
+        function getScore(){
+          try{ return parseInt(el('score')?.textContent||'0',10) || 0; }catch(_){ return 0; }
+        }
+        function getWave(){
+          try{
+            const g = window.game;
+            const w = (g && typeof g.waveNumber==='number') ? (g.waveNumber|0) : 0;
+            if(w>0) return w;
+          }catch(_){ }
+          return 0;
+        }
+        function renderPanel(){
+          const s = loadStats();
+          if(bestWaveEl) bestWaveEl.textContent = String(s.bestWave||0);
+          if(bestScoreEl) bestScoreEl.textContent = String(s.bestScore||0);
+          if(!lastRunsEl) return;
+          const list = loadLB();
+          if(!Array.isArray(list) || list.length===0){
+            lastRunsEl.innerHTML = '<li style="opacity:.7;">No runs yet.</li>';
+            return;
+          }
+          lastRunsEl.innerHTML = list.map((r)=>{
+            const wave = r.wave|0;
+            const score = r.score|0;
+            const dur = formatMs(r.durationMs|0);
+            const d = (function(){ try{ return new Date(r.ts||0); }catch(_){ return null; }})();
+            const ds = d ? `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}` : '';
+            return `<li><span style="color:#7dd3fc; font-weight:700;">W${wave||'-'}</span> <span style="opacity:.9;">${score}</span> <span style="opacity:.75;">(${dur}${ds?`, ${ds}`:''})</span></li>`;
+          }).join('');
+        }
+
+        let runStartMs = 0;
+        let lastRecordedRunId = '';
+
+        function ensureRunStart(){
+          try{
+            const g = window.game;
+            const playing = !!g && g.gameState === 'playing';
+            if(!playing) return;
+            if(!runStartMs) runStartMs = Date.now();
+          }catch(_){ }
+        }
+
+        function recordGameOverOnce(){
+          try{
+            const visible = !!gameOverScreen && (window.getComputedStyle(gameOverScreen).display !== 'none');
+            if(!visible) return;
+            const nowId = `${getWave()}-${getScore()}-${String(gameOverScreen.style.display||'')}`;
+            if(nowId && nowId === lastRecordedRunId) return;
+            lastRecordedRunId = nowId;
+
+            const end = Date.now();
+            const dur = runStartMs ? (end - runStartMs) : 0;
+            const wave = getWave();
+            const score = getScore();
+
+            const st = loadStats();
+            st.bestWave = Math.max(st.bestWave|0, wave|0);
+            st.bestScore = Math.max(st.bestScore|0, score|0);
+            st.totalPlaytimeMs = (st.totalPlaytimeMs|0) + (dur|0);
+            saveStats(st);
+
+            const lb = loadLB();
+            lb.unshift({ wave: wave|0, score: score|0, durationMs: dur|0, ts: Date.now() });
+            const trimmed = lb.slice(0, MAX_RUNS);
+            saveLB(trimmed);
+            renderPanel();
+
+            if(finalStats){
+              const extra = `\n<div style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(51,65,85,0.45); color:#cbd5e1; font-size:13px; line-height:1.55;">`+
+                `<div><strong>Run Time</strong>: ${formatMs(dur)}</div>`+
+                `<div><strong>Best Wave</strong>: ${st.bestWave|0}</div>`+
+                `<div><strong>Best Score</strong>: ${st.bestScore|0}</div>`+
+              `</div>`;
+              if(!finalStats.__extraStatsAppended){
+                finalStats.insertAdjacentHTML('beforeend', extra);
+                finalStats.__extraStatsAppended = true;
+              }
+            }
+          }catch(_){ }
+        }
+
+        function resetAll(){
+          try{ localStorage.removeItem(STORAGE_KEY); }catch(_){ }
+          try{ localStorage.removeItem(LB_KEY); }catch(_){ }
+          runStartMs = 0;
+          lastRecordedRunId = '';
+          try{ if(finalStats){ finalStats.__extraStatsAppended = false; } }catch(_){ }
+          renderPanel();
+        }
+
+        if(resetBtn){
+          resetBtn.addEventListener('click', function(){ resetAll(); });
+        }
+
+        // init
+        renderPanel();
+        setInterval(ensureRunStart, 700);
+
+        if(gameOverScreen){
+          const obs = new MutationObserver(function(){
+            try{ if(finalStats) finalStats.__extraStatsAppended = false; }catch(_){ }
+            recordGameOverOnce();
+          });
+          try{ obs.observe(gameOverScreen, { attributes:true, attributeFilter:['style','class'] }); }catch(_){ }
+        }
+        setInterval(recordGameOverOnce, 800);
+      })();
+    </script>
+    <script>
+      (function(){
+        let ctx = null;
+        function getCtx(){
+          try{
+            if(ctx) return ctx;
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if(!AC) return null;
+            ctx = new AC();
+            return ctx;
+          }catch(_){ return null; }
+        }
+        function readVolume(){
+          try{
+            const a = document.getElementById('masterVolume');
+            if(a && a.value != null) return Math.max(0, Math.min(1, parseFloat(a.value)||0));
+          }catch(_){ }
+          try{
+            const b = document.getElementById('volumeRange');
+            if(b && b.value != null) return Math.max(0, Math.min(1, parseFloat(b.value)||0));
+          }catch(_){ }
+          return 1;
+        }
+        function isSoundOn(){
+          try{
+            const s1 = (document.getElementById('soundState')?.textContent||'').trim().toLowerCase();
+            const s2 = (document.getElementById('soundStateIngame')?.textContent||'').trim().toLowerCase();
+            if(s1==='off' || s2==='off') return false;
+            if(s1==='on' || s2==='on') return true;
+          }catch(_){ }
+          return true;
+        }
+        function canPlay(){
+          const v = readVolume();
+          if(v <= 0.001) return false;
+          if(!isSoundOn()) return false;
+          return true;
+        }
+        function resumeIfNeeded(){
+          try{
+            const c = getCtx();
+            if(!c) return;
+            if(c.state === 'suspended') c.resume();
+          }catch(_){ }
+        }
+        function beep(freq, durMs, gain){
+          try{
+            if(!canPlay()) return;
+            const c = getCtx();
+            if(!c) return;
+            resumeIfNeeded();
+            const g0 = Math.max(0.001, Math.min(0.25, gain||0.06)) * readVolume();
+            const o = c.createOscillator();
+            const g = c.createGain();
+            o.type = 'sine';
+            o.frequency.value = freq;
+            g.gain.value = 0;
+            o.connect(g);
+            g.connect(c.destination);
+            const t0 = c.currentTime;
+            g.gain.setValueAtTime(0, t0);
+            g.gain.linearRampToValueAtTime(g0, t0 + 0.01);
+            g.gain.exponentialRampToValueAtTime(0.0001, t0 + (durMs/1000));
+            o.start();
+            o.stop(t0 + (durMs/1000) + 0.02);
+          }catch(_){ }
+        }
+        function whoosh(){
+          try{
+            if(!canPlay()) return;
+            const c = getCtx();
+            if(!c) return;
+            resumeIfNeeded();
+            const v = readVolume();
+            const o = c.createOscillator();
+            const f = c.createBiquadFilter();
+            const g = c.createGain();
+            o.type = 'triangle';
+            f.type = 'lowpass';
+            f.frequency.value = 1200;
+            g.gain.value = 0;
+            o.connect(f);
+            f.connect(g);
+            g.connect(c.destination);
+            const t0 = c.currentTime;
+            const g0 = Math.max(0.001, Math.min(0.18, 0.07 * v));
+            g.gain.setValueAtTime(0.0001, t0);
+            g.gain.linearRampToValueAtTime(g0, t0 + 0.02);
+            g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.18);
+            o.frequency.setValueAtTime(320, t0);
+            o.frequency.exponentialRampToValueAtTime(80, t0 + 0.18);
+            o.start();
+            o.stop(t0 + 0.22);
+          }catch(_){ }
+        }
+
+        let lastPingAt = 0;
+        function ping(){
+          const now = Date.now();
+          if(now - lastPingAt < 140) return;
+          lastPingAt = now;
+          beep(880, 70, 0.05);
+        }
+
+        function wire(){
+          try{
+            const dodgeBtn = document.getElementById('dodgeBtn');
+            if(dodgeBtn && !dodgeBtn.__sfxBound){
+              dodgeBtn.addEventListener('pointerdown', function(){ whoosh(); }, { passive:true });
+              dodgeBtn.__sfxBound = true;
+            }
+          }catch(_){ }
+        }
+
+        let lastScore = -1;
+        let lastMats = -1;
+        function poll(){
+          try{
+            const s = parseInt(document.getElementById('score')?.textContent||'0',10) || 0;
+            const m = parseInt(document.getElementById('materialsTop')?.textContent||'0',10) || 0;
+            if(lastScore>=0 && s>lastScore) ping();
+            if(lastMats>=0 && m>lastMats) ping();
+            lastScore = s;
+            lastMats = m;
+          }catch(_){ }
+        }
+
+        document.addEventListener('DOMContentLoaded', function(){
+          wire();
+          setInterval(wire, 1200);
+          setInterval(poll, 600);
+          try{
+            const resume = function(){ resumeIfNeeded(); };
+            window.addEventListener('pointerdown', resume, { once:true, capture:true });
+            window.addEventListener('touchstart', resume, { once:true, capture:true });
+          }catch(_){ }
+        });
+      })();
+    </script>
     <!-- Rotate overlay (shown in portrait via CSS) -->
     <div id="rotateOverlay">
         <div class="box">
@@ -1976,6 +2261,7 @@
         <div id="startScreen">
             <h1 id="startTitle" data-lang="gameTitle">🌟 ELEMENTIST 🌟</h1>
             <p id="startSubtitle" data-lang="subtitle">Collect energy in a neon universe, grow, and defeat your rivals!</p>
+            <div id="patchNote" style="margin-top:8px; font-size:12px; color:#93c5fd; opacity:0.9; letter-spacing:0.2px;">Hand-coded Canvas neon effects!</div>
             
             <button id="startBtn" data-lang="startGame">START GAME</button>
             <button id="settingsBtn" class="primary-btn" style="margin-top:10px;" data-lang="settings">SETTINGS</button>
@@ -3338,6 +3624,37 @@
         }
         function itemNameKey(item){ return `shop_item_${item.id}_name`; }
         function itemDescKey(item){ return `shop_item_${item.id}_desc`; }
+        function getNextWave(){
+          try{
+            const g = (typeof window!=='undefined') ? window.game : null;
+            const w = (g && typeof g.waveNumber==='number') ? (g.waveNumber|0) : 0;
+            const next = Math.max(1, (w||0) + (g?.inWave ? 0 : 1));
+            return next;
+          }catch(_){ return 1; }
+        }
+        function getUnlockState(nextWave){
+          const w = Math.max(1, nextWave|0);
+          return {
+            showUpgrades: w >= 5,
+            showSpecial: w >= 8,
+            rarityMax: (w < 5) ? 'uncommon' : (w < 8) ? 'rare' : (w < 12) ? 'epic' : 'epic'
+          };
+        }
+        function rarityRank(r){
+          const map = { common:0, uncommon:1, rare:2, epic:3, legendary:4 };
+          return map[String(r||'common').toLowerCase()] ?? 9;
+        }
+        function lockedCardHTML(title, desc){
+          const costLabel = T('costLabel', 'Cost');
+          return `
+            <div class="shop-item rarity-common" style="opacity:0.55; filter:saturate(0.7); pointer-events:none;">
+              <div class="shop-title"><span class="shop-icon">🔒</span>${title}</div>
+              <div class="shop-desc">${desc}</div>
+              <div class="shop-cost unaffordable">${costLabel} —</div>
+              <div class="price-badge">LOCKED</div>
+            </div>
+          `;
+        }
         // Helpers for limits and availability
         function totalConsumableCount(id){
           try{ return (localState.inv||[]).reduce((n,s)=> n + ((s&&s.id===id)?(s.count||1):0), 0); }catch(_){ return 0; }
@@ -3407,7 +3724,10 @@
           `;
         }
         function getPool(){
+          const unlock = getUnlockState(getNextWave());
           if(localState.tab==='offers') return Array.isArray(localState.offers)? localState.offers : [];
+          if(localState.tab==='special' && !unlock.showSpecial) return [];
+          if(localState.tab==='upgrades' && !unlock.showUpgrades) return [];
           const base = C[localState.tab]||[];
           if(localState.tab==='upgrades'){
             // Show weapon upgrades only after a weapon is explicitly selected
@@ -3432,7 +3752,11 @@
               });
             }catch(_){ return base.filter(it=> it && it.tag!=='weapon'); }
           }
-          return base;
+          // Rarity progression: hide items above current cap
+          return base.filter(it=>{
+            if(!it) return false;
+            return rarityRank(it.rarity) <= rarityRank(unlock.rarityMax);
+          });
         }
         function render(){
           // Update shop header (title + wave)
@@ -3441,11 +3765,26 @@
             const waveLbl = document.getElementById('shopWaveLabel');
             if(ttl) ttl.textContent = T('shopTitle','Shop - Intermission');
             if(waveLbl){
-              const g = (typeof window!=='undefined') ? window.game : null;
-              const w = (g && typeof g.waveNumber==='number') ? (g.waveNumber|0) : 0;
-              const next = Math.max(1, (w||0) + (g?.inWave ? 0 : 1));
+              const next = getNextWave();
               waveLbl.textContent = `${T('wavePrefix','Wave')} ${next}`;
             }
+          }catch(_){ }
+
+          // Incremental unlock UI (tabs)
+          const unlock = getUnlockState(getNextWave());
+          try{
+            if(tabUpgradesBtn){
+              tabUpgradesBtn.style.display = unlock.showUpgrades ? '' : 'none';
+              tabUpgradesBtn.disabled = !unlock.showUpgrades;
+              tabUpgradesBtn.style.opacity = unlock.showUpgrades ? '' : '0.55';
+            }
+            if(tabSpecialBtn){
+              tabSpecialBtn.style.opacity = unlock.showSpecial ? '' : '0.55';
+              tabSpecialBtn.disabled = !unlock.showSpecial;
+              tabSpecialBtn.title = unlock.showSpecial ? '' : 'Unlocks at Wave 8';
+            }
+            if(localState.tab==='special' && !unlock.showSpecial) localState.tab = 'items';
+            if(localState.tab==='upgrades' && !unlock.showUpgrades) localState.tab = 'items';
           }catch(_){ }
           // Sort by rarity, then by cost for a cleaner layout
           const order = { common:0, uncommon:1, rare:2, epic:3 };
@@ -3499,6 +3838,13 @@
             }
             parts.push(cardHTML(it));
           });
+
+          if(localState.tab==='upgrades' && parts.length===0 && !unlock.showUpgrades){
+            parts.push(lockedCardHTML('Upgrades', 'Unlocks at Wave 5.')); 
+          }
+          if(localState.tab==='special' && parts.length===0 && !unlock.showSpecial){
+            parts.push(lockedCardHTML('Special', 'Unlocks at Wave 8.'));
+          }
           shopItemsEl.innerHTML = parts.join('');
           // Update weapon stats panel inside shop
           try{
@@ -3934,8 +4280,16 @@
 
         // Tab handlers
         tabItemsBtn?.addEventListener('click', ()=>{ localState.tab='items'; render(); });
-        tabUpgradesBtn?.addEventListener('click', ()=>{ localState.tab='upgrades'; render(); });
-        tabSpecialBtn?.addEventListener('click', ()=>{ localState.tab='special'; render(); });
+        tabUpgradesBtn?.addEventListener('click', ()=>{
+          const unlock = getUnlockState(getNextWave());
+          if(!unlock.showUpgrades){ try{ shopItemsEl.classList.add('shake'); setTimeout(()=>shopItemsEl.classList.remove('shake'), 200); }catch(_){ } return; }
+          localState.tab='upgrades'; render();
+        });
+        tabSpecialBtn?.addEventListener('click', ()=>{
+          const unlock = getUnlockState(getNextWave());
+          if(!unlock.showSpecial){ try{ shopItemsEl.classList.add('shake'); setTimeout(()=>shopItemsEl.classList.remove('shake'), 200); }catch(_){ } return; }
+          localState.tab='special'; render();
+        });
         tabOffersBtn?.addEventListener('click', ()=>{
           // If offers are empty, generate defaults and switch; prevents blank tab
           if(!Array.isArray(localState.offers) || localState.offers.length===0){ localState.offers = makeDefaultOffers(); }
