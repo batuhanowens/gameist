@@ -2442,7 +2442,7 @@
             box.className = 'onboarding-hints';
             box.style.position = 'fixed';
             box.style.left = '50%';
-            box.style.top = isTouch ? '28px' : '76px';
+            box.style.top = isTouch ? '54px' : '76px';
             box.style.transform = 'translateX(-50%)';
             box.style.zIndex = '2147483600';
             box.style.maxWidth = 'min(720px, 92vw)';
@@ -2528,7 +2528,13 @@
           let runId = 0;
           try{ runId = parseInt(sessionStorage.getItem(runKey) || '0', 10) || 0; }catch(_){ runId = 0; }
 
-          const slides = [
+          const isTouch = (document.body && document.body.classList.contains('touch')) || (window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches);
+          const slides = isTouch ? [
+            'Use the on-screen joystick to move (auto-movement active).',
+            'Tap the Dodge button to dash – hold for a longer dash!',
+            'Collect drops, then shop during intermission to upgrade.',
+            'Survive waves and keep upgrading between rounds.'
+          ] : [
             'WASD or Arrows to move (auto-movement active).',
             'Space to dodge (choose direction freely) – hold for dash!',
             'Shift for ability, collect drops to upgrade.',
@@ -2591,7 +2597,7 @@
             skip.style.borderColor = '#ef4444';
             skip.style.color = '#ef4444';
             skip.style.background = 'rgba(127,29,29,0.18)';
-            skip.textContent = 'Skip';
+            skip.textContent = 'Close';
 
             const next = document.createElement('button');
             next.className = 'menu-btn';
