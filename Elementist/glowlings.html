@@ -1117,25 +1117,25 @@
 
       /* Mobile adjustments */
       @media (max-width: 768px){
-        .shop-box{ top: 50%; left: 50%; transform: translate(-50%, -50%); max-height: 58vh; overflow: auto; width: min(92vw, 560px); padding: 8px; margin-bottom: 0; font-size: 0.84rem !important; }
+        .shop-box{ top: 50%; left: 50%; transform: translate(-50%, -50%); max-height: 56vh; overflow: auto; width: min(92vw, 560px); padding: 6px; margin-bottom: 0; font-size: 0.80rem !important; }
         #shopOverlay > div,
         #shopOverlay .shop-box{
           width: min(92vw, 520px) !important;
           max-width: min(92vw, 520px) !important;
-          padding: 10px !important;
-          font-size: 0.82rem !important;
+          padding: 8px !important;
+          font-size: 0.80rem !important;
         }
         /* Shop header + tabs smaller */
         #shopTabs .menu-btn{ padding: 3px 7px !important; font-size: 11px !important; }
         /* Items grid tighter */
-        #shopItems{ gap: 6px !important; }
-        .shop-item{ padding: 6px !important; padding-bottom: 28px !important; }
-        .shop-item .shop-title{ font-size: 11px !important; line-height: 1.12 !important; margin-bottom: 3px !important; }
-        .shop-item .shop-desc{ font-size: 10px !important; line-height: 1.12 !important; }
+        #shopItems{ gap: 5px !important; }
+        .shop-item{ padding: 5px !important; padding-bottom: 26px !important; }
+        .shop-item .shop-title{ font-size: 10.5px !important; line-height: 1.1 !important; margin-bottom: 2px !important; }
+        .shop-item .shop-desc{ font-size: 9.6px !important; line-height: 1.1 !important; }
         .shop-item .shop-desc{ display: -webkit-box !important; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .shop-item small{ font-size: 9.5px !important; }
-        .shop-item .price-badge{ font-size: 9px !important; padding: 1px 6px !important; }
-        .shop-item .shop-cost{ padding-right: 60px !important; }
+        .shop-item small{ font-size: 9px !important; }
+        .shop-item .price-badge{ font-size: 8.6px !important; padding: 1px 6px !important; bottom: 6px !important; right: 6px !important; }
+        .shop-item .shop-cost{ padding-right: 56px !important; }
         .shop-icon{ width: 16px !important; height: 16px !important; }
         /* Right stat panel tighter */
         #shopStatPanel{ padding: 6px !important; }
@@ -1160,10 +1160,11 @@
         top: 50% !important;
         left: 50% !important;
         transform: translate(-50%, -50%) !important;
-        max-height: 65vh !important;
+        font-size: 0.80rem !important;
+        max-height: 56vh !important;
         width: min(92vw, 520px) !important;
         max-width: min(92vw, 520px) !important;
-        padding: 10px !important;
+        padding: 8px !important;
         margin-bottom: 0 !important;
         overflow: auto !important;
       }
@@ -2428,13 +2429,18 @@
           }catch(_){ }
         });
 
-        // Onboarding (wave-start tips) - per tab session
+        // Onboarding (wave-start tips) - once per run
         document.addEventListener('DOMContentLoaded', function(){
-          const key = 'elementist_onboarding_session_v1';
-          let shown = false;
-          try{ shown = sessionStorage.getItem(key) === 'true'; }catch(_){ }
+          const runKey = 'elementist_run_id_v1';
+          const shownKey = 'elementist_onboarding_shown_run_v1';
           const isTouch = document.body.classList.contains('touch') || (window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches);
-          if(shown) return;
+          const getRunId = ()=>{
+            try{ return parseInt(sessionStorage.getItem(runKey) || '0', 10) || 0; }catch(_){ return 0; }
+          };
+          const wasShownThisRun = ()=>{
+            try{ return String(sessionStorage.getItem(shownKey) || '') === String(getRunId()); }catch(_){ return false; }
+          };
+          if(wasShownThisRun()) return;
           let box = document.getElementById('onboardingHints');
           if(!box){
             box = document.createElement('div');
@@ -2483,7 +2489,7 @@
             if(i >= msgs.length){
               box.style.opacity = '0';
               setTimeout(()=>{ try{ box.remove(); }catch(_){ } }, 450);
-              try{ sessionStorage.setItem(key, 'true'); }catch(_){ }
+              try{ sessionStorage.setItem(shownKey, String(getRunId())); }catch(_){ }
               return;
             }
             box.textContent = t(msgs[i], '');
@@ -2498,12 +2504,16 @@
           try{
             const shop = document.getElementById('shopOverlay');
             if(shop){
-              const moShop = new MutationObserver(function(){
+              const isShopOpen = ()=>{
                 try{
-                  const visible = window.getComputedStyle(shop).display !== 'none';
-                  if(visible) shopOpenedOnce = true;
-                }catch(_){ }
+                  if(document.body && document.body.classList.contains('shop-open')) return true;
+                  return window.getComputedStyle(shop).display !== 'none';
+                }catch(_){ return false; }
+              };
+              const moShop = new MutationObserver(function(){
+                try{ if(isShopOpen()) shopOpenedOnce = true; }catch(_){ }
               });
+              moShop.observe(document.body, { attributes:true, attributeFilter:['class'] });
               moShop.observe(shop, { attributes:true, attributeFilter:['style','class'] });
             }
           }catch(_){ }
@@ -2512,12 +2522,13 @@
           if(startWaveBtn){
             const handler = function(){
               try{
+                if(wasShownThisRun()) return;
                 if(!shopOpenedOnce) return;
                 startWaveBtn.removeEventListener('click', handler);
                 setTimeout(showNext, 550);
               }catch(_){ }
             };
-            startWaveBtn.addEventListener('click', handler);
+            startWaveBtn.addEventListener('click', handler, true);
           }
         });
 
