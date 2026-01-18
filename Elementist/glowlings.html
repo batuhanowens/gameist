@@ -613,6 +613,8 @@
             transform: translate(-50%, -50%);
             padding: 8px;
             width: min(300px, 84vw);
+            max-height: min(82vh, 520px);
+            overflow: auto;
         }
         body.touch #inGameMenu .menu-btn { padding: 4px 8px; font-size: 11px; }
         body.touch #inGameMenu h3 { font-size: 14px; margin-bottom: 8px; }
@@ -3060,17 +3062,17 @@
                   const resetScroll = ()=>{
                     try{ shop.scrollTop = 0; }catch(_){ }
                     try{
-                      const box = document.querySelector('.shop-box') || shop.querySelector('div');
+                      const box = shop.querySelector('.shop-box') || shop.querySelector('div');
                       if(box){
                         try{ box.scrollTop = 0; }catch(_){ }
-                        try{ box.scrollIntoView({ block:'center', inline:'nearest' }); }catch(__){ }
                       }
                     }catch(_){ }
                   };
                   // Run a couple times to beat layout/paint timing
                   resetScroll();
                   try{ requestAnimationFrame(resetScroll); }catch(_){ setTimeout(resetScroll, 0); }
-                  setTimeout(resetScroll, 60);
+                  setTimeout(resetScroll, 80);
+                  setTimeout(resetScroll, 220);
                 }
               }catch(_){ }
 
