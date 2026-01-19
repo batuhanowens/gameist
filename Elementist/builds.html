@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Builds</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#030712; color:#e5e7eb; }
+    .wrap { min-height: 100vh; display:flex; align-items:center; justify-content:center; padding: 24px; }
+    .card { background:rgba(0,0,0,0.95); padding:26px; border-radius:16px; border:2px solid #00ffff; box-shadow:0 0 30px #00ffff; width:min(980px, 96vw); max-height:86vh; overflow:auto; }
+    h1 { color:#00ffff; margin:0 0 8px 0; text-align:center; }
+    p.sub { color:#b6c2d1; margin: 0 0 12px 0; text-align:center; }
+    .header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+    .btn { background:#0ea5e9; color:#001018; border:none; border-radius:10px; padding:8px 12px; font-weight:700; cursor:pointer; text-decoration:none; }
+
+    /* Tabs */
+    .tabs { display:flex; gap:8px; justify-content:center; margin: 12px 0 16px 0; flex-wrap:wrap; }
+    .tab-btn { background:#0b1220; border:1px solid #334155; color:#e2e8f0; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:700; }
+    .tab-btn.active { background:#00ffff; color:#001018; border-color:#00ffff; }
+    .section { display:none; }
+    .section.active { display:block; }
+
+    .grid { display:grid; grid-template-columns: repeat(1, 1fr); gap:12px; }
+    @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 980px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+    .build { background:#0b1220; border:1px solid #334155; border-radius:10px; padding:12px; }
+    .build h3 { margin:0 0 6px 0; color:#e2e8f0; }
+    .build small { color:#94a3b8; display:block; margin-bottom:8px; }
+    .build ul { margin:0; padding-left:18px; color:#94a3b8; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="header">
+        <h1 data-lang="buildersTitle">Builds</h1>
+        <a href="glowlings.html" class="btn" data-lang="back">Geri Dön</a>
+      </div>
+      <p class="sub" data-lang="buildersSubtitle">3 element için önerilen build’ler ve kısa açıklamalar.</p>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="fire">🔥 Ateş</button>
+        <button class="tab-btn" data-tab="water">💧 Su</button>
+        <button class="tab-btn" data-tab="air">🌪️ Hava</button>
+      </div>
+
+      <!-- Ateş (Fire) -->
+      <section id="tab-fire" class="section active">
+        <div class="grid">
+          <div class="build">
+            <h3>Yanıcı Krit</h3>
+            <small>Yüksek hasar, alan etkili patlamalar</small>
+            <ul>
+              <li>Alev Dansı</li>
+              <li>Kızıl Çiy</li>
+              <li>Ateş Halkası</li>
+              <li>Kritik Alev</li>
+            </ul>
+          </div>
+          <div class="build">
+            <h3>Yanma Üstüne Yanma</h3>
+            <small>Yanma katmanlarıyla sürekli DPS</small>
+            <ul>
+              <li>Süregelen Yanış</li>
+              <li>Köz İzi</li>
+              <li>Isı Dalgası</li>
+              <li>Kömür Kalp</li>
+            </ul>
+          </div>
+          <div class="build">
+            <h3>Patlayıcı</h3>
+            <small>Temas sonrası mini patlamalar</small>
+            <ul>
+              <li>Kıvılcım Yükü</li>
+              <li>Volatil Alev</li>
+              <li>Basınçlı Çekirdek</li>
+              <li>Yanardağ</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Su (Water) -->
+      <section id="tab-water" class="section">
+        <div class="grid">
+          <div class="build">
+            <h3>Dalgasavar</h3>
+            <small>Alan kontrolü ve yavaşlatma</small>
+            <ul>
+              <li>Gelgit Halkası</li>
+              <li>Soğuk Akım</li>
+              <li>Yoğun Sis</li>
+              <li>Derin Basınç</li>
+            </ul>
+          </div>
+          <div class="build">
+            <h3>Akış Ustası</h3>
+            <small>Hareketlilik + iyileşme</small>
+            <ul>
+              <li>Canlandıran Damlalar</li>
+              <li>Çiseleyen Perde</li>
+              <li>Akışkan Zırh</li>
+              <li>Nehrin Ritmi</li>
+            </ul>
+          </div>
+          <div class="build">
+            <h3>Buz Dondurucu</h3>
+            <small>Düşük hız, yüksek kontrol</small>
+            <ul>
+              <li>Donma Noktası</li>
+              <li>Buz Pulu</li>
+              <li>Kırağı Dokunuşu</li>
+              <li>Kutup Sessizliği</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Hava (Air) -->
+      <section id="tab-air" class="section">
+        <div class="grid">
+          <div class="build">
+            <h3>Krit Fırtınası</h3>
+            <small>Yüksek crit, hızlı oyun</small>
+            <ul>
+              <li>Fırtına Öfkesi</li>
+              <li>Yükselen Basınç</li>
+              <li>Gök Gürültüsü</li>
+              <li>Sonsuz Esinti</li>
+            </ul>
+          </div>
+          <div class="build">
+            <h3>Dodger</h3>
+            <small>Kaçınma ve hayatta kalma</small>
+            <ul>
+              <li>Hafif Adımlar</li>
+              <li>Fırtına Zırhı</li>
+              <li>Rüzgar Kalkanı</li>
+              <li>Hafiflik Büyüsü</li>
+            </ul>
+          </div>
+          <div class="build">
+            <h3>Assassin Hızı</h3>
+            <small>Hareket hızı ve ani saldırı</small>
+            <ul>
+              <li>Rüzgar Çizmeleri</li>
+              <li>Jet Akımı</li>
+              <li>Tüy Tetik</li>
+              <li>Fırtına Hücumu</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const buttons = Array.from(document.querySelectorAll('.tab-btn'));
+      const sections = {
+        fire: document.getElementById('tab-fire'),
+        water: document.getElementById('tab-water'),
+        air: document.getElementById('tab-air')
+      };
+      function activate(key){
+        buttons.forEach(b=>b.classList.toggle('active', b.dataset.tab===key));
+        Object.keys(sections).forEach(k=>sections[k].classList.toggle('active', k===key));
+        try{ history.replaceState(null, '', '#'+key); }catch(_){ }
+      }
+      buttons.forEach(b=> b.addEventListener('click', ()=> activate(b.dataset.tab)));
+      // On load, respect hash
+      const initial = (location.hash||'').replace('#','');
+      if(['fire','water','air'].includes(initial)) activate(initial);
+    })();
+  </script>
+</body>
+</html>

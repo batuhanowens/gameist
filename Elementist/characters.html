@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Karakterler</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#030712; color:#e5e7eb; }
+    a { color:#67e8f9; }
+    .wrap { min-height: 100vh; display:flex; align-items:center; justify-content:center; padding: 24px; }
+    .card {
+      background:rgba(0,0,0,0.95);
+      padding:26px; border-radius:16px; border:2px solid #00ffff; box-shadow:0 0 30px #00ffff;
+      width:min(880px, 96vw); max-height:86vh; overflow:auto;
+    }
+    h1 { color:#00ffff; margin:0 0 8px 0; text-align:center; }
+    p.sub { color:#b6c2d1; margin: 0 0 12px 0; text-align:center; }
+    #charactersList { display:grid; grid-template-columns: repeat(1, 1fr); gap:10px; }
+    @media (min-width: 640px) { #charactersList { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 980px) { #charactersList { grid-template-columns: repeat(3, 1fr); } }
+    .char-item{ display:flex; align-items:center; gap:12px; padding:10px; border:1px solid #334155; border-radius:10px; background:#0b1220; }
+    .shop-name{ font-weight:700; color:#e2e8f0; }
+    .shop-desc{ color:#94a3b8; font-size: 14px; }
+    .header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+    .btn { background:#0ea5e9; color:#001018; border:none; border-radius:10px; padding:8px 12px; font-weight:700; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <!-- We reuse the same structure as the overlay so glowlings-enhanced.js can render icons -->
+  <div id="charactersOverlay" style="display:block; position:relative; inset:auto; background:transparent; z-index:1; pointer-events:all;">
+    <div class="wrap">
+      <div class="card">
+        <div class="header">
+          <h1 data-lang="charactersTitle">Karakterler</h1>
+          <a href="glowlings.html" class="btn">Geri Dön</a>
+        </div>
+        <p class="sub" data-lang="charactersSubtitle">Temelden zora tüm düşman arketiplerinin görseli ve açıklaması.</p>
+        <div id="charactersList">
+          <div class="char-item">
+            <canvas class="char-icon" width="80" height="80" data-role="rush" data-shape="circle"></canvas>
+            <div>
+              <div class="shop-name">Rush (Daire)</div>
+              <div class="shop-desc">En temel yakıncı; ateş etmez. Doğrudan kovalar, sürekli basınç kurar.</div>
+            </div>
+          </div>
+          <div class="char-item">
+            <canvas class="char-icon" width="80" height="80" data-role="rush" data-shape="triangle"></canvas>
+            <div>
+              <div class="shop-name">Rush (Üçgen)</div>
+              <div class="shop-desc">Keskin dönüş alır; kısa patlamalarla hızlanıp üstüne kapanır.</div>
+            </div>
+          </div>
+          <div class="char-item">
+            <canvas class="char-icon" width="80" height="80" data-role="shooter" data-shape="circle"></canvas>
+            <div>
+              <div class="shop-name">Shooter</div>
+              <div class="shop-desc">Orta-uzak mesafeden periyodik enerji mermisi atar; sabit ritim, orta hız.</div>
+            </div>
+          </div>
+          <div class="char-item">
+            <canvas class="char-icon" width="80" height="80" data-role="sniper" data-shape="triangle"></canvas>
+            <div>
+              <div class="shop-name">Sniper</div>
+              <div class="shop-desc">Çok uzakta bekler; nişan alıp gecikmeli fakat yüksek hasarlı atış yapar.</div>
+            </div>
+          </div>
+          <div class="char-item">
+            <canvas class="char-icon" width="80" height="80" data-role="charger" data-shape="circle"></canvas>
+            <div>
+              <div class="shop-name">Charger</div>
+              <div class="shop-desc">Kısa telegraph sonrası düz bir hatta aşırı hızlanır ve çarpar.</div>
+            </div>
+          </div>
+          <div class="char-item">
+            <canvas class="char-icon" width="80" height="80" data-role="brute" data-shape="triangle"></canvas>
+            <div>
+              <div class="shop-name">Brute</div>
+              <div class="shop-desc">Yüksek can ve kütle; yakın temasta güçlü itiş uygular, yavaş ama ısrarlı.</div>
+            </div>
+          </div>
+          <div class="char-item">
+            <canvas class="char-icon" width="80" height="80" data-role="assassin" data-shape="triangle"></canvas>
+            <div>
+              <div class="shop-name">Assassin</div>
+              <div class="shop-desc">Görünürlük arasında geçiş yapar; pusu kurup ani yaklaşır.</div>
+            </div>
+          </div>
+          <div class="char-item">
+            <canvas class="char-icon" width="80" height="80" data-role="juggernaut" data-shape="circle"></canvas>
+            <div>
+              <div class="shop-name">Juggernaut</div>
+              <div class="shop-desc">Önde dönen kalkanla mermileri bloklar; yavaş ilerleyen ağır tank.</div>
+            </div>
+          </div>
+          <div class="char-item">
+            <canvas class="char-icon" width="80" height="80" data-role="parasite" data-shape="circle"></canvas>
+            <div>
+              <div class="shop-name">Parasite</div>
+              <div class="shop-desc">Temasta zayıflatma uygular; yakın kalarak yıpratır.</div>
+            </div>
+          </div>
+          <div class="char-item">
+            <canvas class="char-icon" width="80" height="80" data-role="mutant" data-shape="triangle"></canvas>
+            <div>
+              <div class="shop-name">Mutant</div>
+              <div class="shop-desc">Dalga ilerledikçe biçim ve davranış değiştirir; tahmin etmesi zordur.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Minimal scripts so icons are drawn using project logic -->
+  <script src="Vector2.js"></script>
+  <script src="glowlings-enhanced.js"></script>
+  <script>
+    // On standalone page, ensure icons render even without button flow
+    (function(){
+      function render() {
+        try { if (window.openCharactersOverlay) window.openCharactersOverlay(); } catch(e) {}
+        try {
+          document.querySelectorAll('#charactersOverlay .char-icon').forEach(function(c){
+            // If enhanced script didn't draw yet, force a small delay
+            const ctx = c.getContext('2d');
+            if (ctx && ctx.getImageData(0,0,1,1).data.every(v=>v===0)) {
+              setTimeout(function(){ if (window.openCharactersOverlay) window.openCharactersOverlay(); }, 30);
+            }
+          });
+        } catch(e) {}
+      }
+      if (document.readyState !== 'loading') render();
+      else document.addEventListener('DOMContentLoaded', render);
+    })();
+  </script>
+</body>
+</html>
