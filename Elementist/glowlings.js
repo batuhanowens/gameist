@@ -3526,7 +3526,20 @@ class GlowlingsGame {
             }
             if (nearest && minD <= (t.range || 520)) {
                 const dir = nearest.pos.minusNew(t.pos).normalise();
-                t.aimDir = dir.clone();
+                // Smooth rotation with lerp (interpolation factor)
+                const lerpFactor = Math.min(1, 0.18 * (dt / 16.67)); // Normalize to 60 FPS
+                if (!t.aimDir || (Math.abs(t.aimDir.x) + Math.abs(t.aimDir.y) < 0.0001)) {
+                    t.aimDir = dir.clone();
+                } else {
+                    // Lerp between current and target direction
+                    t.aimDir.x += (dir.x - t.aimDir.x) * lerpFactor;
+                    t.aimDir.y += (dir.y - t.aimDir.y) * lerpFactor;
+                    const mag = Math.sqrt(t.aimDir.x * t.aimDir.x + t.aimDir.y * t.aimDir.y);
+                    if (mag > 0.0001) {
+                        t.aimDir.x /= mag;
+                        t.aimDir.y /= mag;
+                    }
+                }
                 if (t.cooldown <= 0) {
                     const vel = dir.multiplyNew(520 * (this.projectileSpeedMult || 1));
                     const spawn = t.pos.plusNew(dir.multiplyNew(10));
@@ -7666,6 +7679,83 @@ class GlowlingsGame {
             livesEl.textContent = '❤️'.repeat(clamped);
         }
         
+        // Ability-ready glow effect
+        try {
+            const abilityIcon = document.getElementById('abilityIcon');
+            const now = Date.now();
+            const cooldownRemaining = Math.max(0, (this.abilityCooldown || 0) - (now - (this.lastAbilityTime || 0)));
+            
+            if (abilityIcon) {
+                if (cooldownRemaining <= 0 && this.abilityReady) {
+                    // Ability is ready - add bright glow
+                    abilityIcon.style.boxShadow = '0 0 20px rgba(34, 197, 94, 0.8), inset 0 0 12px rgba(34, 197, 94, 0.4)';
+                    abilityIcon.style.animation = 'abilityReadyGlow 0.6s ease-in-out infinite';
+                    
+                    // Show hint once when ability becomes ready
+                    if (!this._abilityReadyHinted) {
+                        this._abilityReadyHinted = true;
+                        try {
+                            if (typeof this.showHintToast === 'function') {
+                                this.showHintToast('Ability Ready!');
+                            }
+                        } catch(_) {}
+                    }
+                } else {
+                    // On cooldown - remove glow and reset hint flag
+                    abilityIcon.style.animation = 'none';
+                    abilityIcon.style.boxShadow = 'inset 0 0 8px rgba(0,255,255,0.2)';
+                    this._abilityReadyHinted = false;
+                }
+            }
+        } catch(_) {}
+
+        // Update power-up display (centered on player)
+        try {
+            const powerUpDisplay = document.getElementById('powerUpDisplay');
+            const powerUpIcon = document.getElementById('powerUpIcon');
+            const now = Date.now();
+            
+            // Check if any consumable power-up is active
+            const activeConsumable = this.activeConsumable ? true : false;
+            const consumableName = this.activeConsumable || '';
+            
+            if (powerUpDisplay && powerUpIcon) {
+                if (activeConsumable && consumableName) {
+                    // Show power-up with appropriate icon
+                    powerUpDisplay.classList.add('active');
+                    
+                    // Set icon based on consumable type
+                    const iconMap = {
+                        'blood_draught': '🩸',
+                        'flame_syrup': '🔥',
+                        'mist_tonic': '🌫️',
+                        'stone_infusion': '🪨',
+                        'heal_potion': '💚'
+                    };
+                    
+                    powerUpIcon.textContent = iconMap[consumableName] || '⭐';
+                    
+                    // Calculate and show cooldown progress if there's a duration
+                    const consumableExpireAt = this.consumableActiveUntil || 0;
+                    const timeRemaining = Math.max(0, consumableExpireAt - now);
+                    const totalDuration = this.consumableDuration || 5000;
+                    const progress = timeRemaining / totalDuration;
+                    
+                    // Update SVG progress circle if visible
+                    const progressCircle = document.querySelector('.power-up-cooldown-bar .power-up-progress');
+                    if (progressCircle && totalDuration > 0) {
+                        const circumference = 2 * Math.PI * 45; // radius 45
+                        const offset = circumference * (1 - Math.min(1, progress));
+                        progressCircle.style.strokeDashoffset = offset;
+                    }
+                } else {
+                    // No active power-up
+                    powerUpDisplay.classList.remove('active');
+                    powerUpIcon.textContent = '⭐';
+                }
+            }
+        } catch(_) {}
+        
         // Update leaderboard display
         this.drawLeaderboard();
     }
@@ -11534,6 +11624,28 @@ class GlowlingsGame {
             el.style.zIndex = 20050; // above in-game HUD/menus
             document.body.appendChild(el);
             setTimeout(() => { try { el.remove(); } catch(_){} }, 2000);
+        } catch {}
+    }
+
+    showHintToast(message) {
+        try {
+            // Only show hint during gameplay (not in menu, shop, or cutscenes)
+            if (!document.body.classList.contains('playing')) return;
+            
+            const hintToast = document.getElementById('hintToast');
+            if (!hintToast) return;
+            
+            // Update message text
+            const hintToastText = document.getElementById('hintToastText');
+            if (hintToastText) {
+                hintToastText.textContent = message || 'New power-up active!';
+            }
+            
+            // Remove animation class and re-apply it to trigger animation
+            hintToast.classList.remove('hint-toast');
+            // Force reflow to trigger animation
+            void hintToast.offsetWidth;
+            hintToast.classList.add('hint-toast');
         } catch {}
     }
 

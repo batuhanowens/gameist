@@ -654,15 +654,28 @@
         }
 
         #gameUI {
-            position: absolute;
+            position: fixed;
             top: 20px;
-            left: 20px;
+            right: 20px;
             display: none;
             pointer-events: none;
+            z-index: 1005;
         }
 
+        /* Show gameUI when playing */
+        body.playing #gameUI {
+            display: block !important;
+        }
+
+        /* Score is now top-right - larger, more prominent */
+        #gameUI .stat { min-width: 140px; }
+        #gameUI #score { font-size: 24px; font-weight: 900; color: #22c55e; text-shadow: 0 0 12px rgba(34, 197, 94, 0.6); }
+        #scoreLabel { font-size: 12px; color: #94a3b8; }
+
         /* Smaller HUD on touch devices (joystick/skill excluded) */
-        body.touch #gameUI .stat { font-size: 12px; }
+        body.touch #gameUI .stat { font-size: 11px; }
+        body.touch #gameUI #score { font-size: 18px; }
+        body.touch #gameUI #scoreLabel { font-size: 10px; }
         /* Smaller timer box on mobile */
         body.touch #timer { font-size: clamp(12px, 3vw, 16px); padding: 4px 8px; border-width: 1px; border-radius: 8px; }
         body.touch #livesDisplay { font-size: 14px !important; letter-spacing: 2px !important; }
@@ -750,6 +763,11 @@
             margin-bottom: 8px;
         }
         #statsSummary div { font-size: 8px !important; }
+        #statsSummary strong[data-lang="bestScoreLabel"] {
+            color: #22c55e !important;
+            font-weight: 900 !important;
+            text-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+        }
         #statsLastRuns {
             list-style: none;
             margin: 0;
@@ -1132,6 +1150,117 @@
             color: white;
             font-size: 14px;
         }
+
+        /* Power-up Display (around player center) */
+        .power-up-display {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            pointer-events: none;
+            z-index: 10020;
+            width: 120px;
+            height: 120px;
+        }
+
+        .power-up-icon {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            border: 2px solid rgba(34, 197, 94, 0.5);
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3), inset 0 0 15px rgba(34, 197, 94, 0.1);
+            opacity: 0;
+            transition: opacity 0.2s ease-out;
+        }
+
+        .power-up-display.active .power-up-icon {
+            opacity: 1;
+            animation: powerUpGlow 1.5s ease-in-out infinite;
+        }
+
+        @keyframes powerUpGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.3), inset 0 0 15px rgba(34, 197, 94, 0.1); }
+            50% { box-shadow: 0 0 30px rgba(34, 197, 94, 0.6), inset 0 0 20px rgba(34, 197, 94, 0.2); }
+        }
+
+        @keyframes abilityReadyGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.8), inset 0 0 12px rgba(34, 197, 94, 0.4); filter: brightness(1.1); }
+            50% { box-shadow: 0 0 28px rgba(34, 197, 94, 1), inset 0 0 16px rgba(34, 197, 94, 0.6); filter: brightness(1.2); }
+        }
+
+        .power-up-cooldown-bar {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .power-up-cooldown-bar .power-up-progress {
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transform-origin: 50px 50px;
+            transform: rotate(-90deg);
+        }
+
+        body.touch .power-up-display { width: 100px; height: 100px; }
+        body.touch .power-up-icon { font-size: 36px; }
+
+        /* Mini Hint Toast Popup */
+        .hint-toast {
+            position: fixed;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(34, 197, 94, 0.95);
+            color: #0f172a;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: 1px solid #22c55e;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+            z-index: 10050;
+            pointer-events: none;
+            opacity: 0;
+            animation: hintToastSlideUp 0.4s ease-out forwards, hintToastFadeOut 0.4s ease-in forwards 2.6s;
+        }
+
+        @keyframes hintToastSlideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        @keyframes hintToastFadeOut {
+            from {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-10px);
+            }
+        }
+
+        body.touch .hint-toast { padding: 10px 16px; font-size: 12px; bottom: 100px; }
+
+        /* Show power-up display when playing */
+        body.playing .power-up-display { display: block; }
+        
+        /* Hide hint toast when not playing (menus, shop, cutscenes) */
+        body:not(.playing) #hintToast { display: none !important; }
 
         /* Shop wave label smaller on mobile */
         body.touch #shopWaveLabel { font-size: 11px !important; }
@@ -2454,6 +2583,19 @@
                     <span id="cooldownText">3</span>
                 </div>
             </div>
+        </div>
+        <!-- Power-up Display (center around player) -->
+        <div class="power-up-display" id="powerUpDisplay">
+            <div class="power-up-icon" id="powerUpIcon">⭐</div>
+            <svg class="power-up-cooldown-bar" id="powerUpCooldownBar" viewBox="0 0 100 100" style="display: none;">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(34, 197, 94, 0.2)" stroke-width="2"/>
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#22c55e" stroke-width="2.5" 
+                        stroke-dasharray="282.7" stroke-dashoffset="0" class="power-up-progress"/>
+            </svg>
+        </div>
+        <!-- Mini Hint Toast Popup -->
+        <div id="hintToast" class="hint-toast">
+            <span id="hintToastText">New power-up active!</span>
         </div>
     </div>
     <!-- Touch Controls (mobile) -->
@@ -4446,6 +4588,23 @@
           // apply consumable immediate effect hooks
           applyConsumableImmediate(id);
           recomputeAndPublishStats();
+          
+          // Show hint popup notification
+          try{
+            const g = (typeof window!=='undefined') ? window.game : undefined;
+            if(g && typeof g.showHintToast === 'function'){
+              const consumableNames = {
+                'blood_draught': 'Blood Draught Active!',
+                'flame_syrup': 'Flame Syrup Active!',
+                'mist_tonic': 'Mist Tonic Active!',
+                'stone_infusion': 'Stone Infusion Active!',
+                'heal_potion': 'HP Restored!',
+                'magnet_core': 'Magnet Core Active!'
+              };
+              const message = consumableNames[id] || 'Power-up Active!';
+              g.showHintToast(message);
+            }
+          }catch(_){ }
         }
 
         // Allow using consumables by tapping the slot in the bar (mobile-friendly)
