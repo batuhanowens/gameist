@@ -1265,6 +1265,11 @@
         
         /* Hide hint toast only in main menu */
         body.menu-open #hintToast { display: none !important; }
+        
+        /* Show hint toast when playing or in shop (between waves) */
+        #hintToast { display: none; }
+        body.playing #hintToast, 
+        body.shop-open #hintToast { display: block; }
 
         /* Shop wave label smaller on mobile */
         body.touch #shopWaveLabel { font-size: 11px !important; }
