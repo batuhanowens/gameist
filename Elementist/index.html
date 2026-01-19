@@ -673,6 +673,7 @@
         #scoreLabel { font-size: 12px; color: #94a3b8; }
 
         /* Smaller HUD on touch devices (joystick/skill excluded) */
+        body.touch #gameUI { top: 10px; left: 20px; right: auto; }
         body.touch #gameUI .stat { font-size: 11px; }
         body.touch #gameUI #score { font-size: 18px; }
         body.touch #gameUI #scoreLabel { font-size: 10px; }
@@ -801,6 +802,9 @@
           box-shadow: 0 0 12px rgba(14,165,233,0.25);
         }
         #statsLastRuns li { opacity: 0.9; }
+        /* Hide stats panel when shop is open on mobile */
+        body.shop-open #statsPanel { display: none !important; }
+        
         /* Phones/tablets: shrink Run Stats panel regardless of width (touch detection) */
         @media (hover: none) and (pointer: coarse) {
             #statsPanel { width: 138px; right: 6px; top: 50px; padding: 4px; }
