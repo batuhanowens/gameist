@@ -1363,6 +1363,7 @@
         const bestWaveEl = el('statsBestWave');
         const bestScoreEl = el('statsBestScore');
         const lastRunsEl = el('statsLastRuns');
+        const globalTopEl = el('globalTopScores');
         const resetBtn = el('resetStatsBtn');
         const gameOverScreen = el('gameOverScreen');
         const finalStats = el('finalStats');
@@ -1424,6 +1425,36 @@
         let runStartMs = 0;
         let lastRecordedRunId = '';
 
+        function getGF(){
+          try{ return window.GameistFirebase || null; }catch(_){ return null; }
+        }
+
+        function renderGlobalTop(list){
+          if(!globalTopEl) return;
+          if(!Array.isArray(list) || list.length===0){
+            globalTopEl.innerHTML = '<li style="opacity:.7;">No scores yet.</li>';
+            return;
+          }
+          globalTopEl.innerHTML = list.slice(0, 10).map((r, i)=>{
+            const s = (r && typeof r.score==='number') ? (r.score|0) : (parseInt(r?.score||0,10)||0);
+            const w = (r && typeof r.wave==='number') ? (r.wave|0) : (parseInt(r?.wave||0,10)||0);
+            const nm = (r && r.displayName) ? String(r.displayName) : 'Player';
+            return `<li><span style="opacity:.7;">#${i+1}</span> <span style="color:#7dd3fc; font-weight:800;">${s}</span> <span style="opacity:.85;">(W${w||0})</span> <span style="opacity:.75;">${nm}</span></li>`;
+          }).join('');
+        }
+
+        async function refreshGlobalTop(){
+          if(!globalTopEl) return;
+          const gf = getGF();
+          if(!gf || typeof gf.fetchTopScores!=='function') return;
+          try{
+            const list = await gf.fetchTopScores('elementist', 10);
+            renderGlobalTop(list);
+          }catch(_){
+            globalTopEl.innerHTML = '<li style="opacity:.7;">Could not load.</li>';
+          }
+        }
+
         function ensureRunStart(){
           try{
             const g = window.game;
@@ -1458,6 +1489,17 @@
             saveLB(trimmed);
             renderPanel();
 
+            (function(){
+              try{
+                const gf = getGF();
+                const authed = !!gf && !!gf.auth && !!gf.auth.currentUser;
+                if(!authed || typeof gf.submitScore!=='function') return;
+                gf.submitScore({ game: 'elementist', score: score|0, wave: wave|0, durationMs: dur|0 });
+              }catch(_){ }
+            })();
+
+            refreshGlobalTop();
+
             if(finalStats){
               const extra = `\n<div style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(51,65,85,0.45); color:#cbd5e1; font-size:13px; line-height:1.55;">`+
                 `<div><strong>Run Time</strong>: ${formatMs(dur)}</div>`+
@@ -1487,6 +1529,8 @@
 
         // init
         renderPanel();
+        setTimeout(refreshGlobalTop, 1200);
+        setInterval(refreshGlobalTop, 20000);
         setInterval(ensureRunStart, 700);
 
         if(gameOverScreen){
@@ -2257,10 +2301,20 @@
           </div>
           <button id="resetStatsBtn" class="menu-btn" style="width:auto; margin:8px 0; padding:6px 10px;" data-lang="resetStats">Reset Stats</button>
           <ul id="statsLastRuns"></ul>
+          <div style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(51,65,85,0.45);">
+            <div style="font-weight:800; letter-spacing:0.6px; color:#e2e8f0; margin-bottom:6px;">Global Top 10</div>
+            <ul id="globalTopScores" style="margin:0; padding-left:18px;"><li style="opacity:.7;">Loading...</li></ul>
+          </div>
         </div>
         <div id="startScreen">
             <h1 id="startTitle" data-lang="gameTitle">🌟 ELEMENTIST 🌟</h1>
             <p id="startSubtitle" data-lang="subtitle">Collect energy in a neon universe, grow, and defeat your rivals!</p>
+            <div id="gameistAuthWidget" style="display:flex; align-items:center; justify-content:center; gap:8px; margin:10px auto 6px auto; width:fit-content; padding:8px 10px; border:1px solid rgba(255,255,255,0.14); border-radius:14px; background:rgba(0,0,0,0.22); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
+              <img id="gameistUserImg" alt="" style="display:none; width:24px; height:24px; border-radius:999px;" />
+              <span id="gameistUserName" style="display:none; font-size:12px; font-weight:700; opacity:0.92; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
+              <button id="gameistLoginBtn" class="menu-btn" style="width:auto; padding:7px 10px;">Login</button>
+              <button id="gameistLogoutBtn" class="menu-btn" style="display:none; width:auto; padding:7px 10px;">Logout</button>
+            </div>
             
             <button id="startBtn" data-lang="startGame">START GAME</button>
             <button id="settingsBtn" class="primary-btn" style="margin-top:10px;" data-lang="settings">SETTINGS</button>
@@ -4746,6 +4800,7 @@
         }
       })();
     </script>
+    <script type="module" src="../firebase-client.js"></script>
     <!-- Characters wiring handled in glowlings.js to match Builds behavior -->
     
   </body>
