@@ -11629,11 +11629,6 @@ class GlowlingsGame {
 
     showHintToast(message) {
         try {
-            // Only show hint during gameplay (not in main menu or shop scenes)
-            // Allow during shop only if we're between waves (for ability cooldown messages)
-            const inMenu = document.body.classList.contains('menu-open');
-            if (inMenu) return;
-            
             const hintToast = document.getElementById('hintToast');
             if (!hintToast) return;
             

@@ -1263,8 +1263,8 @@
         /* Show power-up display when playing */
         body.playing .power-up-display { display: block; }
         
-        /* Hide hint toast when not playing (menus, shop, cutscenes) */
-        body:not(.playing) #hintToast { display: none !important; }
+        /* Hide hint toast only in main menu */
+        body.menu-open #hintToast { display: none !important; }
 
         /* Shop wave label smaller on mobile */
         body.touch #shopWaveLabel { font-size: 11px !important; }
