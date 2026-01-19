@@ -4593,6 +4593,25 @@
           applyConsumableImmediate(id);
           recomputeAndPublishStats();
           
+          // Special handling for magnet_core activation
+          if(id === 'magnet_core'){
+            try{
+              const g = (typeof window!=='undefined') ? window.game : undefined;
+              if(g){
+                g._magnetActiveCount = (g._magnetActiveCount||0) + 1;
+                g.magnetActive = true;
+                g.magnetRadius = Math.max(g.magnetRadius||300, 360);
+                const off = ()=>{
+                  try{
+                    g._magnetActiveCount = Math.max(0, (g._magnetActiveCount||1) - 1);
+                    if(g._magnetActiveCount===0){ g.magnetActive = false; }
+                  }catch(_){ }
+                };
+                setTimeout(off, 7000);
+              }
+            }catch(_){ }
+          }
+          
           // Show hint popup notification
           try{
             const g = (typeof window!=='undefined') ? window.game : undefined;
