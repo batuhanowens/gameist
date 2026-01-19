@@ -11629,6 +11629,15 @@ class GlowlingsGame {
 
     showHintToast(message) {
         try {
+            // Only show during active wave gameplay
+            // Hide in: main menu, shop, cutscenes
+            const inMenu = document.body.classList.contains('menu-open');
+            const inShop = document.body.classList.contains('shop-open');
+            const isPlaying = document.body.classList.contains('playing');
+            
+            // Show only when playing AND not in shop/menu
+            if (!isPlaying || inMenu || inShop) return;
+            
             const hintToast = document.getElementById('hintToast');
             if (!hintToast) return;
             
