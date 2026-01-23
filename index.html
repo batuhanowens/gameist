@@ -1270,6 +1270,15 @@
       
       // Start listening for stats updates
       listenForStatsUpdates();
+      
+      // Auto-refresh stats every 30 seconds for cross-device sync
+      setInterval(() => {
+        const user = firebase.auth().currentUser;
+        if (user) {
+          console.log('🔄 Auto-refreshing user stats for cross-device sync...');
+          loadUserStats(user.uid);
+        }
+      }, 30000);
 
       // Check for redirect result (when using signInWithRedirect) - Enhanced
       firebase.auth().getRedirectResult()
