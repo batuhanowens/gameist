@@ -5180,11 +5180,13 @@
           
           button.addEventListener('click', () => {
             const user = window.gameistAuth.getCurrentUser();
-            const score = getElementistScore();
+            const stats = getElementistNativeStats();
+            const score = stats.bestScore; // Use bestScore from native stats
             
             console.log('🧪 Manual score save test');
             console.log('👤 User:', user ? user.displayName : 'null');
-            console.log('📊 Score:', score);
+            console.log('📊 Stats:', stats);
+            console.log('📊 Score to save:', score);
             
             if (user && score > 0) {
               window.gameistAuth.saveScore('elementist', score)
