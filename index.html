@@ -241,21 +241,27 @@
                 </div>
                 
                 <!-- Action Buttons -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; position: relative; z-index: 1;">
-                  <button id="profileBtn" style="padding: 10px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(59,130,246,0.3); display: flex; align-items: center; justify-content: center; gap: 4px;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; position: relative; z-index: 1;">
+                  <button id="profileBtn" style="padding: 8px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(59,130,246,0.3); display: flex; align-items: center; justify-content: center; gap: 3px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
                     </svg>
                     <span data-i18n="profile_button">Profile</span>
                   </button>
-                  <button id="leaderboardBtn" style="padding: 10px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(139,92,246,0.3); display: flex; align-items: center; justify-content: center; gap: 4px;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <button id="leaderboardBtn" style="padding: 8px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(139,92,246,0.3); display: flex; align-items: center; justify-content: center; gap: 3px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M7.5 21L2 16l2.5-2.5L7.5 16l6-6L16 12l-8.5 9zM22.5 6L12 16.5l-3-3L18 4.5l4.5 1.5z"/>
                     </svg>
                     <span data-i18n="leaderboard_button">Leaderboard</span>
                   </button>
-                  <button id="logout" style="padding: 10px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(239,68,68,0.3); display: flex; align-items: center; justify-content: center; gap: 4px;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <button id="refreshStatsBtn" style="padding: 8px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(16,185,129,0.3); display: flex; align-items: center; justify-content: center; gap: 3px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                    </svg>
+                    <span>Refresh</span>
+                  </button>
+                  <button id="logout" style="padding: 8px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(239,68,68,0.3); display: flex; align-items: center; justify-content: center; gap: 3px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
                     </svg>
                     <span data-i18n="logout_button">Logout</span>
@@ -670,6 +676,9 @@
         console.error("❌ Firestore initialization failed:", error);
       }
 
+      // Make db accessible globally for stats functions
+      window.gameistDB = db;
+
       // Logout button event listener
       document.getElementById('logout').addEventListener('click', async () => {
         try {
@@ -836,6 +845,18 @@
         showLeaderboardModal();
       });
 
+      // Refresh stats button handler
+      document.getElementById('refreshStatsBtn').addEventListener('click', function() {
+        const savedUser = localStorage.getItem('gameist_user');
+        if (savedUser) {
+          const user = JSON.parse(savedUser);
+          console.log('🔄 Manual stats refresh for:', user.displayName);
+          loadUserStats(user.uid);
+        } else {
+          console.log('❌ No user found for stats refresh');
+        }
+      });
+
       // Show profile modal
       function showProfileModal(user) {
         const modal = document.createElement('div');
@@ -945,15 +966,28 @@
 
       // Load user statistics
       async function loadUserStats(userId) {
+        console.log('📊 Loading user stats for:', userId);
+        
         try {
-          const snapshot = await db.collection('leaderboard')
+          const database = window.gameistDB || db;
+          if (!database) {
+            console.error('❌ Database not available');
+            return;
+          }
+          
+          console.log('🔍 Querying leaderboard for user:', userId);
+          const snapshot = await database.collection('leaderboard')
             .where('userId', '==', userId)
             .orderBy('timestamp', 'desc')
             .get();
           
           const scores = snapshot.docs.map(doc => doc.data());
+          console.log('📈 Found scores:', scores.length, scores);
+          
           const totalScore = scores.reduce((sum, score) => sum + score.score, 0);
           const gamesPlayed = new Set(scores.map(s => s.game)).size;
+          
+          console.log('📊 Calculated stats:', { totalScore, gamesPlayed });
           
           // Update modal stats
           const modalTotalScore = document.getElementById('modalTotalScore');
@@ -964,8 +998,22 @@
           if (modalGamesPlayed) modalGamesPlayed.textContent = gamesPlayed;
           
           // Update main UI stats
-          document.getElementById('userTotalScore').textContent = totalScore.toLocaleString();
-          document.getElementById('userGamesPlayed').textContent = gamesPlayed;
+          const userTotalScoreEl = document.getElementById('userTotalScore');
+          const userGamesPlayedEl = document.getElementById('userGamesPlayed');
+          
+          if (userTotalScoreEl) {
+            userTotalScoreEl.textContent = totalScore.toLocaleString();
+            console.log('✅ Updated main UI total score:', totalScore);
+          } else {
+            console.error('❌ userTotalScore element not found');
+          }
+          
+          if (userGamesPlayedEl) {
+            userGamesPlayedEl.textContent = gamesPlayed;
+            console.log('✅ Updated main UI games played:', gamesPlayed);
+          } else {
+            console.error('❌ userGamesPlayed element not found');
+          }
           
           // Game-specific stats
           const gameStatsMap = {};
@@ -976,6 +1024,8 @@
             gameStatsMap[score.game].count++;
             gameStatsMap[score.game].highScore = Math.max(gameStatsMap[score.game].highScore, score.score);
           });
+          
+          console.log('🎮 Game stats map:', gameStatsMap);
           
           if (gameStats) {
             let statsHTML = '';
@@ -988,10 +1038,13 @@
               `;
             }
             gameStats.innerHTML = statsHTML || '<div>No games played yet</div>';
+            console.log('✅ Updated game stats HTML');
           }
           
+          console.log('✅ User stats loaded successfully');
+          
         } catch (error) {
-          console.error('Error loading user stats:', error);
+          console.error('❌ Error loading user stats:', error);
         }
       }
 
