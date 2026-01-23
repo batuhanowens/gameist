@@ -104,6 +104,25 @@
         </div>
         
         <div id="status" class="status">Firebase yükleniyor...</div>
+        
+        <div style="margin-top: 20px;">
+            <h4>Debug Bilgileri:</h4>
+            <div id="debugInfo" style="font-family: monospace; font-size: 12px; text-align: left; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px;">
+                Domain: <span id="currentDomain"></span><br>
+                Protocol: <span id="currentProtocol"></span><br>
+                Firebase SDK: <span id="firebaseVersion"></span><br>
+                Auth State: <span id="authState"></span>
+            </div>
+        </div>
+        
+        <div style="margin-top: 15px;">
+            <button onclick="testDirectOAuth()" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Direct OAuth Test
+            </button>
+            <button onclick="clearAllAuth()" style="padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
+                Clear All Auth Data
+            </button>
+        </div>
     </div>
 
     <script>
@@ -124,10 +143,20 @@
             firebase.initializeApp(firebaseConfig);
             statusDiv.innerHTML = "✅ Firebase başarıyla yüklendi!";
             
+            // Debug bilgilerini güncelle
+            document.getElementById('currentDomain').textContent = window.location.hostname;
+            document.getElementById('currentProtocol').textContent = window.location.protocol;
+            document.getElementById('firebaseVersion').textContent = firebase.SDK_VERSION || 'Unknown';
+            
             // Firebase Authentication Logic
             const provider = new firebase.auth.GoogleAuthProvider();
             provider.addScope('email');
             provider.addScope('profile');
+            
+            // Custom redirect URI ekle
+            provider.setCustomParameters({
+                'redirect_uri': window.location.origin
+            });
 
             document.getElementById('googleLogin').addEventListener('click', () => {
                 statusDiv.innerHTML = "🔄 Google giriş başlatılıyor...";
@@ -200,31 +229,39 @@
                 Detay: ${JSON.stringify(error, null, 2)}`;
             }
 
-            document.getElementById('logout').addEventListener('click', () => {
-                firebase.auth().signOut()
-                    .then(() => {
-                        document.getElementById('googleLogin').style.display = 'inline-flex';
-                        document.getElementById('userInfo').style.display = 'none';
-                        statusDiv.innerHTML = "✅ Çıkış yapıldı";
-                    })
-                    .catch((error) => {
-                        console.error("Çıkış hatası:", error);
-                        statusDiv.innerHTML = `❌ Çıkış hatası: ${error.message}`;
-                    });
-            });
+            // Debug fonksiyonları
+            window.testDirectOAuth = function() {
+                statusDiv.innerHTML = "🔄 Direct OAuth test başlatılıyor...";
+                
+                // Manuel OAuth URL oluştur
+                const clientId = '1090533689306-rjg08sp5j2dqoqs7gs0nkj7g8b9uotds.apps.googleusercontent.com';
+                const redirectUri = encodeURIComponent(window.location.origin);
+                const scope = encodeURIComponent('email profile');
+                const responseType = 'code';
+                
+                const oauthUrl = `https://accounts.google.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=${responseType}`;
+                
+                console.log('OAuth URL:', oauthUrl);
+                statusDiv.innerHTML = `🔄 OAuth URL oluşturuldu:<br>${oauthUrl}<br><br>Yeni pencerede açılıyor...`;
+                
+                window.open(oauthUrl, '_blank', 'width=500,height=600');
+            };
 
-            // Giriş durumu kontrol
+            window.clearAllAuth = function() {
+                firebase.auth().signOut().then(() => {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    statusDiv.innerHTML = "✅ Tüm auth verileri temizlendi. Sayfayı yenile ve tekrar dene.";
+                });
+            };
+
+            // Auth state listener
             firebase.auth().onAuthStateChanged((user) => {
                 if (user) {
-                    document.getElementById('userName').textContent = user.displayName;
-                    document.getElementById('userPhoto').src = user.photoURL;
-                    document.getElementById('googleLogin').style.display = 'none';
-                    document.getElementById('userInfo').style.display = 'block';
-                    statusDiv.innerHTML = `✅ Oturum açık: ${user.displayName} (${user.uid})`;
+                    document.getElementById('authState').textContent = `Logged in as ${user.email}`;
+                    handleAuthSuccess({ user, credential: { accessToken: 'N/A' } });
                 } else {
-                    document.getElementById('googleLogin').style.display = 'inline-flex';
-                    document.getElementById('userInfo').style.display = 'none';
-                    statusDiv.innerHTML = "⏳ Oturum kapalı - giriş yapın";
+                    document.getElementById('authState').textContent = 'Not logged in';
                 }
             });
             
@@ -232,6 +269,20 @@
             statusDiv.innerHTML = `❌ Firebase hatası: ${error.message}`;
             console.error("Firebase initialization error:", error);
         }
+
+        // Logout event listener
+        document.getElementById('logout').addEventListener('click', () => {
+            firebase.auth().signOut()
+                .then(() => {
+                    document.getElementById('googleLogin').style.display = 'inline-flex';
+                    document.getElementById('userInfo').style.display = 'none';
+                    statusDiv.innerHTML = "✅ Çıkış yapıldı";
+                })
+                .catch((error) => {
+                    console.error("Çıkış hatası:", error);
+                    statusDiv.innerHTML = `❌ Çıkış hatası: ${error.message}`;
+                });
+        });
     </script>
 </body>
 </html>
