@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Sync Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+        .test-btn:hover {
+            background: #45a049;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Manual Sync Test</h1>
+        <p>Mobilde manuel skor senkronizasyon testi</p>
+        
+        <button class="test-btn" onclick="testManualSync()">🔄 784.000 Puan Manuel Kaydet</button>
+        <button class="test-btn" onclick="testVerifySync()">✅ Sync'i Doğrula</button>
+        <button class="test-btn" onclick="clearStatus()">🧹 Temizle</button>
+        
+        <div id="status"></div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7ckcqdZWfnUx5r8uKmvu9Ikax1x5Qidk",
+            authDomain: "gameist.firebaseapp.com",
+            projectId: "gameist",
+            storageBucket: "gameist.appspot.com",
+            messagingSenderId: "525659299937",
+            appId: "1:525659299937:web:1c8343a25be2a994bcca20",
+            measurementId: "G-WE9R0GWKM6",
+            databaseURL: "https://gameist-default-rtdb.firebaseio.com/"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            const timestamp = new Date().toLocaleTimeString();
+            statusDiv.innerHTML += `<div class="status ${type}">[${timestamp}] ${message}</div>`;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function clearStatus() {
+            document.getElementById('status').innerHTML = '';
+        }
+
+        async function testManualSync() {
+            updateStatus('🔄 Manuel skor kaydediliyor...', 'info');
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    updateStatus('❌ Giriş yapılmamış', 'error');
+                    return;
+                }
+                
+                updateStatus(`✅ Kullanıcı: ${user.displayName}`, 'success');
+                updateStatus(`🆔 UID: ${user.uid}`, 'info');
+                
+                // Create test score like Elementist would
+                const testScore = {
+                    userId: user.uid,
+                    displayName: user.displayName,
+                    email: user.email,
+                    score: 784000, // 784 bin puan
+                    game: 'elementist',
+                    timestamp: Date.now(),
+                    firestoreFailed: true,
+                    fromElementist: true,
+                    manualTest: true
+                };
+                
+                updateStatus('📝 Realtime Database\'e yazılıyor...', 'info');
+                
+                const startTime = Date.now();
+                const userScoresRef = database.ref(`userScores/${user.uid}`);
+                const newScoreRef = userScoresRef.push();
+                
+                await newScoreRef.set(testScore);
+                const endTime = Date.now();
+                
+                updateStatus(`✅ Skor kaydedildi: ${testScore.score} pts (${endTime - startTime}ms)`, 'success');
+                updateStatus(`📄 Ref: ${newScoreRef.toString()}`, 'info');
+                
+                // Also save to localStorage for completeness
+                const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
+                localScores.push(testScore);
+                localStorage.setItem('gameist_local_scores', JSON.stringify(localScores));
+                updateStatus('💾 Ayrıca localStorage\'a da kaydedildi', 'success');
+                
+                // Trigger BroadcastChannel
+                try {
+                    const channel = new BroadcastChannel('gameist_stats');
+                    const message = {
+                        type: 'statsUpdate',
+                        userId: user.uid,
+                        game: 'elementist',
+                        score: testScore.score,
+                        timestamp: Date.now(),
+                        firestoreSuccess: false,
+                        manualTest: true
+                    };
+                    
+                    channel.postMessage(message);
+                    updateStatus('📡 BroadcastChannel mesajı gönderildi', 'success');
+                } catch (error) {
+                    updateStatus('⚠️ BroadcastChannel hatası (normal)', 'info');
+                }
+                
+                updateStatus('🎯 Manuel sync tamamlandı! PC\'de kontrol et', 'success');
+                
+            } catch (error) {
+                updateStatus(`❌ Hata: ${error.message}`, 'error');
+                updateStatus(`🔍 Error code: ${error.code}`, 'error');
+            }
+        }
+
+        async function testVerifySync() {
+            updateStatus('✅ Sync doğrulanıyor...', 'info');
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    updateStatus('❌ Giriş yapılmamış', 'error');
+                    return;
+                }
+                
+                const startTime = Date.now();
+                const userScoresRef = database.ref(`userScores/${user.uid}`);
+                const snapshot = await userScoresRef.once('value');
+                const endTime = Date.now();
+                
+                updateStatus(`✅ Skorlar okundu: ${endTime - startTime}ms`, 'success');
+                
+                const data = snapshot.val();
+                if (data) {
+                    const scores = Object.values(data);
+                    updateStatus(`📊 Toplam ${scores.length} skor bulundu`, 'info');
+                    
+                    let elementistTotal = 0;
+                    scores.forEach(score => {
+                        updateStatus(`📄 ${score.game}: ${score.score} pts (${score.manualTest ? 'Manual' : 'Auto'})`, 'info');
+                        if (score.game === 'elementist') {
+                            elementistTotal += score.score;
+                        }
+                    });
+                    
+                    updateStatus(`🎮 Elementist toplamı: ${elementistTotal}`, 'success');
+                    
+                    if (elementistTotal > 0) {
+                        updateStatus('🎉 Sync başarılı! PC ana menüde görünmeli', 'success');
+                    } else {
+                        updateStatus('⚠️ Elementist skoru bulunamadı', 'error');
+                    }
+                } else {
+                    updateStatus('📭 Hiç skor bulunamadı', 'info');
+                }
+                
+            } catch (error) {
+                updateStatus(`❌ Hata: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run
+        window.addEventListener('load', () => {
+            updateStatus('🔄 Manuel sync test başlatıldı', 'info');
+        });
+    </script>
+</body>
+</html>
