@@ -5245,9 +5245,30 @@
             console.log('🔄 Syncing Elementist stats to main index:', stats);
             
             // Save best score to our leaderboard
+            console.log('💾 Attempting to save score to Firestore...');
+            console.log('🔍 Auth component available:', !!window.gameistAuth);
+            console.log('🔍 SaveScore method available:', !!(window.gameistAuth && window.gameistAuth.saveScore));
+            console.log('🔍 Database reference:', window.gameistAuth ? window.gameistAuth.db : 'null');
+            
+            if (!window.gameistAuth) {
+              console.error('❌ window.gameistAuth not available');
+              return;
+            }
+            
+            if (!window.gameistAuth.saveScore) {
+              console.error('❌ saveScore method not available');
+              return;
+            }
+            
             window.gameistAuth.saveScore('elementist', stats.bestScore)
-              .then(() => {
+              .then((result) => {
                 console.log('✅ Elementist best score synced to main index:', stats.bestScore);
+                console.log('📄 Firestore save result:', result);
+                
+                // Verify the save immediately
+                setTimeout(() => {
+                  verifyScoreInFirestore(user.uid, stats.bestScore);
+                }, 1000);
                 
                 // Notify main page about the update using BroadcastChannel
                 try {
@@ -5281,6 +5302,7 @@
               })
               .catch(error => {
                 console.error('❌ Failed to sync Elementist stats:', error);
+                console.error('❌ Error details:', error.code, error.message);
               });
           }
         }
