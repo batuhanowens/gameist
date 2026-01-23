@@ -614,38 +614,6 @@
         console.error("❌ Firestore initialization failed:", error);
       }
 
-      // Login button event listener
-      document.getElementById('googleLogin').addEventListener('click', async () => {
-        const authStatus = document.getElementById('authStatus');
-        authStatus.style.display = 'block';
-        authStatus.innerHTML = '🔄 Google giriş başlatılıyor...';
-        
-        try {
-          // Try popup first (better UX)
-          const result = await firebase.auth().signInWithPopup(provider);
-          handleAuthSuccess(result);
-        } catch (error) {
-          console.error("Popup failed, trying redirect:", error);
-          
-          // Fallback to redirect if popup fails
-          if (error.code === 'auth/popup-closed-by-user' || 
-              error.code === 'auth/popup-blocked' ||
-              error.code === 'auth/cancelled-popup-request') {
-            
-            authStatus.innerHTML = '🔄 Popup engellendi, yönlendiriliyor...';
-            
-            try {
-              await firebase.auth().signInWithRedirect(provider);
-              authStatus.innerHTML = '🔄 Yönlendirme başlatıldı...';
-            } catch (redirectError) {
-              handleAuthError(redirectError);
-            }
-          } else {
-            handleAuthError(error);
-          }
-        }
-      });
-
       // Logout button event listener
       document.getElementById('logout').addEventListener('click', async () => {
         try {
@@ -752,18 +720,70 @@
         }
       });
 
-      // Check for redirect result (when using signInWithRedirect)
+      // Check for redirect result (when using signInWithRedirect) - Enhanced
       firebase.auth().getRedirectResult()
         .then((result) => {
           if (result.user) {
+            console.log("🔄 Redirect result received:", result.user.displayName);
             handleAuthSuccess(result);
+          } else {
+            console.log("ℹ️ No redirect result - normal flow");
           }
         })
         .catch((error) => {
+          console.error("❌ Redirect result error:", error);
           if (error.code !== 'auth/no-current-user') {
             handleAuthError(error);
           }
         });
+
+      // Enhanced popup blocker detection
+      document.getElementById('googleLogin').addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const authStatus = document.getElementById('authStatus');
+        authStatus.style.display = 'block';
+        authStatus.innerHTML = '🔄 Google giriş başlatılıyor...';
+        
+        // Force user gesture for popup
+        const userGesture = new Promise((resolve) => {
+          setTimeout(resolve, 100);
+        });
+        
+        userGesture.then(() => {
+          // Try popup with explicit user gesture
+          firebase.auth().signInWithPopup(provider)
+            .then((result) => {
+              console.log("✅ Popup successful");
+              handleAuthSuccess(result);
+            })
+            .catch((error) => {
+              console.error("❌ Popup failed:", error);
+              
+              // Immediate redirect fallback
+              if (error.code === 'auth/popup-closed-by-user' || 
+                  error.code === 'auth/popup-blocked' ||
+                  error.code === 'auth/cancelled-popup-request') {
+                
+                console.log("🔄 Trying redirect method...");
+                authStatus.innerHTML = '🔄 Popup engellendi, yönlendiriliyor...';
+                
+                // Use redirect as fallback
+                firebase.auth().signInWithRedirect(provider)
+                  .then(() => {
+                    console.log("✅ Redirect initiated");
+                    authStatus.innerHTML = '🔄 Yönlendirme başlatıldı...';
+                  })
+                  .catch((redirectError) => {
+                    console.error("❌ Redirect failed:", redirectError);
+                    handleAuthError(redirectError);
+                  });
+              } else {
+                handleAuthError(error);
+              }
+            });
+        });
+      });
 
       // Leaderboard helper functions (ready for implementation)
       function saveUserScore(userId, displayName, score) {
