@@ -5146,9 +5146,103 @@
             }, 30000);
             
             console.log('✅ Elementist leaderboard hooks installed');
+            
+            // Monitor Elementist's own stats and sync to main index
+            monitorElementistStats();
           }
         }, 2000);
       });
+      
+      // Monitor Elementist's native stats system
+      function monitorElementistStats() {
+        console.log('📊 Starting Elementist stats monitoring');
+        
+        // Function to get Elementist's current stats
+        function getElementistNativeStats() {
+          try {
+            const bestScoreEl = document.getElementById('statsBestScore');
+            const bestWaveEl = document.getElementById('statsBestWave');
+            const lastRunsEl = document.getElementById('statsLastRuns');
+            
+            const stats = {
+              bestScore: bestScoreEl ? parseInt(bestScoreEl.textContent || '0', 10) : 0,
+              bestWave: bestWaveEl ? parseInt(bestWaveEl.textContent || '0', 10) : 0,
+              lastRuns: []
+            };
+            
+            // Parse last runs if available
+            if (lastRunsEl) {
+              const runItems = lastRunsEl.querySelectorAll('li');
+              stats.lastRuns = Array.from(runItems).map(li => {
+                const text = li.textContent;
+                const waveMatch = text.match(/W(\d+)/);
+                const scoreMatch = text.match(/(\d+)/g);
+                return {
+                  wave: waveMatch ? parseInt(waveMatch[1], 10) : 0,
+                  score: scoreMatch ? Math.max(...scoreMatch.map(Number)) : 0
+                };
+              });
+            }
+            
+            return stats;
+          } catch (error) {
+            console.error('❌ Error getting Elementist stats:', error);
+            return { bestScore: 0, bestWave: 0, lastRuns: [] };
+          }
+        }
+        
+        // Function to sync stats to main index
+        function syncStatsToMainIndex() {
+          const user = window.gameistAuth.getCurrentUser();
+          const stats = getElementistNativeStats();
+          
+          if (user && stats.bestScore > 0) {
+            console.log('🔄 Syncing Elementist stats to main index:', stats);
+            
+            // Save best score to our leaderboard
+            window.gameistAuth.saveScore('elementist', stats.bestScore)
+              .then(() => {
+                console.log('✅ Elementist best score synced to main index:', stats.bestScore);
+                
+                // Notify main page about the update
+                notifyMainPageStatsUpdate(user.uid);
+              })
+              .catch(error => {
+                console.error('❌ Failed to sync Elementist stats:', error);
+              });
+          }
+        }
+        
+        // Monitor stats changes every 5 seconds
+        setInterval(() => {
+          syncStatsToMainIndex();
+        }, 5000);
+        
+        // Also sync immediately when game over screen appears
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        if (gameOverScreen) {
+          const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+              if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                const isVisible = window.getComputedStyle(gameOverScreen).display !== 'none';
+                if (isVisible) {
+                  // Wait a moment for stats to update, then sync
+                  setTimeout(() => {
+                    syncStatsToMainIndex();
+                  }, 1500);
+                }
+              }
+            });
+          });
+          
+          observer.observe(gameOverScreen, { attributes: true });
+        }
+        
+        // Initial sync
+        setTimeout(() => {
+          syncStatsToMainIndex();
+        }, 3000);
+      }
       
       // Show score saved notification
       function showScoreSavedNotification() {
