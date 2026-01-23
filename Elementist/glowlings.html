@@ -5219,33 +5219,33 @@
                   });
                   localStorage.setItem('gameist_local_scores', JSON.stringify(localScores));
                   console.log('✅ Score saved to localStorage fallback (will sync to Firestore later)');
-                  
-                  // Also save to Realtime Database for cross-device sync
-                  console.log('☁️ Also saving to Realtime Database for cross-device sync...');
-                  try {
-                    const database = firebase.database();
-                    const userScoresRef = database.ref(`userScores/${user.uid}`);
-                    const newScoreRef = userScoresRef.push();
-                    
-                    newScoreRef.set({
-                      userId: user.uid,
-                      displayName: user.displayName,
-                      email: user.email,
-                      score: stats.bestScore,
-                      game: 'elementist',
-                      timestamp: Date.now(),
-                      firestoreFailed: true,
-                      fromElementist: true
-                    }).then(() => {
-                      console.log('✅ Score also saved to Realtime Database for cross-device sync');
-                    }).catch(rtError => {
-                      console.error('❌ Realtime Database sync failed:', rtError);
-                    });
-                  } catch (rtError) {
-                    console.error('❌ Realtime Database sync failed:', rtError);
-                  }
                 } else {
-                  console.log('🎯 Score successfully saved to Firestore - no localStorage needed');
+                  console.log('🎯 Score successfully saved to Firestore');
+                }
+                
+                // ALWAYS save to Realtime Database for cross-device sync
+                console.log('☁️ Always saving to Realtime Database for cross-device sync...');
+                try {
+                  const database = firebase.database();
+                  const userScoresRef = database.ref(`userScores/${user.uid}`);
+                  const newScoreRef = userScoresRef.push();
+                  
+                  newScoreRef.set({
+                    userId: user.uid,
+                    displayName: user.displayName,
+                    email: user.email,
+                    score: stats.bestScore,
+                    game: 'elementist',
+                    timestamp: Date.now(),
+                    firestoreSuccess: result !== false,
+                    fromElementist: true
+                  }).then(() => {
+                    console.log('✅ Score saved to Realtime Database for cross-device sync');
+                  }).catch(rtError => {
+                    console.error('❌ Realtime Database sync failed:', rtError);
+                  });
+                } catch (rtError) {
+                  console.error('❌ Realtime Database sync failed:', rtError);
                 }
                 
                 // Notify main page about the update using BroadcastChannel
