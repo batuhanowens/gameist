@@ -276,30 +276,6 @@
               0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
               100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
             }
-            
-            /* Player count styles */
-            .player-count {
-              display: flex;
-              align-items: center;
-              gap: 6px;
-              font-size: 12px;
-              color: rgba(255,255,255,0.7);
-              margin-top: 8px;
-              padding: 4px 8px;
-              background: rgba(255,255,255,0.05);
-              border-radius: 12px;
-              border: 1px solid rgba(255,255,255,0.1);
-              transition: all 0.3s ease;
-            }
-            
-            .player-count:hover {
-              background: rgba(255,255,255,0.1);
-              color: rgba(255,255,255,0.9);
-            }
-            
-            .player-count .count-text {
-              font-weight: 600;
-            }
             </style>
             <div id="authStatus" style="margin-top: 8px; font-size: 12px; color: rgba(255,255,255,0.7); display: none;"></div>
           </div>
@@ -362,9 +338,6 @@
                   <i class="fas fa-language"></i>
                   TR / EN / DE / ES / PT-BR / JA / HI / ZH
                 </span>
-              </div>
-              <div class="player-count" data-game="elementist">
-                <i class="fas fa-users"></i> <span class="count-text">Loading...</span> players
               </div>
               <div class="card-footer">
                <div class="rating">
@@ -433,9 +406,6 @@
                   TR / EN / DE
                 </span>
               </div>
-              <div class="player-count" data-game="2048">
-                <i class="fas fa-users"></i> <span class="count-text">Loading...</span> players
-              </div>
               <div class="card-footer">
                 <div class="rating">
                   <div class="stars">
@@ -499,9 +469,6 @@
                   <i class="fas fa-language"></i>
                   TR / EN
                 </span>
-              </div>
-              <div class="player-count" data-game="wordlist">
-                <i class="fas fa-users"></i> <span class="count-text">Loading...</span> players
               </div>
               <div class="card-footer">
                 <div class="rating">
@@ -572,9 +539,6 @@
                   <i class="fas fa-language"></i>
                   TR / EN
                 </span>
-              </div>
-              <div class="player-count" data-game="bilardist">
-                <i class="fas fa-users"></i> <span class="count-text">Loading...</span> players
               </div>
               <div class="card-footer">
                 <div class="rating">
@@ -1209,105 +1173,6 @@
       
       // Start listening for stats updates
       listenForStatsUpdates();
-      
-      // Dynamic Player Count System - Real-time with gameStats collection
-      function initializeGameStats() {
-        console.log('� Initializing gameStats collection...');
-        
-        const database = window.gameistDB || db;
-        if (!database) {
-          console.error('❌ Database not available for gameStats initialization');
-          return;
-        }
-        
-        // Create gameStats documents if they don't exist
-        const games = [
-          { id: 'elementist', count: 1200 },
-          { id: '2048', count: 5000 },
-          { id: 'wordlist', count: 850 },
-          { id: 'bilardist', count: 650 }
-        ];
-        
-        games.forEach(async (game) => {
-          try {
-            const docRef = database.collection('gameStats').doc(game.id);
-            const doc = await docRef.get();
-            
-            if (!doc.exists) {
-              await docRef.set({
-                playerCount: game.count,
-                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-              });
-              console.log(`✅ Created gameStats document for ${game.id} with count ${game.count}`);
-            } else {
-              console.log(`ℹ️ gameStats document for ${game.id} already exists`);
-            }
-          } catch (error) {
-            console.error(`❌ Error creating gameStats for ${game.id}:`, error);
-          }
-        });
-      }
-      
-      function updatePlayerCounts() {
-        console.log('📊 Setting up real-time player count listener...');
-        
-        const database = window.gameistDB || db;
-        if (!database) {
-          console.error('❌ Database not available for player counts');
-          return;
-        }
-        
-        // Set up real-time listener for gameStats
-        database.collection('gameStats').onSnapshot((snapshot) => {
-          console.log('🔄 Received gameStats update');
-          
-          snapshot.forEach(doc => {
-            const data = doc.data();
-            const countElement = document.querySelector(`[data-game="${doc.id.toLowerCase()}"] .count-text`);
-            
-            if (countElement) {
-              const playerCount = data.playerCount || 0;
-              // Format the number (e.g., 1500 -> 1.5K)
-              let formattedCount = playerCount.toString();
-              if (playerCount >= 1000) {
-                formattedCount = (playerCount / 1000).toFixed(1) + 'K';
-              }
-              
-              countElement.textContent = formattedCount + '+';
-              console.log(`✅ Updated ${doc.id} player count: ${playerCount} (${formattedCount}+)`);
-            } else {
-              console.warn(`⚠️ Player count element not found for game: ${doc.id}`);
-            }
-          });
-        }, (error) => {
-          console.error('❌ Error in gameStats listener:', error);
-          // Fallback to default values
-          const fallbackCounts = {
-            'elementist': '1.2K',
-            '2048': '5K',
-            'wordlist': '850',
-            'bilardist': '650'
-          };
-          
-          Object.keys(fallbackCounts).forEach(game => {
-            const countElement = document.querySelector(`[data-game="${game}"] .count-text`);
-            if (countElement) {
-              countElement.textContent = fallbackCounts[game] + '+';
-            }
-          });
-        });
-      }
-      
-      // Initialize gameStats and start listening
-      initializeGameStats();
-      setTimeout(updatePlayerCounts, 2000); // Wait for initialization
-      
-      // Update player counts when user logs in
-      firebase.auth().onAuthStateChanged((user) => {
-        if (user) {
-          setTimeout(updatePlayerCounts, 1000);
-        }
-      });
 
       // Check for redirect result (when using signInWithRedirect) - Enhanced
       firebase.auth().getRedirectResult()

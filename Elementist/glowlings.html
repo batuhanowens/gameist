@@ -5204,9 +5204,6 @@
               .then(() => {
                 console.log('✅ Elementist best score synced to main index:', stats.bestScore);
                 
-                // Increment player count in gameStats
-                incrementPlayerCount('elementist');
-                
                 // Notify main page about the update using BroadcastChannel
                 const channel = new BroadcastChannel('gameist_stats');
                 const message = {
@@ -5226,28 +5223,6 @@
               .catch(error => {
                 console.error('❌ Failed to sync Elementist stats:', error);
               });
-          }
-        }
-        
-        // Function to increment player count
-        function incrementPlayerCount(game) {
-          try {
-            const database = window.gameistAuth ? window.gameistAuth.db : null;
-            if (!database) {
-              console.error('❌ No database available for player count increment');
-              return;
-            }
-            
-            database.collection('gameStats').doc(game).update({
-              playerCount: firebase.firestore.FieldValue.increment(1),
-              lastPlayed: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-              console.log(`✅ Incremented player count for ${game}`);
-            }).catch(error => {
-              console.error(`❌ Failed to increment player count for ${game}:`, error);
-            });
-          } catch (error) {
-            console.error('❌ Error incrementing player count:', error);
           }
         }
         
