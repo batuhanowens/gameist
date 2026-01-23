@@ -1081,9 +1081,13 @@
           
           // Also get scores from localStorage
           const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
+          console.log('📊 All local scores:', localScores);
+          
           const filteredLocalScores = gameFilter !== 'all' 
             ? localScores.filter(score => score.game === gameFilter)
             : localScores;
+          
+          console.log('📊 Filtered local scores:', filteredLocalScores);
           
           const localScoresFormatted = filteredLocalScores.map((score, index) => ({
             id: `local_${index}`,
@@ -1102,6 +1106,10 @@
           console.log('🔥 Firestore scores:', firestoreScores.length);
           console.log('💾 LocalStorage scores:', localScoresFormatted.length);
           
+          // Debug: Check if EL UNICO is in the scores
+          const elUnicoScores = allScores.filter(score => score.displayName === 'EL UNICO');
+          console.log('👤 EL UNICO scores found:', elUnicoScores);
+          
           // Group by user and get highest score
           const userHighScores = {};
           allScores.forEach(score => {
@@ -1110,6 +1118,8 @@
               userHighScores[key] = score;
             }
           });
+          
+          console.log('👥 User high scores:', userHighScores);
           
           // Sort by score
           const leaderboard = Object.values(userHighScores)
