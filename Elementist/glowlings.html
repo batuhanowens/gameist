@@ -5250,20 +5250,34 @@
                 console.log('✅ Elementist best score synced to main index:', stats.bestScore);
                 
                 // Notify main page about the update using BroadcastChannel
-                const channel = new BroadcastChannel('gameist_stats');
-                const message = {
-                  type: 'statsUpdate',
-                  userId: user.uid,
-                  game: 'elementist',
-                  score: stats.bestScore,
-                  timestamp: Date.now()
-                };
-                
-                channel.postMessage(message);
-                console.log('📡 Sent stats update via BroadcastChannel:', message);
-                
-                // Also store in localStorage as fallback
-                localStorage.setItem('gameist_stats_update_needed', JSON.stringify(message));
+                try {
+                  const channel = new BroadcastChannel('gameist_stats');
+                  const message = {
+                    type: 'statsUpdate',
+                    userId: user.uid,
+                    game: 'elementist',
+                    score: stats.bestScore,
+                    timestamp: Date.now()
+                  };
+                  
+                  channel.postMessage(message);
+                  console.log('📡 Sent stats update via BroadcastChannel:', message);
+                  console.log('📡 Channel state:', channel ? 'open' : 'closed');
+                  
+                  // Also store in localStorage as fallback
+                  localStorage.setItem('gameist_stats_update_needed', JSON.stringify(message));
+                  console.log('💾 Stored fallback in localStorage:', message);
+                } catch (error) {
+                  console.error('❌ Error sending BroadcastChannel message:', error);
+                  // Still store in localStorage as fallback
+                  localStorage.setItem('gameist_stats_update_needed', JSON.stringify({
+                    type: 'statsUpdate',
+                    userId: user.uid,
+                    game: 'elementist',
+                    score: stats.bestScore,
+                    timestamp: Date.now()
+                  }));
+                }
               })
               .catch(error => {
                 console.error('❌ Failed to sync Elementist stats:', error);

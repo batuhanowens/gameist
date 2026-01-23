@@ -1120,55 +1120,60 @@
       // Create BroadcastChannel for cross-page communication
       const gameistChannel = new BroadcastChannel('gameist_stats');
       
-      // Listen for stats updates from other pages
+      // Listen for stats updates from other pages using BroadcastChannel
       function listenForStatsUpdates() {
-        // Listen for messages from BroadcastChannel
-        gameistChannel.onmessage = (event) => {
-          if (event.data && event.data.type === 'statsUpdate') {
-            console.log('📊 Received stats update via BroadcastChannel:', event.data);
+        try {
+          const gameistChannel = new BroadcastChannel('gameist_stats');
+          
+          gameistChannel.onmessage = (event) => {
+            console.log('📡 Received BroadcastChannel message:', event.data);
             
-            const savedUser = localStorage.getItem('gameist_user');
-            if (savedUser) {
-              const user = JSON.parse(savedUser);
-              if (user.uid === event.data.userId) {
-                console.log('🔄 Loading stats for user:', user.displayName);
-                loadUserStats(user.uid);
+            if (event.data && event.data.type === 'statsUpdate') {
+              console.log('📊 Processing stats update from game:', event.data.game);
+              console.log('👤 User ID:', event.data.userId);
+              console.log('📈 Score:', event.data.score);
+              
+              // Check if this is for the current user
+              const currentUser = firebase.auth().currentUser;
+              if (currentUser && currentUser.uid === event.data.userId) {
+                console.log('✅ Stats update matches current user, reloading stats...');
+                loadUserStats(currentUser.uid);
+              } else {
+                console.log('ℹ️ Stats update for different user, ignoring');
               }
             }
-          }
-        };
-        
-        // Also check localStorage for updates (fallback)
-        setInterval(() => {
-          const updateFlag = localStorage.getItem('gameist_stats_update_needed');
-          if (updateFlag) {
-            try {
-              const updateData = JSON.parse(updateFlag);
-              const currentTime = Date.now();
-              
-              // Only process updates from last 5 seconds
-              if (currentTime - updateData.timestamp < 5000) {
-                console.log('📊 Processing stats update from game:', updateData.game);
+          };
+          
+          gameistChannel.addEventListener('error', (error) => {
+            console.error('❌ BroadcastChannel error:', error);
+          });
+          
+          console.log('📡 BroadcastChannel stats listener initialized');
+        } catch (error) {
+          console.error('❌ Failed to initialize BroadcastChannel listener:', error);
+          // Fallback to localStorage polling
+          console.log('� Falling back to localStorage polling...');
+          
+          setInterval(() => {
+            const updateNeeded = localStorage.getItem('gameist_stats_update_needed');
+            if (updateNeeded) {
+              try {
+                const data = JSON.parse(updateNeeded);
+                console.log('📊 Processing stats update from localStorage:', data);
                 
-                const savedUser = localStorage.getItem('gameist_user');
-                if (savedUser) {
-                  const user = JSON.parse(savedUser);
-                  if (user.uid === updateData.userId) {
-                    loadUserStats(user.uid);
-                  }
+                const currentUser = firebase.auth().currentUser;
+                if (currentUser && currentUser.uid === data.userId) {
+                  console.log('✅ Processing localStorage stats update...');
+                  loadUserStats(currentUser.uid);
+                  localStorage.removeItem('gameist_stats_update_needed');
                 }
-                
-                // Clear the flag
+              } catch (error) {
+                console.error('❌ Error processing localStorage update:', error);
                 localStorage.removeItem('gameist_stats_update_needed');
               }
-            } catch (error) {
-              console.error('❌ Error processing stats update:', error);
-              localStorage.removeItem('gameist_stats_update_needed');
             }
-          }
-        }, 1000);
-        
-        console.log('� BroadcastChannel stats listener initialized');
+          }, 1000);
+        }
       }
       
       // Start listening for stats updates
