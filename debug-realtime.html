@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realtime Database Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+        .test-btn:hover {
+            background: #45a049;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1🔍 Realtime Database Debug</h1>
+        <p>Mevcut tüm skorları kontrol et</p>
+        
+        <button class="test-btn" onclick="checkAllUsers()">👥 Tüm Kullanıcıları Kontrol Et</button>
+        <button class="test-btn" onclick="checkCurrentUser()">👤 Mevcut Kullanıcıyı Kontrol Et</button>
+        <button class="test-btn" onclick="checkElementistScores()">🎮 Elementist Skorlarını Kontrol Et</button>
+        <button class="test-btn" onclick="clearStatus()">🧹 Temizle</button>
+        
+        <div id="status"></div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7ckcqdZWfnUx5r8uKmvu9Ikax1x5Qidk",
+            authDomain: "gameist.firebaseapp.com",
+            projectId: "gameist",
+            storageBucket: "gameist.appspot.com",
+            messagingSenderId: "525659299937",
+            appId: "1:525659299937:web:1c8343a25be2a994bcca20",
+            measurementId: "G-WE9R0GWKM6",
+            databaseURL: "https://gameist-default-rtdb.firebaseio.com/"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            const timestamp = new Date().toLocaleTimeString();
+            statusDiv.innerHTML += `<div class="status ${type}">[${timestamp}] ${message}</div>`;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function clearStatus() {
+            document.getElementById('status').innerHTML = '';
+        }
+
+        async function checkAllUsers() {
+            updateStatus('👥 Tüm kullanıcılar kontrol ediliyor...', 'info');
+            
+            try {
+                const startTime = Date.now();
+                const allUsersRef = database.ref('userScores');
+                const snapshot = await allUsersRef.once('value');
+                const endTime = Date.now();
+                
+                updateStatus(`✅ Tüm kullanıcılar okundu: ${endTime - startTime}ms`, 'success');
+                
+                const allData = snapshot.val();
+                if (allData) {
+                    const userCount = Object.keys(allData).length;
+                    updateStatus(`👥 Toplam ${userCount} kullanıcı bulundu`, 'info');
+                    
+                    let totalElementistScore = 0;
+                    Object.entries(allData).forEach(([uid, userData]) => {
+                        const scores = Object.values(userData);
+                        const elementistScores = scores.filter(s => s.game === 'elementist');
+                        const elementistTotal = elementistScores.reduce((sum, score) => sum + score.score, 0);
+                        
+                        if (elementistScores.length > 0) {
+                            updateStatus(`👤 ${uid}: ${elementistScores.length} Elementist skoru, ${elementistTotal} toplam`, 'info');
+                            totalElementistScore += elementistTotal;
+                        }
+                    });
+                    
+                    updateStatus(`🎮 Tüm Elementist skorları toplamı: ${totalElementistScore}`, 'success');
+                } else {
+                    updateStatus('📭 Hiç kullanıcı bulunamadı', 'info');
+                }
+                
+            } catch (error) {
+                updateStatus(`❌ Hata: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkCurrentUser() {
+            updateStatus('👤 Mevcut kullanıcı kontrol ediliyor...', 'info');
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    updateStatus('❌ Giriş yapılmamış', 'error');
+                    return;
+                }
+                
+                updateStatus(`✅ Kullanıcı: ${user.displayName} (${user.email})`, 'success');
+                updateStatus(`🆔 UID: ${user.uid}`, 'info');
+                
+                const startTime = Date.now();
+                const userScoresRef = database.ref(`userScores/${user.uid}`);
+                const snapshot = await userScoresRef.once('value');
+                const endTime = Date.now();
+                
+                updateStatus(`✅ Kullanıcı skorları okundu: ${endTime - startTime}ms`, 'success');
+                
+                const data = snapshot.val();
+                if (data) {
+                    const scores = Object.values(data);
+                    updateStatus(`📊 Toplam ${scores.length} skor bulundu`, 'info');
+                    
+                    let elementistTotal = 0;
+                    scores.forEach(score => {
+                        updateStatus(`📄 ${score.game}: ${score.score} pts (${new Date(score.timestamp).toLocaleString()})`, 'info');
+                        if (score.game === 'elementist') {
+                            elementistTotal += score.score;
+                        }
+                    });
+                    
+                    updateStatus(`🎮 Elementist toplamı: ${elementistTotal}`, 'success');
+                } else {
+                    updateStatus('📭 Bu kullanıcı için skor bulunamadı', 'info');
+                }
+                
+            } catch (error) {
+                updateStatus(`❌ Hata: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkElementistScores() {
+            updateStatus('🎮 Sadece Elementist skorları kontrol ediliyor...', 'info');
+            
+            try {
+                const startTime = Date.now();
+                const allUsersRef = database.ref('userScores');
+                const snapshot = await allUsersRef.once('value');
+                const endTime = Date.now();
+                
+                updateStatus(`✅ Elementist skorları okundu: ${endTime - startTime}ms`, 'success');
+                
+                const allData = snapshot.val();
+                if (allData) {
+                    let allElementistScores = [];
+                    
+                    Object.entries(allData).forEach(([uid, userData]) => {
+                        const scores = Object.values(userData);
+                        const elementistScores = scores.filter(s => s.game === 'elementist');
+                        
+                        elementistScores.forEach(score => {
+                            allElementistScores.push({
+                                uid: uid,
+                                displayName: score.displayName || 'Unknown',
+                                score: score.score,
+                                timestamp: score.timestamp,
+                                fromElementist: score.fromElementist || false
+                            });
+                        });
+                    });
+                    
+                    updateStatus(`🎮 Toplam ${allElementistScores.length} Elementist skoru bulundu`, 'info');
+                    
+                    // Sort by score descending
+                    allElementistScores.sort((a, b) => b.score - a.score);
+                    
+                    allElementistScores.forEach((score, index) => {
+                        updateStatus(`🏆 ${index + 1}. ${score.displayName}: ${score.score} pts (${score.fromElementist ? 'Elementist' : 'Manual'})`, 'success');
+                    });
+                    
+                    if (allElementistScores.length === 0) {
+                        updateStatus('📭 Hiç Elementist skoru bulunamadı', 'info');
+                        updateStatus('💡 Mobilde Elementist oynayıp skor yapın', 'info');
+                    }
+                } else {
+                    updateStatus('📭 Hiç kullanıcı bulunamadı', 'info');
+                }
+                
+            } catch (error) {
+                updateStatus(`❌ Hata: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run
+        window.addEventListener('load', () => {
+            updateStatus('🔍 Realtime Database debug başlatıldı', 'info');
+            checkElementistScores();
+        });
+    </script>
+</body>
+</html>
