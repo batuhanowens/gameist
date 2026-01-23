@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalıcı Çözüm Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+        .test-btn:hover {
+            background: #45a049;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Kalıcı Çözüm Test</h1>
+        <p>Ana menüdeki loadUserStats sorununu kalıcı olarak çöz</p>
+        
+        <button class="test-btn" onclick="testDirectLoadUserStats()">🔥 Direkt loadUserStats Test</button>
+        <button class="test-btn" onclick="testRealtimeDirect()">📱 Direkt Realtime Database Test</button>
+        <button class="test-btn" onclick="testCombinedSolution()">🔄 Birleşik Çözüm Test</button>
+        <button class="test-btn" onclick="clearStatus()">🧹 Temizle</button>
+        
+        <div id="status"></div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7ckcqdZWfnUx5r8uKmvu9Ikax1x5Qidk",
+            authDomain: "gameist.firebaseapp.com",
+            projectId: "gameist",
+            storageBucket: "gameist.firebasestorage.app",
+            messagingSenderId: "525659299937",
+            appId: "1:525659299937:web:1c8343a25be2a994bcca20",
+            measurementId: "G-WE9R0GWKM6",
+            databaseURL: "https://gameist-default-rtdb.firebaseio.com/"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+        const db = firebase.firestore();
+
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            const timestamp = new Date().toLocaleTimeString();
+            statusDiv.innerHTML += `<div class="status ${type}">[${timestamp}] ${message}</div>`;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function clearStatus() {
+            document.getElementById('status').innerHTML = '';
+        }
+
+        // Kopyaladığımız loadUserStats fonksiyonu
+        async function loadUserStats(userId) {
+            updateStatus('📊 Loading user stats for: ' + userId, 'info');
+            
+            try {
+                const database = db;
+                if (!database) {
+                    updateStatus('❌ Database not available', 'error');
+                    return;
+                }
+                
+                updateStatus('🔍 Querying leaderboard for user: ' + userId, 'info');
+                const snapshot = await database.collection('leaderboard')
+                    .where('userId', '==', userId)
+                    .orderBy('timestamp', 'desc')
+                    .get();
+                
+                const scores = snapshot.docs.map(doc => doc.data());
+                updateStatus('📈 Found scores from Firestore: ' + scores.length, 'info');
+                
+                // Also check localStorage for fallback scores
+                const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
+                const userLocalScores = localScores.filter(score => score.userId === userId);
+                updateStatus('📈 Found scores from localStorage: ' + userLocalScores.length, 'info');
+                
+                // Check cloud storage fallback for cross-device sync
+                const cloudKey = `gameist_scores_${userId}`;
+                const cloudScores = JSON.parse(localStorage.getItem(cloudKey) || '[]');
+                updateStatus('📈 Found scores from cloud storage fallback: ' + cloudScores.length, 'info');
+                
+                // Check Firebase Realtime Database for cross-device sync
+                let realtimeScores = [];
+                try {
+                    updateStatus('🔍 Checking Realtime Database for cross-device sync...', 'info');
+                    const database = firebase.database();
+                    const userScoresRef = database.ref(`userScores/${userId}`);
+                    
+                    const snapshot = await userScoresRef.once('value');
+                    const data = snapshot.val();
+                    
+                    if (data) {
+                        realtimeScores = Object.values(data).map(score => ({
+                            ...score,
+                            userId: userId,
+                            timestamp: score.timestamp || Date.now()
+                        }));
+                        updateStatus('📈 Found scores from Realtime Database: ' + realtimeScores.length, 'success');
+                        realtimeScores.forEach(score => {
+                            updateStatus(`📄 Realtime score: ${score.game} - ${score.score} pts`, 'info');
+                        });
+                    } else {
+                        updateStatus('📭 No scores found in Realtime Database', 'info');
+                    }
+                } catch (error) {
+                    updateStatus('ℹ️ Realtime Database not available: ' + error.message, 'info');
+                }
+                
+                // Combine all scores
+                const allScores = [...scores, ...userLocalScores, ...cloudScores, ...realtimeScores];
+                updateStatus('📈 Total combined scores: ' + allScores.length, 'info');
+                
+                const totalScore = allScores.reduce((sum, score) => sum + score.score, 0);
+                const gamesPlayed = new Set(allScores.map(s => s.game)).size;
+                
+                updateStatus('📊 Calculated stats: totalScore=' + totalScore + ', gamesPlayed=' + gamesPlayed, 'success');
+                
+                return { totalScore, gamesPlayed, allScores };
+                
+            } catch (error) {
+                updateStatus('❌ Error loading user stats: ' + error.message, 'error');
+                return { totalScore: 0, gamesPlayed: 0, allScores: [] };
+            }
+        }
+
+        async function testDirectLoadUserStats() {
+            updateStatus('🔥 Testing direkt loadUserStats...', 'info');
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    updateStatus('❌ Giriş yapılmamış', 'error');
+                    return;
+                }
+                
+                updateStatus('✅ Kullanıcı: ' + user.displayName, 'success');
+                const result = await loadUserStats(user.uid);
+                
+                updateStatus('🎯 Sonuç: ' + result.totalScore + ' pts, ' + result.gamesPlayed + ' games', 'success');
+                
+            } catch (error) {
+                updateStatus('❌ Hata: ' + error.message, 'error');
+            }
+        }
+
+        async function testRealtimeDirect() {
+            updateStatus('📱 Testing direkt Realtime Database...', 'info');
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    updateStatus('❌ Giriş yapılmamış', 'error');
+                    return;
+                }
+                
+                updateStatus('🔍 Realtime Database kontrol ediliyor...', 'info');
+                const userScoresRef = database.ref(`userScores/${user.uid}`);
+                const snapshot = await userScoresRef.once('value');
+                const data = snapshot.val();
+                
+                if (data) {
+                    const scores = Object.values(data);
+                    updateStatus('📊 Realtime Database: ' + scores.length + ' skor bulundu', 'success');
+                    
+                    let totalScore = 0;
+                    scores.forEach(score => {
+                        totalScore += score.score;
+                        updateStatus(`📄 ${score.game}: ${score.score} pts`, 'info');
+                    });
+                    
+                    updateStatus('🎮 Realtime toplam: ' + totalScore + ' pts', 'success');
+                } else {
+                    updateStatus('📭 Realtime Database\'de skor yok', 'info');
+                }
+                
+            } catch (error) {
+                updateStatus('❌ Realtime Database hatası: ' + error.message, 'error');
+            }
+        }
+
+        async function testCombinedSolution() {
+            updateStatus('🔄 Testing birleşik çözüm...', 'info');
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    updateStatus('❌ Giriş yapılmamış', 'error');
+                    return;
+                }
+                
+                // 1. Önce Realtime Database kontrol et
+                await testRealtimeDirect();
+                
+                // 2. Sonra loadUserStats çalıştır
+                await testDirectLoadUserStats();
+                
+                updateStatus('✅ Birleşik çözüm test tamamlandı', 'success');
+                
+            } catch (error) {
+                updateStatus('❌ Birleşik çözüm hatası: ' + error.message, 'error');
+            }
+        }
+
+        // Auto-run
+        window.addEventListener('load', () => {
+            updateStatus('🔧 Kalıcı çözüm test başlatıldı', 'info');
+            
+            // Auth state kontrol et
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    updateStatus('✅ Kullanıcı giriş yaptı: ' + user.displayName, 'success');
+                    setTimeout(() => {
+                        testCombinedSolution();
+                    }, 1000);
+                } else {
+                    updateStatus('ℹ️ Giriş yapılmamış', 'info');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
