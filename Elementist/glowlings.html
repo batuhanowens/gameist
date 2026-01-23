@@ -5180,13 +5180,22 @@
           const user = window.gameistAuth.getCurrentUser();
           const stats = getElementistNativeStats();
           
-          console.log('🔄 Syncing Elementist stats to main index:', stats);
-          
           if (user && stats.bestScore > 0) {
-            console.log('💾 Attempting to save score to Firestore...');
+            console.log('🔄 Syncing Elementist stats to main index:', stats);
             
-            if (!window.gameistAuth || !window.gameistAuth.saveScore) {
-              console.error('❌ Auth component not available');
+            // Save best score to our leaderboard
+            console.log('💾 Attempting to save score to Firestore...');
+            console.log('🔍 Auth component available:', !!window.gameistAuth);
+            console.log('🔍 SaveScore method available:', !!(window.gameistAuth && window.gameistAuth.saveScore));
+            console.log('🔍 Database reference:', window.gameistAuth ? window.gameistAuth.db : 'null');
+            
+            if (!window.gameistAuth) {
+              console.error('❌ window.gameistAuth not available');
+              return;
+            }
+            
+            if (!window.gameistAuth.saveScore) {
+              console.error('❌ saveScore method not available');
               return;
             }
             
@@ -5199,28 +5208,16 @@
                 if (result === false) {
                   console.log('💾 Saving to localStorage fallback...');
                   const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
-                  
-                  // Check if this score already exists to avoid duplicates
-                  const existingScore = localScores.find(s => 
-                    s.userId === user.uid && 
-                    s.game === 'elementist' && 
-                    s.score === stats.bestScore
-                  );
-                  
-                  if (!existingScore) {
-                    localScores.push({
-                      userId: user.uid,
-                      displayName: user.displayName,
-                      email: user.email,
-                      score: stats.bestScore,
-                      game: 'elementist',
-                      timestamp: Date.now()
-                    });
-                    localStorage.setItem('gameist_local_scores', JSON.stringify(localScores));
-                    console.log('✅ Score saved to localStorage fallback');
-                  } else {
-                    console.log('ℹ️ Score already exists in localStorage, skipping');
-                  }
+                  localScores.push({
+                    userId: user.uid,
+                    displayName: user.displayName,
+                    email: user.email,
+                    score: stats.bestScore,
+                    game: 'elementist',
+                    timestamp: Date.now()
+                  });
+                  localStorage.setItem('gameist_local_scores', JSON.stringify(localScores));
+                  console.log('✅ Score saved to localStorage fallback');
                 }
                 
                 // Notify main page about the update using BroadcastChannel
@@ -5236,6 +5233,7 @@
                   
                   channel.postMessage(message);
                   console.log('📡 Sent stats update via BroadcastChannel:', message);
+                  console.log('📡 Channel state:', channel ? 'open' : 'closed');
                   
                   // Also store in localStorage as fallback
                   localStorage.setItem('gameist_stats_update_needed', JSON.stringify(message));
@@ -5254,47 +5252,13 @@
               })
               .catch(error => {
                 console.error('❌ Failed to sync Elementist stats:', error);
-                
-                // Fallback to localStorage on error
-                console.log('💾 Fallback - saving to localStorage...');
-                const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
-                const existingScore = localScores.find(s => 
-                  s.userId === user.uid && 
-                  s.game === 'elementist' && 
-                  s.score === stats.bestScore
-                );
-                
-                if (!existingScore) {
-                  localScores.push({
-                    userId: user.uid,
-                    displayName: user.displayName,
-                    email: user.email,
-                    score: stats.bestScore,
-                    game: 'elementist',
-                    timestamp: Date.now()
-                  });
-                  localStorage.setItem('gameist_local_scores', JSON.stringify(localScores));
-                  console.log('💾 Fallback saved to localStorage');
-                  
-                  // Still send BroadcastChannel message
-                  try {
-                    const channel = new BroadcastChannel('gameist_stats');
-                    const message = {
-                      type: 'statsUpdate',
-                      userId: user.uid,
-                      game: 'elementist',
-                      score: stats.bestScore,
-                      timestamp: Date.now()
-                    };
-                    channel.postMessage(message);
-                    localStorage.setItem('gameist_stats_update_needed', JSON.stringify(message));
-                  } catch (e) {
-                    console.error('❌ BroadcastChannel failed:', e);
-                  }
-                }
+                console.error('❌ Error details:', error.code, error.message);
               });
-          } else {
-            console.log('❌ Cannot sync - no user or score is 0');
+            
+            // Add timeout to detect hanging promise
+            setTimeout(() => {
+              console.log('⏰ Checking if saveScore completed...');
+            }, 5000);
           }
         }
         

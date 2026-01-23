@@ -1060,8 +1060,6 @@
       // Load leaderboard
       async function loadLeaderboard(gameFilter = 'all') {
         try {
-          console.log('🏆 Loading leaderboard for game:', gameFilter);
-          
           let query = db.collection('leaderboard');
           
           if (gameFilter !== 'all') {
@@ -1073,92 +1071,47 @@
             .limit(50)
             .get();
           
-          const firestoreScores = snapshot.docs.map(doc => ({
+          const scores = snapshot.docs.map(doc => ({
             id: doc.id,
-            ...doc.data(),
-            source: 'firestore'
+            ...doc.data()
           }));
-          
-          // Also get scores from localStorage
-          const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
-          console.log('📊 All local scores:', localScores);
-          
-          const filteredLocalScores = gameFilter !== 'all' 
-            ? localScores.filter(score => score.game === gameFilter)
-            : localScores;
-          
-          console.log('📊 Filtered local scores:', filteredLocalScores);
-          
-          const localScoresFormatted = filteredLocalScores.map((score, index) => ({
-            id: `local_${index}`,
-            userId: score.userId,
-            displayName: score.displayName,
-            email: score.email,
-            score: score.score,
-            game: score.game,
-            timestamp: score.timestamp,
-            source: 'localStorage'
-          }));
-          
-          // Combine all scores
-          const allScores = [...firestoreScores, ...localScoresFormatted];
-          console.log('📊 Total scores found:', allScores.length);
-          console.log('🔥 Firestore scores:', firestoreScores.length);
-          console.log('💾 LocalStorage scores:', localScoresFormatted.length);
-          
-          // Debug: Check if EL UNICO is in the scores
-          const elUnicoScores = allScores.filter(score => score.displayName === 'EL UNICO');
-          console.log('👤 EL UNICO scores found:', elUnicoScores);
           
           // Group by user and get highest score
           const userHighScores = {};
-          allScores.forEach(score => {
+          scores.forEach(score => {
             const key = score.userId;
             if (!userHighScores[key] || userHighScores[key].score < score.score) {
               userHighScores[key] = score;
             }
           });
           
-          console.log('👥 User high scores:', userHighScores);
-          
           // Sort by score
           const leaderboard = Object.values(userHighScores)
             .sort((a, b) => b.score - a.score)
             .slice(0, 20);
           
-          console.log('🏆 Final leaderboard:', leaderboard);
-          
           const leaderboardContent = document.getElementById('leaderboardContent');
           if (leaderboardContent) {
-            if (leaderboard.length === 0) {
-              leaderboardContent.innerHTML = `
-                <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.6);">
-                  <div style="font-size: 48px; margin-bottom: 16px;">🎮</div>
-                  <div>No scores yet. Be the first to play!</div>
-                </div>
-              `;
-            } else {
-              leaderboardContent.innerHTML = `
-                <div style="background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
-                  ${leaderboard.map((entry, index) => `
-                    <div style="display: flex; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); ${index < 3 ? 'background: linear-gradient(90deg, rgba(255,215,0,0.1) 0%, transparent 100%);' : ''}">
-                      <div style="width: 30px; text-align: center; font-weight: 700; color: ${index < 3 ? '#fbbf24' : 'rgba(255,255,255,0.8)'};">
-                        ${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
-                      </div>
-                      <img src="${entry.photoURL || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; border-radius: 50%; margin: 0 12px; border: 2px solid rgba(255,255,255,0.3);">
-                      <div style="flex: 1;">
-                        <div style="color: white; font-weight: 600; font-size: 14px;">${entry.displayName}</div>
-                        <div style="color: rgba(255,255,255,0.6); font-size: 12px;">${entry.game} ${entry.source === 'localStorage' ? '📱' : '☁️'}</div>
-                      </div>
-                      <div style="text-align: right;">
-                        <div style="color: #fbbf24; font-weight: 700; font-size: 16px;">${entry.score.toLocaleString()}</div>
-                        <div style="color: rgba(255,255,255,0.6); font-size: 11px;">points</div>
-                      </div>
+            leaderboardContent.innerHTML = `
+              <div style="background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
+                ${leaderboard.map((entry, index) => `
+                  <div style="display: flex; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); ${index < 3 ? 'background: linear-gradient(90deg, rgba(255,215,0,0.1) 0%, transparent 100%);' : ''}">
+                    <div style="width: 30px; text-align: center; font-weight: 700; color: ${index < 3 ? '#fbbf24' : 'rgba(255,255,255,0.8)'};">
+                      ${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
                     </div>
-                  `).join('')}
-                </div>
-              `;
-            }
+                    <img src="${entry.photoURL || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; border-radius: 50%; margin: 0 12px; border: 2px solid rgba(255,255,255,0.3);">
+                    <div style="flex: 1;">
+                      <div style="color: white; font-weight: 600; font-size: 14px;">${entry.displayName}</div>
+                      <div style="color: rgba(255,255,255,0.6); font-size: 12px;">${entry.game}</div>
+                    </div>
+                    <div style="text-align: right;">
+                      <div style="color: #fbbf24; font-weight: 700; font-size: 16px;">${entry.score.toLocaleString()}</div>
+                      <div style="color: rgba(255,255,255,0.6); font-size: 11px;">points</div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            `;
           }
           
         } catch (error) {
