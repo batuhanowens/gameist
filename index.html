@@ -193,7 +193,7 @@
 
           <!-- Firebase Authentication -->
           <div class="auth-section" style="margin-top: 20px; text-align: center;">
-            <button id="googleLogin" class="google-login-btn" style="padding: 10px 20px; background: #4285f4; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 8px;">
+            <button id="googleLogin" class="google-login-btn" style="padding: 10px 20px; background: #4285f4; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s ease;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -203,16 +203,20 @@
               Google ile Giriş Yap
             </button>
             <div id="userInfo" style="display: none; margin-top: 10px;">
-              <div style="padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; backdrop-filter: blur(10px);">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                  <img id="userPhoto" src="" alt="User" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
-                  <span style="color: white; font-weight: 500;">Hoş geldin, <span id="userName"></span></span>
+              <div style="padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px; justify-content: center;">
+                  <img id="userPhoto" src="" alt="User" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.3);">
+                  <div style="text-align: left;">
+                    <div style="color: white; font-weight: 600; font-size: 14px;">Hoş geldin,</div>
+                    <div id="userName" style="color: white; font-weight: 500; font-size: 16px;"></div>
+                  </div>
                 </div>
-                <button id="logout" style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                <button id="logout" style="padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.3s ease;">
                   Çıkış Yap
                 </button>
               </div>
             </div>
+            <div id="authStatus" style="margin-top: 8px; font-size: 12px; color: rgba(255,255,255,0.7); display: none;"></div>
           </div>
         </div>
       </header>
@@ -593,55 +597,204 @@
 
       // Firebase Authentication Logic
       const provider = new firebase.auth.GoogleAuthProvider();
+      provider.addScope('email');
+      provider.addScope('profile');
+      
+      // Custom redirect URI for better compatibility
+      provider.setCustomParameters({
+        'redirect_uri': window.location.origin
+      });
 
-      document.getElementById('googleLogin').addEventListener('click', () => {
-        firebase.auth().signInWithPopup(provider)
-          .then((result) => {
-            const user = result.user;
-            document.getElementById('userName').textContent = user.displayName;
-            document.getElementById('userPhoto').src = user.photoURL;
-            document.getElementById('googleLogin').style.display = 'none';
-            document.getElementById('userInfo').style.display = 'block';
-            console.log("Giriş yapıldı:", user.uid);
+      // Initialize Firestore for leaderboard
+      let db;
+      try {
+        db = firebase.firestore();
+        console.log("✅ Firestore initialized - leaderboard ready");
+      } catch (error) {
+        console.error("❌ Firestore initialization failed:", error);
+      }
+
+      // Login button event listener
+      document.getElementById('googleLogin').addEventListener('click', async () => {
+        const authStatus = document.getElementById('authStatus');
+        authStatus.style.display = 'block';
+        authStatus.innerHTML = '🔄 Google giriş başlatılıyor...';
+        
+        try {
+          // Try popup first (better UX)
+          const result = await firebase.auth().signInWithPopup(provider);
+          handleAuthSuccess(result);
+        } catch (error) {
+          console.error("Popup failed, trying redirect:", error);
+          
+          // Fallback to redirect if popup fails
+          if (error.code === 'auth/popup-closed-by-user' || 
+              error.code === 'auth/popup-blocked' ||
+              error.code === 'auth/cancelled-popup-request') {
             
-            // Leaderboard skor save hazır
-            const db = firebase.firestore();
-            console.log("Firestore hazır - skorlar kaydedilebilir");
-          })
-          .catch((error) => {
-            console.error("Giriş hatası:", error);
-            alert("Giriş yapılamadı: " + error.message);
-          });
+            authStatus.innerHTML = '🔄 Popup engellendi, yönlendiriliyor...';
+            
+            try {
+              await firebase.auth().signInWithRedirect(provider);
+              authStatus.innerHTML = '🔄 Yönlendirme başlatıldı...';
+            } catch (redirectError) {
+              handleAuthError(redirectError);
+            }
+          } else {
+            handleAuthError(error);
+          }
+        }
       });
 
-      document.getElementById('logout').addEventListener('click', () => {
-        firebase.auth().signOut()
-          .then(() => {
-            document.getElementById('googleLogin').style.display = 'inline-flex';
-            document.getElementById('userInfo').style.display = 'none';
-            console.log("Çıkış yapıldı");
-          })
-          .catch((error) => {
-            console.error("Çıkış hatası:", error);
-          });
+      // Logout button event listener
+      document.getElementById('logout').addEventListener('click', async () => {
+        try {
+          await firebase.auth().signOut();
+          document.getElementById('googleLogin').style.display = 'inline-flex';
+          document.getElementById('userInfo').style.display = 'none';
+          document.getElementById('authStatus').style.display = 'none';
+          console.log("✅ User signed out successfully");
+        } catch (error) {
+          console.error("❌ Sign out error:", error);
+          const authStatus = document.getElementById('authStatus');
+          authStatus.style.display = 'block';
+          authStatus.innerHTML = '❌ Çıkış hatası: ' + error.message;
+        }
       });
 
-      // Giriş durumu kontrol
+      // Handle successful authentication
+      function handleAuthSuccess(result) {
+        const user = result.user;
+        const credential = result.credential;
+        const token = credential ? credential.accessToken : 'N/A';
+        
+        // Update UI
+        document.getElementById('userName').textContent = user.displayName;
+        document.getElementById('userPhoto').src = user.photoURL;
+        document.getElementById('googleLogin').style.display = 'none';
+        document.getElementById('userInfo').style.display = 'block';
+        
+        // Update status
+        const authStatus = document.getElementById('authStatus');
+        authStatus.style.display = 'block';
+        authStatus.innerHTML = '✅ Giriş başarılı!';
+        
+        console.log("✅ Authentication successful:", {
+          displayName: user.displayName,
+          email: user.email,
+          uid: user.uid,
+          token: token.substring(0, 20) + '...'
+        });
+        
+        // Leaderboard functionality ready
+        if (db) {
+          console.log("✅ Leaderboard ready - scores can be saved");
+          
+          // Example: Save user score (uncomment when needed)
+          // saveUserScore(user.uid, user.displayName, 0);
+        }
+        
+        // Hide status after 3 seconds
+        setTimeout(() => {
+          authStatus.style.display = 'none';
+        }, 3000);
+      }
+
+      // Handle authentication errors
+      function handleAuthError(error) {
+        console.error("❌ Authentication error:", error);
+        
+        const authStatus = document.getElementById('authStatus');
+        authStatus.style.display = 'block';
+        
+        let errorMessage = error.message;
+        
+        // User-friendly error messages
+        switch (error.code) {
+          case 'auth/popup-closed-by-user':
+            errorMessage = 'Popup kapatıldı. Lütfen tekrar deneyin.';
+            break;
+          case 'auth/popup-blocked':
+            errorMessage = 'Popup engellendi. Lütfen popup engelleyiciyi devre dışı bırakın.';
+            break;
+          case 'auth/cancelled-popup-request':
+            errorMessage = 'İptal edildi. Lütfen tekrar deneyin.';
+            break;
+          case 'auth/unauthorized-domain':
+            errorMessage = 'Domain yetkili değil. Firebase Console\'a domain ekleyin.';
+            break;
+          default:
+            errorMessage = `Giriş hatası: ${error.message}`;
+        }
+        
+        authStatus.innerHTML = `❌ ${errorMessage}`;
+        
+        // Hide status after 5 seconds
+        setTimeout(() => {
+          authStatus.style.display = 'none';
+        }, 5000);
+      }
+
+      // Listen for authentication state changes
       firebase.auth().onAuthStateChanged((user) => {
         if (user) {
-          // Girişli – leaderboard skor save hazır
+          // User is signed in
           document.getElementById('userName').textContent = user.displayName;
           document.getElementById('userPhoto').src = user.photoURL;
           document.getElementById('googleLogin').style.display = 'none';
           document.getElementById('userInfo').style.display = 'block';
-          console.log("Oturum açık:", user.uid);
+          console.log("✅ User session active:", user.displayName);
         } else {
-          // Çıkışlı
+          // User is signed out
           document.getElementById('googleLogin').style.display = 'inline-flex';
           document.getElementById('userInfo').style.display = 'none';
-          console.log("Oturum kapalı");
+          console.log("ℹ️ No active user session");
         }
       });
+
+      // Check for redirect result (when using signInWithRedirect)
+      firebase.auth().getRedirectResult()
+        .then((result) => {
+          if (result.user) {
+            handleAuthSuccess(result);
+          }
+        })
+        .catch((error) => {
+          if (error.code !== 'auth/no-current-user') {
+            handleAuthError(error);
+          }
+        });
+
+      // Leaderboard helper functions (ready for implementation)
+      function saveUserScore(userId, displayName, score) {
+        if (!db) {
+          console.error("❌ Firestore not initialized");
+          return;
+        }
+        
+        return db.collection('leaderboard').add({
+          userId: userId,
+          displayName: displayName,
+          score: score,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          game: 'elementist' // or other game name
+        });
+      }
+
+      function getTopScores(game = 'elementist', limit = 10) {
+        if (!db) {
+          console.error("❌ Firestore not initialized");
+          return Promise.resolve([]);
+        }
+        
+        return db.collection('leaderboard')
+          .where('game', '==', game)
+          .orderBy('score', 'desc')
+          .limit(limit)
+          .get();
+      }
+
+      console.log("🔥 Firebase Authentication initialized successfully");
     </script>
   </body>
 </html>
