@@ -4993,6 +4993,56 @@
               }
             }
             
+            // Direct Firebase score save function (bypass auth-component)
+            function saveScoreDirectly(score) {
+              try {
+                console.log('🔥 Direct Firebase save attempt');
+                console.log('📊 Score to save:', score);
+                
+                // Get Firebase from window (should be loaded by auth-component)
+                if (typeof firebase === 'undefined') {
+                  console.error('❌ Firebase not loaded');
+                  return false;
+                }
+                
+                const auth = firebase.auth();
+                const db = firebase.firestore();
+                
+                if (!auth.currentUser) {
+                  console.error('❌ No user logged in');
+                  return false;
+                }
+                
+                const user = auth.currentUser;
+                console.log('👤 Current user:', user.displayName, user.uid);
+                
+                // Save to leaderboard collection
+                db.collection('leaderboard').add({
+                  userId: user.uid,
+                  displayName: user.displayName,
+                  email: user.email,
+                  score: score,
+                  game: 'elementist',
+                  timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                })
+                .then((docRef) => {
+                  console.log('✅ Score saved directly to Firebase:', docRef.id);
+                  showScoreSavedNotification();
+                  
+                  // Notify main page
+                  notifyMainPageStatsUpdate(user.uid);
+                })
+                .catch((error) => {
+                  console.error('❌ Direct save failed:', error);
+                });
+                
+                return true;
+              } catch (error) {
+                console.error('❌ Error in direct save:', error);
+                return false;
+              }
+            }
+            
             // Hook into existing stats recording system
             const originalRecordRun = window.recordRun;
             if (typeof originalRecordRun === 'function') {
@@ -5000,34 +5050,14 @@
                 // Call original function first
                 const result = originalRecordRun.apply(this, arguments);
                 
-                // Then save to our leaderboard
-                const user = window.gameistAuth.getCurrentUser();
+                // Then save to our leaderboard using direct method
                 const score = getElementistScore();
                 
-                if (user && score > 0) {
-                  console.log('🎯 Saving Elementist score:', score);
-                  console.log('👤 User info:', { displayName: user.displayName, uid: user.uid });
-                  
-                  window.gameistAuth.saveScore('elementist', score)
-                    .then(() => {
-                      console.log('✅ Elementist score saved to leaderboard:', score);
-                      showScoreSavedNotification();
-                      
-                      // Notify main page about the score update
-                      notifyMainPageStatsUpdate(user.uid);
-                      
-                      // Verify the score was actually saved by checking Firestore
-                      setTimeout(() => {
-                        verifyScoreInFirestore(user.uid, score);
-                      }, 2000);
-                    })
-                    .catch(error => {
-                      console.error('❌ Failed to save Elementist score:', error);
-                      console.error('❌ Error details:', error.code, error.message);
-                    });
+                if (score > 0) {
+                  console.log('🎯 Wave completed, score:', score);
+                  saveScoreDirectly(score);
                 } else {
-                  console.log('ℹ️ No user logged in or score is 0, skipping leaderboard save');
-                  console.log('ℹ️ User:', user ? user.uid : 'null', 'Score:', score);
+                  console.log('ℹ️ Score is 0, skipping save');
                 }
                 
                 return result;
@@ -5044,22 +5074,11 @@
                     if (isVisible) {
                       // Game over screen is visible, save score
                       setTimeout(() => {
-                        const user = window.gameistAuth.getCurrentUser();
                         const score = getElementistScore();
                         
-                        if (user && score > 0) {
+                        if (score > 0) {
                           console.log('🎯 Game over detected, saving score:', score);
-                          window.gameistAuth.saveScore('elementist', score)
-                            .then(() => {
-                              console.log('✅ Elementist score saved on game over:', score);
-                              showScoreSavedNotification();
-                              
-                              // Notify main page about the score update
-                              notifyMainPageStatsUpdate(user.uid);
-                            })
-                            .catch(error => {
-                              console.error('❌ Failed to save Elementist score on game over:', error);
-                            });
+                          saveScoreDirectly(score);
                         }
                       }, 1000); // Wait 1 second for score to finalize
                     }
