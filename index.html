@@ -643,6 +643,8 @@
       import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
       import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyD7ckcqdZWfnUx5r8uKmvu9Ikax1x5Qidk",
@@ -665,632 +667,77 @@
         if (user) {
           console.log('✅ User authenticated:', user.displayName, user.uid);
           window.currentUser = user;
-        } else {
-          console.log('ℹ️ No user authenticated');
-          window.currentUser = null;
-        }
-      });
-    </script>
-
-    <!-- Legacy Firebase for existing auth system -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
-      // Firebase Authentication Logic
-      const provider = new firebase.auth.GoogleAuthProvider();
-      provider.addScope('email');
-      provider.addScope('profile');
-      
-      // Custom redirect URI for better compatibility
-      provider.setCustomParameters({
-        'redirect_uri': window.location.origin
-      });
-
-      // Initialize Firestore for leaderboard
-      let db;
-      try {
-        db = firebase.firestore();
-        console.log("✅ Firestore initialized - leaderboard ready");
-      } catch (error) {
-        console.error("❌ Firestore initialization failed:", error);
-      }
-
-      // Make db accessible globally for stats functions
-      window.gameistDB = db;
-
-      // Logout button event listener
-      document.getElementById('logout').addEventListener('click', async () => {
-        try {
-          await firebase.auth().signOut();
-          document.getElementById('googleLogin').style.display = 'inline-flex';
-          document.getElementById('userInfo').style.display = 'none';
-          document.getElementById('authStatus').style.display = 'none';
-          console.log("✅ User signed out successfully");
-        } catch (error) {
-          console.error("❌ Sign out error:", error);
-          const authStatus = document.getElementById('authStatus');
-          authStatus.style.display = 'block';
-          authStatus.innerHTML = '❌ Çıkış hatası: ' + error.message;
-        }
-      });
-
-      // Handle successful authentication
-      function handleAuthSuccess(result) {
-        const user = result.user;
-        const credential = result.credential;
-        const token = credential ? credential.accessToken : 'N/A';
-        
-        // Update UI with user info
-        document.getElementById('userName').textContent = user.displayName;
-        document.getElementById('userEmailText').textContent = user.email;
-        document.getElementById('userPhoto').src = user.photoURL;
-        document.getElementById('googleLogin').style.display = 'none';
-        document.getElementById('userInfo').style.display = 'block';
-        
-        // Update status with translation
-        const authStatus = document.getElementById('authStatus');
-        authStatus.style.display = 'block';
-        authStatus.innerHTML = '✅ ' + getAuthTranslation('login_success');
-        
-        console.log("✅ Authentication successful:", {
-          displayName: user.displayName,
-          email: user.email,
-          uid: user.uid,
-          token: token.substring(0, 20) + '...'
-        });
-        
-        // Save user session for cross-page access
-        localStorage.setItem('gameist_user', JSON.stringify({
-          displayName: user.displayName,
-          email: user.email,
-          photoURL: user.photoURL,
-          uid: user.uid
-        }));
-        
-        // Load and update user stats immediately after login
-        loadUserStats(user.uid);
-        
-        // Leaderboard functionality ready
-        if (db) {
-          console.log("✅ Leaderboard ready - scores can be saved");
           
-          // Example: Save user score (uncomment when needed)
-          // saveUserScore(user.uid, user.displayName, 0);
-        }
-        
-        // Hide status after 3 seconds
-        setTimeout(() => {
-          authStatus.style.display = 'none';
-        }, 3000);
-      }
-
-      // Handle authentication errors with translations
-      function handleAuthError(error) {
-        console.error("❌ Authentication error:", error);
-        
-        const authStatus = document.getElementById('authStatus');
-        authStatus.style.display = 'block';
-        
-        let errorMessage;
-        
-        // Use translated error messages
-        switch (error.code) {
-          case 'auth/popup-closed-by-user':
-            errorMessage = getAuthTranslation('popup_closed');
-            break;
-          case 'auth/popup-blocked':
-            errorMessage = getAuthTranslation('popup_blocked');
-            break;
-          case 'auth/cancelled-popup-request':
-            errorMessage = getAuthTranslation('popup_closed');
-            break;
-          case 'auth/unauthorized-domain':
-            errorMessage = getAuthTranslation('unauthorized_domain');
-            break;
-          default:
-            errorMessage = getAuthTranslation('login_failed') + ': ' + error.message;
-        }
-        
-        authStatus.innerHTML = '❌ ' + errorMessage;
-        
-        // Hide status after 5 seconds
-        setTimeout(() => {
-          authStatus.style.display = 'none';
-        }, 5000);
-      }
-
-      // Listen for authentication state changes
-      firebase.auth().onAuthStateChanged((user) => {
-        if (user) {
-          // User is signed in - update UI
+          // Update UI
           document.getElementById('userName').textContent = user.displayName;
           document.getElementById('userEmailText').textContent = user.email;
           document.getElementById('userPhoto').src = user.photoURL;
           document.getElementById('googleLogin').style.display = 'none';
           document.getElementById('userInfo').style.display = 'block';
           
-          // Save session for cross-page access
-          localStorage.setItem('gameist_user', JSON.stringify({
-            displayName: user.displayName,
-            email: user.email,
-            photoURL: user.photoURL,
-            uid: user.uid
-          }));
-          
-          console.log("✅ User session active:", user.displayName);
-        } else {
-          // User is signed out - clear session
-          document.getElementById('googleLogin').style.display = 'inline-flex';
-          document.getElementById('userInfo').style.display = 'none';
-          localStorage.removeItem('gameist_user');
-          console.log("ℹ️ No active user session");
-        }
-      });
-
-      // Check for saved session on page load
-      function checkSavedSession() {
-        const savedUser = localStorage.getItem('gameist_user');
-        if (savedUser) {
-          try {
-            const user = JSON.parse(savedUser);
-            console.log("🔄 Restoring saved session:", user.displayName);
-            
-            // Update UI with saved data
-            document.getElementById('userName').textContent = user.displayName;
-            document.getElementById('userEmailText').textContent = user.email;
-            document.getElementById('userPhoto').src = user.photoURL;
-            document.getElementById('googleLogin').style.display = 'none';
-            document.getElementById('userInfo').style.display = 'block';
-            
-            // Load user stats when session is restored
-            if (user.uid) {
-              loadUserStats(user.uid);
-            }
-          } catch (e) {
-            console.error("❌ Failed to restore session:", e);
-            localStorage.removeItem('gameist_user');
-          }
-        }
-      }
-
-      // Profile button handler
-      document.getElementById('profileBtn').addEventListener('click', function() {
-        const user = JSON.parse(localStorage.getItem('gameist_user') || '{}');
-        showProfileModal(user);
-      });
-
-      // Leaderboard button handler
-      document.getElementById('leaderboardBtn').addEventListener('click', function() {
-        showLeaderboardModal();
-      });
-
-      // Refresh stats button handler
-      document.getElementById('refreshStatsBtn').addEventListener('click', function() {
-        const savedUser = localStorage.getItem('gameist_user');
-        if (savedUser) {
-          const user = JSON.parse(savedUser);
-          console.log('🔄 Manual stats refresh for:', user.displayName);
+          // Load user stats
           loadUserStats(user.uid);
         } else {
-          console.log('❌ No user found for stats refresh');
+          console.log('ℹ️ No user authenticated');
+          window.currentUser = null;
+          
+          // Update UI
+          document.getElementById('googleLogin').style.display = 'inline-flex';
+          document.getElementById('userInfo').style.display = 'none';
         }
       });
 
-      // Show profile modal
-      function showProfileModal(user) {
-        const modal = document.createElement('div');
-        modal.style.cssText = `
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0,0,0,0.8);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 10000;
-          backdrop-filter: blur(5px);
-        `;
-        
-        modal.innerHTML = `
-          <div style="background: linear-gradient(145deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 100%); padding: 30px; border-radius: 20px; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.3); max-width: 400px; width: 90%; position: relative;">
-            <button onclick="this.closest('div').parentElement.remove()" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; color: white; font-size: 16px; display: flex; align-items: center; justify-content: center;">×</button>
-            
-            <div style="text-align: center; margin-bottom: 20px;">
-              <img src="${user.photoURL || 'https://via.placeholder.com/80'}" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.4); margin-bottom: 15px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
-              <h2 style="color: white; margin: 0; font-size: 24px; font-weight: 700;">${user.displayName}</h2>
-              <p style="color: rgba(255,255,255,0.8); margin: 5px 0; font-size: 14px;">${user.email}</p>
-              <p style="color: rgba(255,255,255,0.6); margin: 0; font-size: 12px;">ID: ${user.uid}</p>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-              <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; text-align: center;">
-                <div style="color: #fbbf24; font-size: 24px; font-weight: 700;">🏆</div>
-                <div style="color: rgba(255,255,255,0.8); font-size: 12px; margin-bottom: 5px;">${getAuthTranslation('total_score')}</div>
-                <div id="modalTotalScore" style="color: white; font-size: 20px; font-weight: 700;">0</div>
-              </div>
-              <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; text-align: center;">
-                <div style="color: #60a5fa; font-size: 24px; font-weight: 700;">🎮</div>
-                <div style="color: rgba(255,255,255,0.8); font-size: 12px; margin-bottom: 5px;">${getAuthTranslation('games_played')}</div>
-                <div id="modalGamesPlayed" style="color: white; font-size: 20px; font-weight: 700;">0</div>
-              </div>
-            </div>
-            
-            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-              <h3 style="color: white; margin: 0 0 10px 0; font-size: 16px;">🎯 Game Stats</h3>
-              <div id="gameStats" style="color: rgba(255,255,255,0.8); font-size: 14px; line-height: 1.6;">
-                Loading game statistics...
-              </div>
-            </div>
-            
-            <button onclick="this.closest('div').parentElement.remove()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 600;">
-              Close
-            </button>
-          </div>
-        `;
-        
-        document.body.appendChild(modal);
-        loadUserStats(user.uid);
-      }
-
-      // Show leaderboard modal
-      function showLeaderboardModal() {
-        const modal = document.createElement('div');
-        modal.style.cssText = `
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0,0,0,0.8);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 10000;
-          backdrop-filter: blur(5px);
-        `;
-        
-        modal.innerHTML = `
-          <div style="background: linear-gradient(145deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 100%); padding: 30px; border-radius: 20px; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.3); max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; position: relative;">
-            <button onclick="this.closest('div').parentElement.remove()" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; color: white; font-size: 16px; display: flex; align-items: center; justify-content: center;">×</button>
-            
-            <h2 style="color: white; margin: 0 0 20px 0; text-align: center; font-size: 28px; font-weight: 700;">🏆 ${getAuthTranslation('leaderboard_button')}</h2>
-            
-            <div style="margin-bottom: 20px;">
-              <select id="gameFilter" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; color: white; font-size: 14px;">
-                <option value="all">All Games</option>
-                <option value="elementist">Elementist</option>
-                <option value="2048">2048</option>
-                <option value="wordlist">Wordlist</option>
-                <option value="bilardist">Bilardist</option>
-              </select>
-            </div>
-            
-            <div id="leaderboardContent" style="color: white;">
-              <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.6);">
-                Loading leaderboard...
-              </div>
-            </div>
-          </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        // Load leaderboard data
-        const gameFilter = modal.querySelector('#gameFilter');
-        gameFilter.addEventListener('change', () => loadLeaderboard(gameFilter.value));
-        loadLeaderboard('all');
-      }
-
-      // Load user statistics
-      async function loadUserStats(userId) {
-        console.log('📊 Loading user stats for:', userId);
-        
+      // Google Sign In
+      window.signInWithGoogle = async function() {
+        const provider = new GoogleAuthProvider();
         try {
-          const database = window.gameistDB || db;
-          if (!database) {
-            console.error('❌ Database not available');
-            return;
-          }
+          const result = await signInWithPopup(window.auth, result.user);
+          console.log('✅ Google sign in successful');
+        } catch (error) {
+          console.error('❌ Google sign in error:', error);
+        }
+      };
+
+      // Load user stats
+      window.loadUserStats = async function(userId) {
+        try {
+          console.log('📊 Loading user stats for:', userId);
           
-          console.log('🔍 Querying leaderboard for user:', userId);
-          const snapshot = await database.collection('leaderboard')
-            .where('userId', '==', userId)
-            .orderBy('timestamp', 'desc')
-            .get();
+          const q = query(
+            collection(window.db, 'leaderboard'),
+            where('userId', '==', userId),
+            orderBy('timestamp', 'desc')
+          );
           
+          const snapshot = await getDocs(q);
           const scores = snapshot.docs.map(doc => doc.data());
+          
           console.log('📈 Found scores:', scores.length, scores);
           
           const totalScore = scores.reduce((sum, score) => sum + score.score, 0);
           const gamesPlayed = new Set(scores.map(s => s.game)).size;
           
-          console.log('📊 Calculated stats:', { totalScore, gamesPlayed });
+          // Update UI
+          document.getElementById('userTotalScore').textContent = totalScore.toLocaleString();
+          document.getElementById('userGamesPlayed').textContent = gamesPlayed;
           
-          // Update modal stats
-          const modalTotalScore = document.getElementById('modalTotalScore');
-          const modalGamesPlayed = document.getElementById('modalGamesPlayed');
-          const gameStats = document.getElementById('gameStats');
-          
-          if (modalTotalScore) modalTotalScore.textContent = totalScore.toLocaleString();
-          if (modalGamesPlayed) modalGamesPlayed.textContent = gamesPlayed;
-          
-          // Update main UI stats
-          const userTotalScoreEl = document.getElementById('userTotalScore');
-          const userGamesPlayedEl = document.getElementById('userGamesPlayed');
-          
-          if (userTotalScoreEl) {
-            userTotalScoreEl.textContent = totalScore.toLocaleString();
-            console.log('✅ Updated main UI total score:', totalScore);
-          } else {
-            console.error('❌ userTotalScore element not found');
-          }
-          
-          if (userGamesPlayedEl) {
-            userGamesPlayedEl.textContent = gamesPlayed;
-            console.log('✅ Updated main UI games played:', gamesPlayed);
-          } else {
-            console.error('❌ userGamesPlayed element not found');
-          }
-          
-          // Game-specific stats
-          const gameStatsMap = {};
-          scores.forEach(score => {
-            if (!gameStatsMap[score.game]) {
-              gameStatsMap[score.game] = { count: 0, highScore: 0 };
-            }
-            gameStatsMap[score.game].count++;
-            gameStatsMap[score.game].highScore = Math.max(gameStatsMap[score.game].highScore, score.score);
-          });
-          
-          console.log('🎮 Game stats map:', gameStatsMap);
-          
-          if (gameStats) {
-            let statsHTML = '';
-            for (const [game, stats] of Object.entries(gameStatsMap)) {
-              statsHTML += `
-                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                  <span>${game.charAt(0).toUpperCase() + game.slice(1)}</span>
-                  <span>${stats.highScore} (${stats.count} games)</span>
-                </div>
-              `;
-            }
-            gameStats.innerHTML = statsHTML || '<div>No games played yet</div>';
-            console.log('✅ Updated game stats HTML');
-          }
-          
-          console.log('✅ User stats loading completed');
-          
+          console.log('✅ User stats loaded:', { totalScore, gamesPlayed });
         } catch (error) {
           console.error('❌ Error loading user stats:', error);
-          console.error('❌ Error details:', error.message);
-          console.error('❌ Error stack:', error.stack);
         }
-      }
+      };
 
-      // Load leaderboard
-      async function loadLeaderboard(gameFilter = 'all') {
-        try {
-          let query = db.collection('leaderboard');
-          
-          if (gameFilter !== 'all') {
-            query = query.where('game', '==', gameFilter);
-          }
-          
-          const snapshot = await query
-            .orderBy('score', 'desc')
-            .limit(50)
-            .get();
-          
-          const scores = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          }));
-          
-          // Group by user and get highest score
-          const userHighScores = {};
-          scores.forEach(score => {
-            const key = score.userId;
-            if (!userHighScores[key] || userHighScores[key].score < score.score) {
-              userHighScores[key] = score;
-            }
-          });
-          
-          // Sort by score
-          const leaderboard = Object.values(userHighScores)
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 20);
-          
-          const leaderboardContent = document.getElementById('leaderboardContent');
-          if (leaderboardContent) {
-            leaderboardContent.innerHTML = `
-              <div style="background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
-                ${leaderboard.map((entry, index) => `
-                  <div style="display: flex; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); ${index < 3 ? 'background: linear-gradient(90deg, rgba(255,215,0,0.1) 0%, transparent 100%);' : ''}">
-                    <div style="width: 30px; text-align: center; font-weight: 700; color: ${index < 3 ? '#fbbf24' : 'rgba(255,255,255,0.8)'};">
-                      ${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
-                    </div>
-                    <img src="${entry.photoURL || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; border-radius: 50%; margin: 0 12px; border: 2px solid rgba(255,255,255,0.3);">
-                    <div style="flex: 1;">
-                      <div style="color: white; font-weight: 600; font-size: 14px;">${entry.displayName}</div>
-                      <div style="color: rgba(255,255,255,0.6); font-size: 12px;">${entry.game}</div>
-                    </div>
-                    <div style="text-align: right;">
-                      <div style="color: #fbbf24; font-weight: 700; font-size: 16px;">${entry.score.toLocaleString()}</div>
-                      <div style="color: rgba(255,255,255,0.6); font-size: 11px;">points</div>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            `;
-          }
-          
-        } catch (error) {
-          console.error('Error loading leaderboard:', error);
-          const leaderboardContent = document.getElementById('leaderboardContent');
-          if (leaderboardContent) {
-            leaderboardContent.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.6);">Error loading leaderboard</div>';
-          }
+      // Add click listener to login button
+      document.addEventListener('DOMContentLoaded', () => {
+        const loginBtn = document.getElementById('googleLogin');
+        if (loginBtn) {
+          loginBtn.addEventListener('click', window.signInWithGoogle);
         }
-      }
-
-      // Initialize session check
-      checkSavedSession();
-      
-      // Create BroadcastChannel for cross-page communication
-      const gameistChannel = new BroadcastChannel('gameist_stats');
-      
-      // Listen for stats updates from other pages
-      function listenForStatsUpdates() {
-        // Listen for messages from BroadcastChannel
-        gameistChannel.onmessage = (event) => {
-          if (event.data && event.data.type === 'statsUpdate') {
-            console.log('📊 Received stats update via BroadcastChannel:', event.data);
-            
-            const savedUser = localStorage.getItem('gameist_user');
-            if (savedUser) {
-              const user = JSON.parse(savedUser);
-              if (user.uid === event.data.userId) {
-                console.log('🔄 Loading stats for user:', user.displayName);
-                loadUserStats(user.uid);
-              }
-            }
-          }
-        };
-        
-        // Also check localStorage for updates (fallback)
-        setInterval(() => {
-          const updateFlag = localStorage.getItem('gameist_stats_update_needed');
-          if (updateFlag) {
-            try {
-              const updateData = JSON.parse(updateFlag);
-              const currentTime = Date.now();
-              
-              // Only process updates from last 5 seconds
-              if (currentTime - updateData.timestamp < 5000) {
-                console.log('📊 Processing stats update from game:', updateData.game);
-                
-                const savedUser = localStorage.getItem('gameist_user');
-                if (savedUser) {
-                  const user = JSON.parse(savedUser);
-                  if (user.uid === updateData.userId) {
-                    loadUserStats(user.uid);
-                  }
-                }
-                
-                // Clear the flag
-                localStorage.removeItem('gameist_stats_update_needed');
-              }
-            } catch (error) {
-              console.error('❌ Error processing stats update:', error);
-              localStorage.removeItem('gameist_stats_update_needed');
-            }
-          }
-        }, 1000);
-        
-        console.log('� BroadcastChannel stats listener initialized');
-      }
-      
-      // Start listening for stats updates
-      listenForStatsUpdates();
-
-      // Check for redirect result (when using signInWithRedirect) - Enhanced
-      firebase.auth().getRedirectResult()
-        .then((result) => {
-          if (result.user) {
-            console.log("🔄 Redirect result received:", result.user.displayName);
-            handleAuthSuccess(result);
-          } else {
-            console.log("ℹ️ No redirect result - normal flow");
-          }
-        })
-        .catch((error) => {
-          console.error("❌ Redirect result error:", error);
-          if (error.code !== 'auth/no-current-user') {
-            handleAuthError(error);
-          }
-        });
-
-      // Enhanced popup blocker detection
-      document.getElementById('googleLogin').addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        const authStatus = document.getElementById('authStatus');
-        authStatus.style.display = 'block';
-        authStatus.innerHTML = '🔄 Google giriş başlatılıyor...';
-        
-        // Force user gesture for popup
-        const userGesture = new Promise((resolve) => {
-          setTimeout(resolve, 100);
-        });
-        
-        userGesture.then(() => {
-          // Try popup with explicit user gesture
-          firebase.auth().signInWithPopup(provider)
-            .then((result) => {
-              console.log("✅ Popup successful");
-              handleAuthSuccess(result);
-            })
-            .catch((error) => {
-              console.error("❌ Popup failed:", error);
-              
-              // Immediate redirect fallback
-              if (error.code === 'auth/popup-closed-by-user' || 
-                  error.code === 'auth/popup-blocked' ||
-                  error.code === 'auth/cancelled-popup-request') {
-                
-                console.log("🔄 Trying redirect method...");
-                authStatus.innerHTML = '🔄 Popup engellendi, yönlendiriliyor...';
-                
-                // Use redirect as fallback
-                firebase.auth().signInWithRedirect(provider)
-                  .then(() => {
-                    console.log("✅ Redirect initiated");
-                    authStatus.innerHTML = '🔄 Yönlendirme başlatıldı...';
-                  })
-                  .catch((redirectError) => {
-                    console.error("❌ Redirect failed:", redirectError);
-                    handleAuthError(redirectError);
-                  });
-              } else {
-                handleAuthError(error);
-              }
-            });
-        });
       });
-
-      // Leaderboard helper functions (ready for implementation)
-      function saveUserScore(userId, displayName, score) {
-        if (!db) {
-          console.error("❌ Firestore not initialized");
-          return;
-        }
-        
-        return db.collection('leaderboard').add({
-          userId: userId,
-          displayName: displayName,
-          score: score,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          game: 'elementist' // or other game name
-        });
-      }
-
-      function getTopScores(game = 'elementist', limit = 10) {
-        if (!db) {
-          console.error("❌ Firestore not initialized");
-          return Promise.resolve([]);
-        }
-        
-        return db.collection('leaderboard')
-          .where('game', '==', game)
-          .orderBy('score', 'desc')
-          .limit(limit)
-          .get();
-      }
-
-      console.log("🔥 Firebase Authentication initialized successfully");
     </script>
+
+    <!-- Main JavaScript -->
+    <script src="main.js"></script>
+    <script src="auth-i18n.js"></script>
   </body>
 </html>
