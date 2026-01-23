@@ -4971,5 +4971,95 @@
     </script>
     <!-- Characters wiring handled in glowlings.js to match Builds behavior -->
     
+    <!-- Firebase Authentication for Gameist -->
+    <script src="../auth-component.js"></script>
+    
+    <!-- Game-specific leaderboard integration -->
+    <script>
+      // Elementist-specific leaderboard integration
+      document.addEventListener('DOMContentLoaded', function() {
+        // Wait for auth component to initialize
+        setTimeout(() => {
+          if (window.gameistAuth) {
+            console.log('🔥 Elementist auth integration ready');
+            
+            // Hook into game over event to save score
+            const originalGameOver = window.gameOver;
+            if (typeof originalGameOver === 'function') {
+              window.gameOver = function() {
+                // Call original game over function
+                originalGameOver.apply(this, arguments);
+                
+                // Save score to leaderboard
+                const user = window.gameistAuth.getCurrentUser();
+                if (user && window.score) {
+                  window.gameistAuth.saveScore('elementist', window.score)
+                    .then(() => {
+                      console.log('✅ Elementist score saved:', window.score);
+                      showScoreSavedNotification();
+                    })
+                    .catch(error => {
+                      console.error('❌ Failed to save Elementist score:', error);
+                    });
+                }
+              };
+            }
+            
+            // Periodic score save (every 30 seconds)
+            setInterval(() => {
+              const user = window.gameistAuth.getCurrentUser();
+              if (user && window.score && window.score > 0) {
+                window.gameistAuth.saveScore('elementist', window.score)
+                  .catch(error => {
+                    // Silent fail for periodic saves
+                    console.log('⚠️ Periodic save failed:', error.message);
+                  });
+              }
+            }, 30000);
+          }
+        }, 2000);
+      });
+      
+      // Show score saved notification
+      function showScoreSavedNotification() {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+          color: white;
+          padding: 12px 24px;
+          border-radius: 8px;
+          font-weight: 600;
+          z-index: 99999;
+          box-shadow: 0 4px 12px rgba(34,197,94,0.4);
+          animation: slideDown 0.3s ease;
+        `;
+        notification.textContent = '✅ Score saved to leaderboard!';
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.style.animation = 'slideUp 0.3s ease';
+          setTimeout(() => notification.remove(), 300);
+        }, 2000);
+      }
+      
+      // Add animations
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes slideDown {
+          from { transform: translate(-50%, -100%); opacity: 0; }
+          to { transform: translate(-50%, 0); opacity: 1; }
+        }
+        @keyframes slideUp {
+          from { transform: translate(-50%, 0); opacity: 1; }
+          to { transform: translate(-50%, -100%); opacity: 0; }
+        }
+      `;
+      document.head.appendChild(style);
+    </script>
+    
   </body>
 </html>

@@ -202,29 +202,75 @@
               </svg>
               Google ile Giriş Yap
             </button>
-            <div id="userInfo" style="display: none; margin-top: 15px;">
-              <div style="padding: 16px; background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%); border-radius: 12px; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.1); transition: all 0.3s ease;">
-                <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 12px; justify-content: center;">
+            <div id="userInfo" style="display: none; margin-top: 20px;">
+              <div style="padding: 20px; background: linear-gradient(145deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 100%); border-radius: 16px; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden;">
+                <!-- Animated background gradient -->
+                <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent); animation: shimmer 3s infinite;"></div>
+                
+                <!-- User Profile Section -->
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px; position: relative; z-index: 1;">
                   <div style="position: relative;">
-                    <img id="userPhoto" src="" alt="User" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.3); box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
-                    <div style="position: absolute; bottom: -2px; right: -2px; width: 12px; height: 12px; background: #4ade80; border: 2px solid rgba(255,255,255,0.9); border-radius: 50%;"></div>
+                    <img id="userPhoto" src="" alt="User" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.4); box-shadow: 0 8px 24px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.1);">
+                    <div style="position: absolute; bottom: 0px; right: 0px; width: 16px; height: 16px; background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); border: 3px solid rgba(255,255,255,0.9); border-radius: 50%; box-shadow: 0 2px 8px rgba(34,197,94,0.4);"></div>
+                    <div style="position: absolute; top: -2px; right: -2px; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: white; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; border: 2px solid rgba(255,255,255,0.9);">✨</div>
                   </div>
-                  <div style="text-align: left;">
-                    <div style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;" data-i18n="welcome_text">Hoş geldin,</div>
-                    <div id="userName" style="color: white; font-weight: 700; font-size: 18px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
-                    <div id="userEmail" style="color: rgba(255,255,255,0.7); font-size: 13px; margin-top: 2px;"></div>
+                  <div style="text-align: left; flex: 1;">
+                    <div style="color: rgba(255,255,255,0.9); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;" data-i18n="welcome_text">Welcome</div>
+                    <div id="userName" style="color: white; font-weight: 700; font-size: 20px; text-shadow: 0 2px 8px rgba(0,0,0,0.3); margin-bottom: 2px; line-height: 1.2;"></div>
+                    <div id="userEmail" style="color: rgba(255,255,255,0.8); font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="opacity: 0.7;">
+                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                      </svg>
+                      <span style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+                    </div>
                   </div>
                 </div>
-                <div style="display: flex; gap: 8px; justify-content: center;">
-                  <button id="logout" style="padding: 10px 18px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(239,68,68,0.3);">
-                    <span data-i18n="logout_button">Çıkış Yap</span>
+                
+                <!-- Stats Section -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; position: relative; z-index: 1;">
+                  <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.2);">
+                    <div style="color: #fbbf24; font-size: 18px; font-weight: 700; margin-bottom: 2px;">🏆</div>
+                    <div style="color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600;" data-i18n="total_score">Total Score</div>
+                    <div id="userTotalScore" style="color: white; font-size: 16px; font-weight: 700;">0</div>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.2);">
+                    <div style="color: #60a5fa; font-size: 18px; font-weight: 700; margin-bottom: 2px;">🎮</div>
+                    <div style="color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600;" data-i18n="games_played">Games Played</div>
+                    <div id="userGamesPlayed" style="color: white; font-size: 16px; font-weight: 700;">0</div>
+                  </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; position: relative; z-index: 1;">
+                  <button id="profileBtn" style="padding: 10px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(59,130,246,0.3); display: flex; align-items: center; justify-content: center; gap: 4px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                    </svg>
+                    <span data-i18n="profile_button">Profile</span>
                   </button>
-                  <button id="profileBtn" style="padding: 10px 18px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(59,130,246,0.3);">
-                    <span data-i18n="profile_button">Profil</span>
+                  <button id="leaderboardBtn" style="padding: 10px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(139,92,246,0.3); display: flex; align-items: center; justify-content: center; gap: 4px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M7.5 21L2 16l2.5-2.5L7.5 16l6-6L16 12l-8.5 9zM22.5 6L12 16.5l-3-3L18 4.5l4.5 1.5z"/>
+                    </svg>
+                    <span data-i18n="leaderboard_button">Leaderboard</span>
+                  </button>
+                  <button id="logout" style="padding: 10px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(239,68,68,0.3); display: flex; align-items: center; justify-content: center; gap: 4px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                    </svg>
+                    <span data-i18n="logout_button">Logout</span>
                   </button>
                 </div>
               </div>
             </div>
+            
+            <!-- Add shimmer animation -->
+            <style>
+            @keyframes shimmer {
+              0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+              100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            }
+            </style>
             <div id="authStatus" style="margin-top: 8px; font-size: 12px; color: rgba(255,255,255,0.7); display: none;"></div>
           </div>
         </div>
@@ -774,8 +820,238 @@
       // Profile button handler
       document.getElementById('profileBtn').addEventListener('click', function() {
         const user = JSON.parse(localStorage.getItem('gameist_user') || '{}');
-        alert(`👤 Profile\n\nName: ${user.displayName}\nEmail: ${user.email}\nUID: ${user.uid}`);
+        showProfileModal(user);
       });
+
+      // Leaderboard button handler
+      document.getElementById('leaderboardBtn').addEventListener('click', function() {
+        showLeaderboardModal();
+      });
+
+      // Show profile modal
+      function showProfileModal(user) {
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0,0,0,0.8);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10000;
+          backdrop-filter: blur(5px);
+        `;
+        
+        modal.innerHTML = `
+          <div style="background: linear-gradient(145deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 100%); padding: 30px; border-radius: 20px; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.3); max-width: 400px; width: 90%; position: relative;">
+            <button onclick="this.closest('div').parentElement.remove()" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; color: white; font-size: 16px; display: flex; align-items: center; justify-content: center;">×</button>
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+              <img src="${user.photoURL || 'https://via.placeholder.com/80'}" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.4); margin-bottom: 15px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
+              <h2 style="color: white; margin: 0; font-size: 24px; font-weight: 700;">${user.displayName}</h2>
+              <p style="color: rgba(255,255,255,0.8); margin: 5px 0; font-size: 14px;">${user.email}</p>
+              <p style="color: rgba(255,255,255,0.6); margin: 0; font-size: 12px;">ID: ${user.uid}</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+              <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; text-align: center;">
+                <div style="color: #fbbf24; font-size: 24px; font-weight: 700;">🏆</div>
+                <div style="color: rgba(255,255,255,0.8); font-size: 12px; margin-bottom: 5px;">${getAuthTranslation('total_score')}</div>
+                <div id="modalTotalScore" style="color: white; font-size: 20px; font-weight: 700;">0</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; text-align: center;">
+                <div style="color: #60a5fa; font-size: 24px; font-weight: 700;">🎮</div>
+                <div style="color: rgba(255,255,255,0.8); font-size: 12px; margin-bottom: 5px;">${getAuthTranslation('games_played')}</div>
+                <div id="modalGamesPlayed" style="color: white; font-size: 20px; font-weight: 700;">0</div>
+              </div>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+              <h3 style="color: white; margin: 0 0 10px 0; font-size: 16px;">🎯 Game Stats</h3>
+              <div id="gameStats" style="color: rgba(255,255,255,0.8); font-size: 14px; line-height: 1.6;">
+                Loading game statistics...
+              </div>
+            </div>
+            
+            <button onclick="this.closest('div').parentElement.remove()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 600;">
+              Close
+            </button>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        loadUserStats(user.uid);
+      }
+
+      // Show leaderboard modal
+      function showLeaderboardModal() {
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0,0,0,0.8);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10000;
+          backdrop-filter: blur(5px);
+        `;
+        
+        modal.innerHTML = `
+          <div style="background: linear-gradient(145deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 100%); padding: 30px; border-radius: 20px; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.3); max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; position: relative;">
+            <button onclick="this.closest('div').parentElement.remove()" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; color: white; font-size: 16px; display: flex; align-items: center; justify-content: center;">×</button>
+            
+            <h2 style="color: white; margin: 0 0 20px 0; text-align: center; font-size: 28px; font-weight: 700;">🏆 ${getAuthTranslation('leaderboard_button')}</h2>
+            
+            <div style="margin-bottom: 20px;">
+              <select id="gameFilter" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; color: white; font-size: 14px;">
+                <option value="all">All Games</option>
+                <option value="elementist">Elementist</option>
+                <option value="2048">2048</option>
+                <option value="wordlist">Wordlist</option>
+                <option value="bilardist">Bilardist</option>
+              </select>
+            </div>
+            
+            <div id="leaderboardContent" style="color: white;">
+              <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.6);">
+                Loading leaderboard...
+              </div>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Load leaderboard data
+        const gameFilter = modal.querySelector('#gameFilter');
+        gameFilter.addEventListener('change', () => loadLeaderboard(gameFilter.value));
+        loadLeaderboard('all');
+      }
+
+      // Load user statistics
+      async function loadUserStats(userId) {
+        try {
+          const snapshot = await db.collection('leaderboard')
+            .where('userId', '==', userId)
+            .orderBy('timestamp', 'desc')
+            .get();
+          
+          const scores = snapshot.docs.map(doc => doc.data());
+          const totalScore = scores.reduce((sum, score) => sum + score.score, 0);
+          const gamesPlayed = new Set(scores.map(s => s.game)).size;
+          
+          // Update modal stats
+          const modalTotalScore = document.getElementById('modalTotalScore');
+          const modalGamesPlayed = document.getElementById('modalGamesPlayed');
+          const gameStats = document.getElementById('gameStats');
+          
+          if (modalTotalScore) modalTotalScore.textContent = totalScore.toLocaleString();
+          if (modalGamesPlayed) modalGamesPlayed.textContent = gamesPlayed;
+          
+          // Update main UI stats
+          document.getElementById('userTotalScore').textContent = totalScore.toLocaleString();
+          document.getElementById('userGamesPlayed').textContent = gamesPlayed;
+          
+          // Game-specific stats
+          const gameStatsMap = {};
+          scores.forEach(score => {
+            if (!gameStatsMap[score.game]) {
+              gameStatsMap[score.game] = { count: 0, highScore: 0 };
+            }
+            gameStatsMap[score.game].count++;
+            gameStatsMap[score.game].highScore = Math.max(gameStatsMap[score.game].highScore, score.score);
+          });
+          
+          if (gameStats) {
+            let statsHTML = '';
+            for (const [game, stats] of Object.entries(gameStatsMap)) {
+              statsHTML += `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                  <span>${game.charAt(0).toUpperCase() + game.slice(1)}</span>
+                  <span>${stats.highScore} (${stats.count} games)</span>
+                </div>
+              `;
+            }
+            gameStats.innerHTML = statsHTML || '<div>No games played yet</div>';
+          }
+          
+        } catch (error) {
+          console.error('Error loading user stats:', error);
+        }
+      }
+
+      // Load leaderboard
+      async function loadLeaderboard(gameFilter = 'all') {
+        try {
+          let query = db.collection('leaderboard');
+          
+          if (gameFilter !== 'all') {
+            query = query.where('game', '==', gameFilter);
+          }
+          
+          const snapshot = await query
+            .orderBy('score', 'desc')
+            .limit(50)
+            .get();
+          
+          const scores = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          
+          // Group by user and get highest score
+          const userHighScores = {};
+          scores.forEach(score => {
+            const key = score.userId;
+            if (!userHighScores[key] || userHighScores[key].score < score.score) {
+              userHighScores[key] = score;
+            }
+          });
+          
+          // Sort by score
+          const leaderboard = Object.values(userHighScores)
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 20);
+          
+          const leaderboardContent = document.getElementById('leaderboardContent');
+          if (leaderboardContent) {
+            leaderboardContent.innerHTML = `
+              <div style="background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
+                ${leaderboard.map((entry, index) => `
+                  <div style="display: flex; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); ${index < 3 ? 'background: linear-gradient(90deg, rgba(255,215,0,0.1) 0%, transparent 100%);' : ''}">
+                    <div style="width: 30px; text-align: center; font-weight: 700; color: ${index < 3 ? '#fbbf24' : 'rgba(255,255,255,0.8)'};">
+                      ${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
+                    </div>
+                    <img src="${entry.photoURL || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; border-radius: 50%; margin: 0 12px; border: 2px solid rgba(255,255,255,0.3);">
+                    <div style="flex: 1;">
+                      <div style="color: white; font-weight: 600; font-size: 14px;">${entry.displayName}</div>
+                      <div style="color: rgba(255,255,255,0.6); font-size: 12px;">${entry.game}</div>
+                    </div>
+                    <div style="text-align: right;">
+                      <div style="color: #fbbf24; font-weight: 700; font-size: 16px;">${entry.score.toLocaleString()}</div>
+                      <div style="color: rgba(255,255,255,0.6); font-size: 11px;">points</div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            `;
+          }
+          
+        } catch (error) {
+          console.error('Error loading leaderboard:', error);
+          const leaderboardContent = document.getElementById('leaderboardContent');
+          if (leaderboardContent) {
+            leaderboardContent.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.6);">Error loading leaderboard</div>';
+          }
+        }
+      }
 
       // Initialize session check
       checkSavedSession();
