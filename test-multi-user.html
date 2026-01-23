@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Realtime Database Test</title>
+    <title>Multi-User Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -63,12 +63,13 @@
 </head>
 <body>
     <div class="container">
-        <h1>🔥 Firebase Realtime Database Test</h1>
-        <p>Bu sayfa Realtime Database bağlantısını test etmek için kullanılır.</p>
+        <h1>👥 Multi-User Realtime Database Test</h1>
+        <p>Farklı hesapların skor kaydetme testi</p>
         
-        <button class="test-btn" onclick="testRealtimeWrite()">📝 Realtime Write Test</button>
-        <button class="test-btn" onclick="testRealtimeRead()">📖 Realtime Read Test</button>
-        <button class="test-btn" onclick="testRealtimeListen()">👂 Realtime Listen Test</button>
+        <button class="test-btn" onclick="testCurrentUser()">👤 Test Current User</button>
+        <button class="test-btn" onclick="testWriteScore()">📝 Write Test Score</button>
+        <button class="test-btn" onclick="testReadScores()">📖 Read All Scores</button>
+        <button class="test-btn" onclick="testAllUsers()">👥 Test All Users</button>
         <button class="test-btn" onclick="clearStatus()">🧹 Clear Status</button>
         
         <div id="status"></div>
@@ -108,60 +109,66 @@
             document.getElementById('status').innerHTML = '';
         }
 
-        async function testRealtimeWrite() {
-            updateStatus('📝 Testing Realtime Database write...', 'info');
+        function testCurrentUser() {
+            updateStatus('👤 Testing current user...', 'info');
+            
+            const user = auth.currentUser;
+            if (user) {
+                updateStatus(`✅ Current user: ${user.displayName} (${user.email})`, 'success');
+                updateStatus(`🆔 User ID: ${user.uid}`, 'info');
+                updateStatus(`🔐 Auth state: ${user.isAnonymous ? 'Anonymous' : 'Authenticated'}`, 'info');
+            } else {
+                updateStatus('❌ No current user', 'error');
+            }
+        }
+
+        async function testWriteScore() {
+            updateStatus('📝 Writing test score...', 'info');
             
             try {
                 const user = auth.currentUser;
                 if (!user) {
-                    updateStatus('⚠️ No authenticated user. Trying anonymous sign-in...', 'info');
-                    const result = await auth.signInAnonymously();
-                    updateStatus(`✅ Anonymous user signed in: ${result.user.uid}`, 'success');
+                    updateStatus('❌ No authenticated user', 'error');
+                    return;
                 }
                 
-                const currentUser = auth.currentUser;
                 const testData = {
                     score: Math.floor(Math.random() * 100000),
-                    game: 'test-game',
+                    game: 'multi-user-test',
                     timestamp: Date.now(),
-                    displayName: currentUser.displayName || 'Anonymous',
+                    displayName: user.displayName || 'Anonymous',
+                    email: user.email || null,
+                    isAnonymous: user.isAnonymous || false,
                     test: true
                 };
                 
-                updateStatus('📄 Writing to Realtime Database...', 'info');
+                updateStatus(`📄 Writing score for ${user.displayName}...`, 'info');
                 
                 const startTime = Date.now();
-                const userScoresRef = database.ref(`userScores/${currentUser.uid}`);
+                const userScoresRef = database.ref(`userScores/${user.uid}`);
                 const newScoreRef = userScoresRef.push();
                 
                 await newScoreRef.set(testData);
                 const endTime = Date.now();
                 
-                updateStatus(`✅ Realtime Database write successful in ${endTime - startTime}ms`, 'success');
-                updateStatus(`📄 Ref path: ${newScoreRef.toString()}`, 'info');
-                updateStatus(`👤 User ID: ${currentUser.uid}`, 'info');
+                updateStatus(`✅ Score written successfully in ${endTime - startTime}ms`, 'success');
+                updateStatus(`📄 Score: ${testData.score} pts`, 'info');
+                updateStatus(`👤 User: ${user.displayName}`, 'info');
+                updateStatus(`🆔 UID: ${user.uid}`, 'info');
                 
-                return newScoreRef.key;
             } catch (error) {
-                updateStatus(`❌ Realtime Database write error: ${error.message}`, 'error');
+                updateStatus(`❌ Write error: ${error.message}`, 'error');
                 updateStatus(`🔍 Error code: ${error.code}`, 'error');
-                
-                if (error.code === 'permission-denied') {
-                    updateStatus('🚨 PERMISSION DENIED - Realtime Database rules issue!', 'error');
-                    updateStatus('📝 Check Realtime Database security rules in Firebase Console', 'error');
-                }
-                
-                return null;
             }
         }
 
-        async function testRealtimeRead() {
-            updateStatus('📖 Testing Realtime Database read...', 'info');
+        async function testReadScores() {
+            updateStatus('📖 Reading all user scores...', 'info');
             
             try {
                 const user = auth.currentUser;
                 if (!user) {
-                    updateStatus('⚠️ No authenticated user. Please sign in first.', 'error');
+                    updateStatus('❌ No authenticated user', 'error');
                     return;
                 }
                 
@@ -170,12 +177,12 @@
                 const snapshot = await userScoresRef.once('value');
                 const endTime = Date.now();
                 
-                updateStatus(`✅ Realtime Database read successful in ${endTime - startTime}ms`, 'success');
+                updateStatus(`✅ Read successful in ${endTime - startTime}ms`, 'success');
                 
                 const data = snapshot.val();
                 if (data) {
                     const scores = Object.values(data);
-                    updateStatus(`📊 Found ${scores.length} scores`, 'info');
+                    updateStatus(`📊 Found ${scores.length} scores for ${user.displayName}`, 'info');
                     
                     scores.forEach((score, index) => {
                         updateStatus(`📄 Score ${index + 1}: ${score.score} pts (${score.game})`, 'info');
@@ -185,59 +192,46 @@
                 }
                 
             } catch (error) {
-                updateStatus(`❌ Realtime Database read error: ${error.message}`, 'error');
+                updateStatus(`❌ Read error: ${error.message}`, 'error');
                 updateStatus(`🔍 Error code: ${error.code}`, 'error');
             }
         }
 
-        function testRealtimeListen() {
-            updateStatus('👂 Testing Realtime Database real-time listener...', 'info');
+        async function testAllUsers() {
+            updateStatus('👥 Testing all users in database...', 'info');
             
             try {
-                const user = auth.currentUser;
-                if (!user) {
-                    updateStatus('⚠️ No authenticated user. Please sign in first.', 'error');
-                    return;
+                const startTime = Date.now();
+                const allUsersRef = database.ref('userScores');
+                const snapshot = await allUsersRef.once('value');
+                const endTime = Date.now();
+                
+                updateStatus(`✅ All users read successful in ${endTime - startTime}ms`, 'success');
+                
+                const allData = snapshot.val();
+                if (allData) {
+                    const userCount = Object.keys(allData).length;
+                    updateStatus(`👥 Found ${userCount} users in database`, 'info');
+                    
+                    Object.entries(allData).forEach(([uid, userData]) => {
+                        const scores = Object.values(userData);
+                        const totalScore = scores.reduce((sum, score) => sum + score.score, 0);
+                        updateStatus(`👤 ${uid}: ${scores.length} scores, ${totalScore} total pts`, 'info');
+                    });
+                } else {
+                    updateStatus('📭 No users found in database', 'info');
                 }
                 
-                const userScoresRef = database.ref(`userScores/${user.uid}`);
-                
-                const listener = userScoresRef.on('value', (snapshot) => {
-                    const data = snapshot.val();
-                    const timestamp = new Date().toLocaleTimeString();
-                    
-                    if (data) {
-                        const scores = Object.values(data);
-                        updateStatus(`🔔 [${timestamp}] Real-time update: ${scores.length} scores`, 'success');
-                    } else {
-                        updateStatus(`🔔 [${timestamp}] Real-time update: No scores`, 'info');
-                    }
-                }, (error) => {
-                    updateStatus(`❌ Real-time listener error: ${error.message}`, 'error');
-                });
-                
-                updateStatus('✅ Real-time listener active. Add scores to see updates!', 'success');
-                updateStatus('💡 Tip: Open this page in another tab and write a score', 'info');
-                
-                // Store listener reference to clean up later
-                window.realtimeListener = listener;
-                
             } catch (error) {
-                updateStatus(`❌ Real-time listener setup error: ${error.message}`, 'error');
+                updateStatus(`❌ All users read error: ${error.message}`, 'error');
+                updateStatus(`🔍 Error code: ${error.code}`, 'error');
             }
         }
 
-        // Auto-run auth check
+        // Auto-run current user test
         window.addEventListener('load', () => {
-            updateStatus('🔥 Firebase initialized for Realtime Database test', 'info');
-            
-            auth.onAuthStateChanged((user) => {
-                if (user) {
-                    updateStatus(`✅ User authenticated: ${user.displayName || 'Anonymous'} (${user.uid})`, 'success');
-                } else {
-                    updateStatus('ℹ️ No authenticated user', 'info');
-                }
-            });
+            updateStatus('🔥 Multi-user test initialized', 'info');
+            testCurrentUser();
         });
     </script>
 </body>
