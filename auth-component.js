@@ -221,25 +221,41 @@ class GameistAuth {
 
     // Save score to leaderboard
     async saveScore(gameName, score) {
+        console.log('🎮 saveScore called with:', { gameName, score });
+        
         const user = this.getCurrentUser();
+        console.log('👤 Current user:', user);
+        
         if (!user || !this.db) {
             console.error('❌ Cannot save score: user not logged in or DB not available');
+            console.error('❌ User exists:', !!user);
+            console.error('❌ DB exists:', !!this.db);
             return false;
         }
 
+        console.log('💾 Attempting to save to Firestore...');
+        console.log('🔥 DB reference:', this.db);
+        
         try {
-            await this.db.collection('leaderboard').add({
+            const docData = {
                 userId: user.uid,
                 displayName: user.displayName,
                 email: user.email,
                 score: score,
                 game: gameName,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            };
+            
+            console.log('📄 Document data to save:', docData);
+            
+            const result = await this.db.collection('leaderboard').add(docData);
             console.log('✅ Score saved to leaderboard:', score);
-            return true;
+            console.log('📄 Document ID:', result.id);
+            return result;
         } catch (error) {
             console.error('❌ Failed to save score:', error);
+            console.error('❌ Error code:', error.code);
+            console.error('❌ Error message:', error.message);
             return false;
         }
     }
