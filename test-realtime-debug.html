@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realtime Database Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+        .test-btn:hover {
+            background: #45a049;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Firebase Realtime Database Test</h1>
+        <p>Bu sayfa Realtime Database bağlantısını test etmek için kullanılır.</p>
+        
+        <button class="test-btn" onclick="testRealtimeWrite()">📝 Realtime Write Test</button>
+        <button class="test-btn" onclick="testRealtimeRead()">📖 Realtime Read Test</button>
+        <button class="test-btn" onclick="testRealtimeListen()">👂 Realtime Listen Test</button>
+        <button class="test-btn" onclick="clearStatus()">🧹 Clear Status</button>
+        
+        <div id="status"></div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7ckcqdZWfnUx5r8uKmvu9Ikax1x5Qidk",
+            authDomain: "gameist.firebaseapp.com",
+            projectId: "gameist",
+            storageBucket: "gameist.appspot.com",
+            messagingSenderId: "525659299937",
+            appId: "1:525659299937:web:1c8343a25be2a994bcca20",
+            measurementId: "G-WE9R0GWKM6"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            const timestamp = new Date().toLocaleTimeString();
+            statusDiv.innerHTML += `<div class="status ${type}">[${timestamp}] ${message}</div>`;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function clearStatus() {
+            document.getElementById('status').innerHTML = '';
+        }
+
+        async function testRealtimeWrite() {
+            updateStatus('📝 Testing Realtime Database write...', 'info');
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    updateStatus('⚠️ No authenticated user. Trying anonymous sign-in...', 'info');
+                    const result = await auth.signInAnonymously();
+                    updateStatus(`✅ Anonymous user signed in: ${result.user.uid}`, 'success');
+                }
+                
+                const currentUser = auth.currentUser;
+                const testData = {
+                    score: Math.floor(Math.random() * 100000),
+                    game: 'test-game',
+                    timestamp: Date.now(),
+                    displayName: currentUser.displayName || 'Anonymous',
+                    test: true
+                };
+                
+                updateStatus('📄 Writing to Realtime Database...', 'info');
+                
+                const startTime = Date.now();
+                const userScoresRef = database.ref(`userScores/${currentUser.uid}`);
+                const newScoreRef = userScoresRef.push();
+                
+                await newScoreRef.set(testData);
+                const endTime = Date.now();
+                
+                updateStatus(`✅ Realtime Database write successful in ${endTime - startTime}ms`, 'success');
+                updateStatus(`📄 Ref path: ${newScoreRef.toString()}`, 'info');
+                updateStatus(`👤 User ID: ${currentUser.uid}`, 'info');
+                
+                return newScoreRef.key;
+            } catch (error) {
+                updateStatus(`❌ Realtime Database write error: ${error.message}`, 'error');
+                updateStatus(`🔍 Error code: ${error.code}`, 'error');
+                
+                if (error.code === 'permission-denied') {
+                    updateStatus('🚨 PERMISSION DENIED - Realtime Database rules issue!', 'error');
+                    updateStatus('📝 Check Realtime Database security rules in Firebase Console', 'error');
+                }
+                
+                return null;
+            }
+        }
+
+        async function testRealtimeRead() {
+            updateStatus('📖 Testing Realtime Database read...', 'info');
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    updateStatus('⚠️ No authenticated user. Please sign in first.', 'error');
+                    return;
+                }
+                
+                const startTime = Date.now();
+                const userScoresRef = database.ref(`userScores/${user.uid}`);
+                const snapshot = await userScoresRef.once('value');
+                const endTime = Date.now();
+                
+                updateStatus(`✅ Realtime Database read successful in ${endTime - startTime}ms`, 'success');
+                
+                const data = snapshot.val();
+                if (data) {
+                    const scores = Object.values(data);
+                    updateStatus(`📊 Found ${scores.length} scores`, 'info');
+                    
+                    scores.forEach((score, index) => {
+                        updateStatus(`📄 Score ${index + 1}: ${score.score} pts (${score.game})`, 'info');
+                    });
+                } else {
+                    updateStatus('📭 No scores found for this user', 'info');
+                }
+                
+            } catch (error) {
+                updateStatus(`❌ Realtime Database read error: ${error.message}`, 'error');
+                updateStatus(`🔍 Error code: ${error.code}`, 'error');
+            }
+        }
+
+        function testRealtimeListen() {
+            updateStatus('👂 Testing Realtime Database real-time listener...', 'info');
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    updateStatus('⚠️ No authenticated user. Please sign in first.', 'error');
+                    return;
+                }
+                
+                const userScoresRef = database.ref(`userScores/${user.uid}`);
+                
+                const listener = userScoresRef.on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    const timestamp = new Date().toLocaleTimeString();
+                    
+                    if (data) {
+                        const scores = Object.values(data);
+                        updateStatus(`🔔 [${timestamp}] Real-time update: ${scores.length} scores`, 'success');
+                    } else {
+                        updateStatus(`🔔 [${timestamp}] Real-time update: No scores`, 'info');
+                    }
+                }, (error) => {
+                    updateStatus(`❌ Real-time listener error: ${error.message}`, 'error');
+                });
+                
+                updateStatus('✅ Real-time listener active. Add scores to see updates!', 'success');
+                updateStatus('💡 Tip: Open this page in another tab and write a score', 'info');
+                
+                // Store listener reference to clean up later
+                window.realtimeListener = listener;
+                
+            } catch (error) {
+                updateStatus(`❌ Real-time listener setup error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run auth check
+        window.addEventListener('load', () => {
+            updateStatus('🔥 Firebase initialized for Realtime Database test', 'info');
+            
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    updateStatus(`✅ User authenticated: ${user.displayName || 'Anonymous'} (${user.uid})`, 'success');
+                } else {
+                    updateStatus('ℹ️ No authenticated user', 'info');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
