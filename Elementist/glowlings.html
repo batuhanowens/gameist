@@ -5006,6 +5006,8 @@
                 
                 if (user && score > 0) {
                   console.log('🎯 Saving Elementist score:', score);
+                  console.log('👤 User info:', { displayName: user.displayName, uid: user.uid });
+                  
                   window.gameistAuth.saveScore('elementist', score)
                     .then(() => {
                       console.log('✅ Elementist score saved to leaderboard:', score);
@@ -5013,12 +5015,19 @@
                       
                       // Notify main page about the score update
                       notifyMainPageStatsUpdate(user.uid);
+                      
+                      // Verify the score was actually saved by checking Firestore
+                      setTimeout(() => {
+                        verifyScoreInFirestore(user.uid, score);
+                      }, 2000);
                     })
                     .catch(error => {
                       console.error('❌ Failed to save Elementist score:', error);
+                      console.error('❌ Error details:', error.code, error.message);
                     });
                 } else {
                   console.log('ℹ️ No user logged in or score is 0, skipping leaderboard save');
+                  console.log('ℹ️ User:', user ? user.uid : 'null', 'Score:', score);
                 }
                 
                 return result;
@@ -5083,6 +5092,42 @@
                 console.log('📢 Notified main page about stats update');
               } catch (error) {
                 console.error('❌ Failed to notify main page:', error);
+              }
+            }
+            
+            // Verify score was actually saved to Firestore
+            function verifyScoreInFirestore(userId, expectedScore) {
+              try {
+                console.log('🔍 Verifying score in Firestore for user:', userId, 'expected score:', expectedScore);
+                
+                const database = window.gameistAuth ? window.gameistAuth.db : null;
+                if (!database) {
+                  console.error('❌ No database available for verification');
+                  return;
+                }
+                
+                database.collection('leaderboard')
+                  .where('userId', '==', userId)
+                  .where('game', '==', 'elementist')
+                  .orderBy('timestamp', 'desc')
+                  .limit(5)
+                  .get()
+                  .then((snapshot) => {
+                    const scores = snapshot.docs.map(doc => doc.data());
+                    console.log('📊 Recent Elementist scores in Firestore:', scores);
+                    
+                    const foundScore = scores.find(s => s.score === expectedScore);
+                    if (foundScore) {
+                      console.log('✅ Score verification successful - found score:', foundScore.score, 'at:', foundScore.timestamp);
+                    } else {
+                      console.log('⚠️ Score not found in recent entries. All scores:', scores.map(s => s.score));
+                    }
+                  })
+                  .catch((error) => {
+                    console.error('❌ Error verifying score in Firestore:', error);
+                  });
+              } catch (error) {
+                console.error('❌ Verification function error:', error);
               }
             }
             
