@@ -129,22 +129,43 @@
 
             document.getElementById('googleLogin').addEventListener('click', () => {
                 statusDiv.innerHTML = "🔄 Google giriş penceresi açılıyor...";
+                
                 firebase.auth().signInWithPopup(provider)
                     .then((result) => {
                         const user = result.user;
+                        const credential = result.credential;
+                        const token = credential.accessToken;
+                        
                         document.getElementById('userName').textContent = user.displayName;
                         document.getElementById('userPhoto').src = user.photoURL;
                         document.getElementById('googleLogin').style.display = 'none';
                         document.getElementById('userInfo').style.display = 'block';
-                        statusDiv.innerHTML = `✅ Giriş başarılı! User ID: ${user.uid}`;
+                        
+                        statusDiv.innerHTML = `✅ Giriş başarılı!<br>
+                        User: ${user.displayName}<br>
+                        Email: ${user.email}<br>
+                        UID: ${user.uid}<br>
+                        Token: ${token.substring(0, 20)}...`;
                         
                         // Firestore test
                         const db = firebase.firestore();
                         statusDiv.innerHTML += "<br>✅ Firestore hazır - skorlar kaydedilebilir";
                     })
                     .catch((error) => {
-                        console.error("Giriş hatası:", error);
-                        statusDiv.innerHTML = `❌ Giriş hatası: ${error.message}`;
+                        console.error("Giriş hatası detayı:", error);
+                        let errorMessage = error.message;
+                        
+                        if (error.code === 'auth/popup-closed-by-user') {
+                            errorMessage = "Popup kapatıldı. Lütfen tekrar deneyin ve popup'ı kapatmayın.";
+                        } else if (error.code === 'auth/popup-blocked') {
+                            errorMessage = "Popup engellendi. Lütfen popup engelleyiciyi devre dışı bırakın.";
+                        } else if (error.code === 'auth/cancelled-popup-request') {
+                            errorMessage = "İptal edildi. Lütfen tekrar deneyin.";
+                        }
+                        
+                        statusDiv.innerHTML = `❌ Giriş hatası: ${errorMessage}<br>
+                        Hata kodu: ${error.code}<br>
+                        Detay: ${JSON.stringify(error, null, 2)}`;
                     });
             });
 
