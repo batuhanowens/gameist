@@ -5156,6 +5156,24 @@
         }, 2000);
       });
       
+      // Function to get Elementist's current stats (moved here for button access)
+      function getElementistNativeStats() {
+        try {
+          const bestScoreEl = document.getElementById('statsBestScore');
+          const bestWaveEl = document.getElementById('statsBestWave');
+          const lastRunsEl = document.getElementById('statsLastRuns');
+          
+          return {
+            bestScore: parseInt(bestScoreEl?.textContent || '0', 10) || 0,
+            bestWave: parseInt(bestWaveEl?.textContent || '0', 10) || 0,
+            lastRuns: lastRunsEl?.textContent || '0'
+          };
+        } catch (error) {
+          console.error('❌ Error getting Elementist stats:', error);
+          return { bestScore: 0, bestWave: 0, lastRuns: '0' };
+        }
+      }
+      
       // Add manual score save button for testing
       function addManualScoreSaveButton() {
         try {
@@ -5218,40 +5236,6 @@
       function monitorElementistStats() {
         console.log('📊 Starting Elementist stats monitoring');
         
-        // Function to get Elementist's current stats
-        function getElementistNativeStats() {
-          try {
-            const bestScoreEl = document.getElementById('statsBestScore');
-            const bestWaveEl = document.getElementById('statsBestWave');
-            const lastRunsEl = document.getElementById('statsLastRuns');
-            
-            const stats = {
-              bestScore: bestScoreEl ? parseInt(bestScoreEl.textContent || '0', 10) : 0,
-              bestWave: bestWaveEl ? parseInt(bestWaveEl.textContent || '0', 10) : 0,
-              lastRuns: []
-            };
-            
-            // Parse last runs if available
-            if (lastRunsEl) {
-              const runItems = lastRunsEl.querySelectorAll('li');
-              stats.lastRuns = Array.from(runItems).map(li => {
-                const text = li.textContent;
-                const waveMatch = text.match(/W(\d+)/);
-                const scoreMatch = text.match(/(\d+)/g);
-                return {
-                  wave: waveMatch ? parseInt(waveMatch[1], 10) : 0,
-                  score: scoreMatch ? Math.max(...scoreMatch.map(Number)) : 0
-                };
-              });
-            }
-            
-            return stats;
-          } catch (error) {
-            console.error('❌ Error getting Elementist stats:', error);
-            return { bestScore: 0, bestWave: 0, lastRuns: [] };
-          }
-        }
-        
         // Function to sync stats to main index
         function syncStatsToMainIndex() {
           const user = window.gameistAuth.getCurrentUser();
@@ -5297,25 +5281,24 @@
         if (gameOverScreen) {
           const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
-              if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                const isVisible = window.getComputedStyle(gameOverScreen).display !== 'none';
-                if (isVisible) {
-                  // Wait a moment for stats to update, then sync
-                  setTimeout(() => {
-                    syncStatsToMainIndex();
-                  }, 1500);
+              if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                const hasGameOverContent = Array.from(mutation.addedNodes).some(node => {
+                  return node.nodeType === Node.ELEMENT_NODE && 
+                         (node.querySelector('#statsBestScore') || node.textContent.includes('Game Over'));
+                });
+                
+                if (hasGameOverContent) {
+                  setTimeout(syncStatsToMainIndex, 1000);
                 }
               }
             });
           });
           
-          observer.observe(gameOverScreen, { attributes: true });
+          observer.observe(gameOverScreen, {
+            childList: true,
+            subtree: true
+          });
         }
-        
-        // Initial sync
-        setTimeout(() => {
-          syncStatsToMainIndex();
-        }, 3000);
       }
       
       // Show score saved notification
