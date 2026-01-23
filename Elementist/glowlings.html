@@ -4983,21 +4983,36 @@
           if (window.gameistAuth) {
             console.log('🔥 Elementist auth integration ready');
             
-            // Function to get current score from Elementist
-            function getElementistScore() {
+            // Function to get Elementist's native best score
+            function getElementistBestScore() {
               try {
-                return parseInt(document.getElementById('score')?.textContent || '0', 10) || 0;
+                const bestScoreEl = document.getElementById('statsBestScore');
+                const bestScore = parseInt(bestScoreEl?.textContent || '0', 10) || 0;
+                console.log('🏆 Elementist native best score:', bestScore);
+                return bestScore;
               } catch (error) {
-                console.error('Error getting Elementist score:', error);
+                console.error('Error getting Elementist best score:', error);
+                return 0;
+              }
+            }
+            
+            // Function to get Elementist's native best wave
+            function getElementistBestWave() {
+              try {
+                const bestWaveEl = document.getElementById('statsBestWave');
+                const bestWave = parseInt(bestWaveEl?.textContent || '0', 10) || 0;
+                console.log('🌊 Elementist native best wave:', bestWave);
+                return bestWave;
+              } catch (error) {
+                console.error('Error getting Elementist best wave:', error);
                 return 0;
               }
             }
             
             // Direct Firebase score save function (bypass auth-component)
-            function saveScoreDirectly(score) {
+            function saveScoreDirectly() {
               try {
-                console.log('🔥 Direct Firebase save attempt');
-                console.log('📊 Score to save:', score);
+                console.log('🔥 Direct Firebase save attempt using Elementist native stats');
                 
                 // Get Firebase from window (should be loaded by auth-component)
                 if (typeof firebase === 'undefined') {
@@ -5014,19 +5029,29 @@
                 }
                 
                 const user = auth.currentUser;
+                const bestScore = getElementistBestScore();
+                const bestWave = getElementistBestWave();
+                
+                if (bestScore <= 0) {
+                  console.log('ℹ️ Best score is 0, skipping save');
+                  return false;
+                }
+                
                 console.log('👤 Current user:', user.displayName, user.uid);
+                console.log('📊 Best score:', bestScore, 'Best wave:', bestWave);
                 
                 // Save to leaderboard collection
                 db.collection('leaderboard').add({
                   userId: user.uid,
                   displayName: user.displayName,
                   email: user.email,
-                  score: score,
+                  score: bestScore,
                   game: 'elementist',
+                  wave: bestWave,
                   timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 })
                 .then((docRef) => {
-                  console.log('✅ Score saved directly to Firebase:', docRef.id);
+                  console.log('✅ Elementist best score saved to Firebase:', docRef.id);
                   showScoreSavedNotification();
                   
                   // Notify main page
@@ -5043,51 +5068,33 @@
               }
             }
             
-            // Hook into existing stats recording system
-            const originalRecordRun = window.recordRun;
-            if (typeof originalRecordRun === 'function') {
-              window.recordRun = function() {
-                // Call original function first
-                const result = originalRecordRun.apply(this, arguments);
+            // Monitor Elementist's native stats changes
+            function monitorElementistStats() {
+              console.log('📊 Starting Elementist native stats monitoring');
+              
+              let lastBestScore = 0;
+              let lastBestWave = 0;
+              
+              // Check stats every 2 seconds
+              setInterval(() => {
+                const currentBestScore = getElementistBestScore();
+                const currentBestWave = getElementistBestWave();
                 
-                // Then save to our leaderboard using direct method
-                const score = getElementistScore();
-                
-                if (score > 0) {
-                  console.log('🎯 Wave completed, score:', score);
-                  saveScoreDirectly(score);
-                } else {
-                  console.log('ℹ️ Score is 0, skipping save');
+                if (currentBestScore > lastBestScore) {
+                  console.log('🎯 New best score detected:', currentBestScore, '(was:', lastBestScore, ')');
+                  saveScoreDirectly();
+                  lastBestScore = currentBestScore;
                 }
                 
-                return result;
-              };
+                if (currentBestWave > lastBestWave) {
+                  console.log('🌊 New best wave detected:', currentBestWave, '(was:', lastBestWave, ')');
+                  lastBestWave = currentBestWave;
+                }
+              }, 2000);
             }
             
-            // Also hook into game over screen visibility
-            const gameOverScreen = document.getElementById('gameOverScreen');
-            if (gameOverScreen) {
-              const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                  if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                    const isVisible = window.getComputedStyle(gameOverScreen).display !== 'none';
-                    if (isVisible) {
-                      // Game over screen is visible, save score
-                      setTimeout(() => {
-                        const score = getElementistScore();
-                        
-                        if (score > 0) {
-                          console.log('🎯 Game over detected, saving score:', score);
-                          saveScoreDirectly(score);
-                        }
-                      }, 1000); // Wait 1 second for score to finalize
-                    }
-                  }
-                });
-              });
-              
-              observer.observe(gameOverScreen, { attributes: true });
-            }
+            // Start monitoring
+            monitorElementistStats();
             
             // Cross-page communication function using BroadcastChannel
             function notifyMainPageStatsUpdate(userId) {
