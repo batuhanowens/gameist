@@ -4983,39 +4983,93 @@
           if (window.gameistAuth) {
             console.log('🔥 Elementist auth integration ready');
             
-            // Hook into game over event to save score
-            const originalGameOver = window.gameOver;
-            if (typeof originalGameOver === 'function') {
-              window.gameOver = function() {
-                // Call original game over function
-                originalGameOver.apply(this, arguments);
+            // Function to get current score from Elementist
+            function getElementistScore() {
+              try {
+                return parseInt(document.getElementById('score')?.textContent || '0', 10) || 0;
+              } catch (error) {
+                console.error('Error getting Elementist score:', error);
+                return 0;
+              }
+            }
+            
+            // Hook into existing stats recording system
+            const originalRecordRun = window.recordRun;
+            if (typeof originalRecordRun === 'function') {
+              window.recordRun = function() {
+                // Call original function first
+                const result = originalRecordRun.apply(this, arguments);
                 
-                // Save score to leaderboard
+                // Then save to our leaderboard
                 const user = window.gameistAuth.getCurrentUser();
-                if (user && window.score) {
-                  window.gameistAuth.saveScore('elementist', window.score)
+                const score = getElementistScore();
+                
+                if (user && score > 0) {
+                  console.log('🎯 Saving Elementist score:', score);
+                  window.gameistAuth.saveScore('elementist', score)
                     .then(() => {
-                      console.log('✅ Elementist score saved:', window.score);
+                      console.log('✅ Elementist score saved to leaderboard:', score);
                       showScoreSavedNotification();
                     })
                     .catch(error => {
                       console.error('❌ Failed to save Elementist score:', error);
                     });
+                } else {
+                  console.log('ℹ️ No user logged in or score is 0, skipping leaderboard save');
                 }
+                
+                return result;
               };
             }
             
-            // Periodic score save (every 30 seconds)
+            // Also hook into game over screen visibility
+            const gameOverScreen = document.getElementById('gameOverScreen');
+            if (gameOverScreen) {
+              const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                  if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                    const isVisible = window.getComputedStyle(gameOverScreen).display !== 'none';
+                    if (isVisible) {
+                      // Game over screen is visible, save score
+                      setTimeout(() => {
+                        const user = window.gameistAuth.getCurrentUser();
+                        const score = getElementistScore();
+                        
+                        if (user && score > 0) {
+                          console.log('🎯 Game over detected, saving score:', score);
+                          window.gameistAuth.saveScore('elementist', score)
+                            .then(() => {
+                              console.log('✅ Elementist score saved on game over:', score);
+                              showScoreSavedNotification();
+                            })
+                            .catch(error => {
+                              console.error('❌ Failed to save Elementist score on game over:', error);
+                            });
+                        }
+                      }, 1000); // Wait 1 second for score to finalize
+                    }
+                  }
+                });
+              });
+              
+              observer.observe(gameOverScreen, { attributes: true });
+            }
+            
+            // Periodic score save (every 30 seconds) - only for logged in users
             setInterval(() => {
               const user = window.gameistAuth.getCurrentUser();
-              if (user && window.score && window.score > 0) {
-                window.gameistAuth.saveScore('elementist', window.score)
+              const score = getElementistScore();
+              
+              if (user && score > 0) {
+                window.gameistAuth.saveScore('elementist', score)
                   .catch(error => {
                     // Silent fail for periodic saves
                     console.log('⚠️ Periodic save failed:', error.message);
                   });
               }
             }, 30000);
+            
+            console.log('✅ Elementist leaderboard hooks installed');
           }
         }, 2000);
       });
