@@ -126,48 +126,79 @@
             
             // Firebase Authentication Logic
             const provider = new firebase.auth.GoogleAuthProvider();
+            provider.addScope('email');
+            provider.addScope('profile');
 
             document.getElementById('googleLogin').addEventListener('click', () => {
-                statusDiv.innerHTML = "🔄 Google giriş penceresi açılıyor...";
+                statusDiv.innerHTML = "🔄 Google giriş başlatılıyor...";
                 
+                // Önce popup ile dene, olmazsa redirect ile dene
                 firebase.auth().signInWithPopup(provider)
                     .then((result) => {
-                        const user = result.user;
-                        const credential = result.credential;
-                        const token = credential.accessToken;
-                        
-                        document.getElementById('userName').textContent = user.displayName;
-                        document.getElementById('userPhoto').src = user.photoURL;
-                        document.getElementById('googleLogin').style.display = 'none';
-                        document.getElementById('userInfo').style.display = 'block';
-                        
-                        statusDiv.innerHTML = `✅ Giriş başarılı!<br>
-                        User: ${user.displayName}<br>
-                        Email: ${user.email}<br>
-                        UID: ${user.uid}<br>
-                        Token: ${token.substring(0, 20)}...`;
-                        
-                        // Firestore test
-                        const db = firebase.firestore();
-                        statusDiv.innerHTML += "<br>✅ Firestore hazır - skorlar kaydedilebilir";
+                        handleAuthSuccess(result);
                     })
                     .catch((error) => {
-                        console.error("Giriş hatası detayı:", error);
-                        let errorMessage = error.message;
+                        console.error("Popup failed, trying redirect:", error);
                         
-                        if (error.code === 'auth/popup-closed-by-user') {
-                            errorMessage = "Popup kapatıldı. Lütfen tekrar deneyin ve popup'ı kapatmayın.";
-                        } else if (error.code === 'auth/popup-blocked') {
-                            errorMessage = "Popup engellendi. Lütfen popup engelleyiciyi devre dışı bırakın.";
-                        } else if (error.code === 'auth/cancelled-popup-request') {
-                            errorMessage = "İptal edildi. Lütfen tekrar deneyin.";
+                        if (error.code === 'auth/popup-closed-by-user' || 
+                            error.code === 'auth/popup-blocked') {
+                            
+                            statusDiv.innerHTML = "🔄 Popup başarısız, redirect ile deneniyor...";
+                            
+                            // Redirect ile authentication dene
+                            firebase.auth().signInWithRedirect(provider)
+                                .then(() => {
+                                    statusDiv.innerHTML = "🔄 Redirect başlatıldı, yönlendiriliyor...";
+                                })
+                                .catch((redirectError) => {
+                                    console.error("Redirect also failed:", redirectError);
+                                    handleAuthError(redirectError);
+                                });
+                        } else {
+                            handleAuthError(error);
                         }
-                        
-                        statusDiv.innerHTML = `❌ Giriş hatası: ${errorMessage}<br>
-                        Hata kodu: ${error.code}<br>
-                        Detay: ${JSON.stringify(error, null, 2)}`;
                     });
             });
+
+            function handleAuthSuccess(result) {
+                const user = result.user;
+                const credential = result.credential;
+                const token = credential.accessToken;
+                
+                document.getElementById('userName').textContent = user.displayName;
+                document.getElementById('userPhoto').src = user.photoURL;
+                document.getElementById('googleLogin').style.display = 'none';
+                document.getElementById('userInfo').style.display = 'block';
+                
+                statusDiv.innerHTML = `✅ Giriş başarılı!<br>
+                User: ${user.displayName}<br>
+                Email: ${user.email}<br>
+                UID: ${user.uid}<br>
+                Token: ${token.substring(0, 20)}...`;
+                
+                // Firestore test
+                const db = firebase.firestore();
+                statusDiv.innerHTML += "<br>✅ Firestore hazır - skorlar kaydedilebilir";
+            }
+
+            function handleAuthError(error) {
+                console.error("Giriş hatası detayı:", error);
+                let errorMessage = error.message;
+                
+                if (error.code === 'auth/popup-closed-by-user') {
+                    errorMessage = "OAuth flow tamamlanamadı. Firebase Console'u kontrol et.";
+                } else if (error.code === 'auth/popup-blocked') {
+                    errorMessage = "Popup engellendi. Lütfen popup engelleyiciyi devre dışı bırakın.";
+                } else if (error.code === 'auth/cancelled-popup-request') {
+                    errorMessage = "İptal edildi. Lütfen tekrar deneyin.";
+                } else if (error.code === 'auth/unauthorized-domain') {
+                    errorMessage = "Domain yetkili değil. Firebase Console'a domain ekle.";
+                }
+                
+                statusDiv.innerHTML = `❌ Giriş hatası: ${errorMessage}<br>
+                Hata kodu: ${error.code}<br>
+                Detay: ${JSON.stringify(error, null, 2)}`;
+            }
 
             document.getElementById('logout').addEventListener('click', () => {
                 firebase.auth().signOut()
