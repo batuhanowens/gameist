@@ -60,9 +60,79 @@ class GameistAuth {
     }
 
     createAuthUI() {
-        // Auth UI disabled - no login/logout buttons in game pages
-        console.log('🔕 Auth UI disabled for game pages');
-        return;
+        // Find or create auth container
+        let authContainer = document.getElementById('gameist-auth-container');
+        if (!authContainer) {
+            authContainer = document.createElement('div');
+            authContainer.id = 'gameist-auth-container';
+            authContainer.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
+                padding: 12px;
+                border-radius: 12px;
+                backdrop-filter: blur(15px);
+                border: 1px solid rgba(255,255,255,0.2);
+                box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+                min-width: 200px;
+            `;
+            document.body.appendChild(authContainer);
+        }
+
+        authContainer.innerHTML = `
+            <div id="game-login-btn" class="auth-btn" style="display: block;">
+                <button onclick="gameistAuth.signIn()" style="
+                    padding: 8px 16px;
+                    background: #4285f4;
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-size: 12px;
+                    font-weight: 600;
+                    width: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 6px;
+                ">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    </svg>
+                    <span data-i18n="login_button">Giriş Yap</span>
+                </button>
+            </div>
+            <div id="game-user-info" class="auth-info" style="display: none;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <img id="game-user-photo" src="" style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);">
+                    <div style="flex: 1; min-width: 0;">
+                        <div id="game-user-name" style="color: white; font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
+                        <div style="color: rgba(255,255,255,0.7); font-size: 11px;">Oyuncu</div>
+                    </div>
+                </div>
+                <button onclick="gameistAuth.signOut()" style="
+                    padding: 6px 12px;
+                    background: #ef4444;
+                    color: white;
+                    border: none;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 11px;
+                    font-weight: 600;
+                    width: 100%;
+                ">
+                    <span data-i18n="logout_button">Çıkış</span>
+                </button>
+            </div>
+            <div id="game-auth-status" style="font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 4px; display: none;"></div>
+        `;
+
+        // Apply translations if available
+        if (typeof applyAuthTranslations === 'function') {
+            applyAuthTranslations();
+        }
     }
 
     async signIn() {

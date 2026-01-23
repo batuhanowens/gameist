@@ -3321,66 +3321,6 @@
     <script src="glowlings.js"></script>
     <!-- Enhanced hooks after core game -->
     <script src="glowlings-enhanced.js"></script>
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-      import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-      import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-      import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyD7ckcqdZWfnUx5r8uKmvu9Ikax1x5Qidk",
-        authDomain: "gameist.firebaseapp.com",
-        projectId: "gameist",
-        storageBucket: "gameist.firebasestorage.app",
-        messagingSenderId: "525659299937",
-        appId: "1:525659299937:web:1c8343a25be2a994bcca20",
-        measurementId: "G-WE9R0GWKM6"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      window.auth = getAuth(app);
-      window.db = getFirestore(app);
-
-      console.log('🔥 Firebase initialized in Elementist with module system');
-      
-      // Make auth state available globally
-      onAuthStateChanged(window.auth, (user) => {
-        if (user) {
-          console.log('✅ User authenticated in Elementist:', user.displayName, user.uid);
-          window.currentUser = user;
-        } else {
-          console.log('ℹ️ No user authenticated in Elementist');
-          window.currentUser = null;
-        }
-      });
-
-      // Global score save function
-      window.saveScoreToFirebase = function(score) {
-        const user = window.auth.currentUser;
-        if (!user) {
-          console.log("❌ No user logged in");
-          return;
-        }
-
-        setDoc(
-          doc(window.db, "leaderboard", user.uid + "_" + Date.now()),
-          {
-            userId: user.uid,
-            displayName: user.displayName,
-            email: user.email,
-            score: score,
-            game: 'elementist',
-            updatedAt: Date.now()
-          },
-          { merge: true }
-        ).then(() => {
-          console.log('✅ Score saved to Firebase:', score);
-        }).catch(error => {
-          console.error('❌ Failed to save score:', error);
-        });
-      };
-    </script>
     <script>
       (function(){
         const bar = document.getElementById('consumableBar');
@@ -5043,92 +4983,92 @@
           if (window.gameistAuth) {
             console.log('🔥 Elementist auth integration ready');
             
-            // Function to get Elementist's native best score
-            function getElementistBestScore() {
+            // Function to get current score from Elementist
+            function getElementistScore() {
               try {
-                const bestScoreEl = document.getElementById('statsBestScore');
-                const bestScore = parseInt(bestScoreEl?.textContent || '0', 10) || 0;
-                console.log('🏆 Elementist native best score:', bestScore);
-                return bestScore;
+                return parseInt(document.getElementById('score')?.textContent || '0', 10) || 0;
               } catch (error) {
-                console.error('Error getting Elementist best score:', error);
+                console.error('Error getting Elementist score:', error);
                 return 0;
               }
             }
             
-            // Function to get Elementist's native best wave
-            function getElementistBestWave() {
-              try {
-                const bestWaveEl = document.getElementById('statsBestWave');
-                const bestWave = parseInt(bestWaveEl?.textContent || '0', 10) || 0;
-                console.log('🌊 Elementist native best wave:', bestWave);
-                return bestWave;
-              } catch (error) {
-                console.error('Error getting Elementist best wave:', error);
-                return 0;
-              }
-            }
-            
-            // Direct Firebase score save function using new module system
-            function saveScoreDirectly() {
-              try {
-                console.log('🔥 Direct Firebase save attempt using Elementist native stats');
+            // Hook into existing stats recording system
+            const originalRecordRun = window.recordRun;
+            if (typeof originalRecordRun === 'function') {
+              window.recordRun = function() {
+                // Call original function first
+                const result = originalRecordRun.apply(this, arguments);
                 
-                const bestScore = getElementistBestScore();
-                const bestWave = getElementistBestWave();
+                // Then save to our leaderboard
+                const user = window.gameistAuth.getCurrentUser();
+                const score = getElementistScore();
                 
-                if (bestScore <= 0) {
-                  console.log('ℹ️ Best score is 0, skipping save');
-                  return false;
-                }
-                
-                console.log('📊 Best score:', bestScore, 'Best wave:', bestWave);
-                
-                // Use the new global save function
-                if (window.saveScoreToFirebase) {
-                  window.saveScoreToFirebase(bestScore);
-                  showScoreSavedNotification();
+                if (user && score > 0) {
+                  console.log('🎯 Saving Elementist score:', score);
+                  console.log('👤 User info:', { displayName: user.displayName, uid: user.uid });
                   
-                  // Notify main page
-                  notifyMainPageStatsUpdate(window.auth.currentUser?.uid);
-                  return true;
+                  window.gameistAuth.saveScore('elementist', score)
+                    .then(() => {
+                      console.log('✅ Elementist score saved to leaderboard:', score);
+                      showScoreSavedNotification();
+                      
+                      // Notify main page about the score update
+                      notifyMainPageStatsUpdate(user.uid);
+                      
+                      // Verify the score was actually saved by checking Firestore
+                      setTimeout(() => {
+                        verifyScoreInFirestore(user.uid, score);
+                      }, 2000);
+                    })
+                    .catch(error => {
+                      console.error('❌ Failed to save Elementist score:', error);
+                      console.error('❌ Error details:', error.code, error.message);
+                    });
                 } else {
-                  console.error('❌ saveScoreToFirebase function not available');
-                  return false;
-                }
-              } catch (error) {
-                console.error('❌ Error in direct save:', error);
-                return false;
-              }
-            }
-            
-            // Monitor Elementist's native stats changes
-            function monitorElementistStats() {
-              console.log('📊 Starting Elementist native stats monitoring');
-              
-              let lastBestScore = 0;
-              let lastBestWave = 0;
-              
-              // Check stats every 2 seconds
-              setInterval(() => {
-                const currentBestScore = getElementistBestScore();
-                const currentBestWave = getElementistBestWave();
-                
-                if (currentBestScore > lastBestScore) {
-                  console.log('🎯 New best score detected:', currentBestScore, '(was:', lastBestScore, ')');
-                  saveScoreDirectly();
-                  lastBestScore = currentBestScore;
+                  console.log('ℹ️ No user logged in or score is 0, skipping leaderboard save');
+                  console.log('ℹ️ User:', user ? user.uid : 'null', 'Score:', score);
                 }
                 
-                if (currentBestWave > lastBestWave) {
-                  console.log('🌊 New best wave detected:', currentBestWave, '(was:', lastBestWave, ')');
-                  lastBestWave = currentBestWave;
-                }
-              }, 2000);
+                return result;
+              };
             }
             
-            // Start monitoring
-            monitorElementistStats();
+            // Also hook into game over screen visibility
+            const gameOverScreen = document.getElementById('gameOverScreen');
+            if (gameOverScreen) {
+              const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                  if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                    const isVisible = window.getComputedStyle(gameOverScreen).display !== 'none';
+                    if (isVisible) {
+                      // Game over screen is visible, save score
+                      setTimeout(() => {
+                        const user = window.gameistAuth.getCurrentUser();
+                        const score = getElementistScore();
+                        
+                        if (user && score > 0) {
+                          console.log('🎯 Game over detected, saving score:', score);
+                          window.gameistAuth.saveScore('elementist', score)
+                            .then(() => {
+                              console.log('✅ Elementist score saved on game over:', score);
+                              showScoreSavedNotification();
+                              
+                              // Notify main page about the score update
+                              notifyMainPageStatsUpdate(user.uid);
+                            })
+                            .catch(error => {
+                              console.error('❌ Failed to save Elementist score on game over:', error);
+                            });
+                        }
+                      }, 1000); // Wait 1 second for score to finalize
+                    }
+                  }
+                });
+              });
+              
+              observer.observe(gameOverScreen, { attributes: true });
+            }
             
             // Cross-page communication function using BroadcastChannel
             function notifyMainPageStatsUpdate(userId) {
@@ -5207,11 +5147,70 @@
             
             console.log('✅ Elementist leaderboard hooks installed');
             
+            // Add manual score save button for testing
+            addManualScoreSaveButton();
+            
             // Monitor Elementist's own stats and sync to main index
             monitorElementistStats();
           }
         }, 2000);
       });
+      
+      // Add manual score save button for testing
+      function addManualScoreSaveButton() {
+        try {
+          const button = document.createElement('button');
+          button.id = 'manualScoreSave';
+          button.textContent = '💾 Test Score Save';
+          button.style.cssText = `
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 99999;
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(34,197,94,0.4);
+          `;
+          
+          button.addEventListener('click', () => {
+            const user = window.gameistAuth.getCurrentUser();
+            const score = getElementistScore();
+            
+            console.log('🧪 Manual score save test');
+            console.log('👤 User:', user ? user.displayName : 'null');
+            console.log('📊 Score:', score);
+            
+            if (user && score > 0) {
+              window.gameistAuth.saveScore('elementist', score)
+                .then(() => {
+                  console.log('✅ Manual score save successful:', score);
+                  showScoreSavedNotification();
+                  
+                  // Test verification
+                  setTimeout(() => {
+                    verifyScoreInFirestore(user.uid, score);
+                  }, 2000);
+                })
+                .catch(error => {
+                  console.error('❌ Manual score save failed:', error);
+                });
+            } else {
+              console.log('❌ Cannot save score - no user or score is 0');
+            }
+          });
+          
+          document.body.appendChild(button);
+          console.log('✅ Manual score save button added');
+        } catch (error) {
+          console.error('❌ Error adding manual score save button:', error);
+        }
+      }
       
       // Monitor Elementist's native stats system
       function monitorElementistStats() {
