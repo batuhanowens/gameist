@@ -5204,9 +5204,9 @@
                 console.log('✅ Elementist best score synced to main index:', stats.bestScore);
                 console.log('📄 Firestore save result:', result);
                 
-                // If Firestore failed, save to localStorage
+                // If all Firestore attempts failed, save to localStorage
                 if (result === false) {
-                  console.log('💾 Saving to localStorage fallback...');
+                  console.log('💾 All Firestore attempts failed, saving to localStorage fallback...');
                   const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
                   localScores.push({
                     userId: user.uid,
@@ -5214,10 +5214,13 @@
                     email: user.email,
                     score: stats.bestScore,
                     game: 'elementist',
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    firestoreFailed: true
                   });
                   localStorage.setItem('gameist_local_scores', JSON.stringify(localScores));
-                  console.log('✅ Score saved to localStorage fallback');
+                  console.log('✅ Score saved to localStorage fallback (will sync to Firestore later)');
+                } else {
+                  console.log('🎯 Score successfully saved to Firestore - no localStorage needed');
                 }
                 
                 // Notify main page about the update using BroadcastChannel
@@ -5228,14 +5231,15 @@
                     userId: user.uid,
                     game: 'elementist',
                     score: stats.bestScore,
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    firestoreSuccess: result !== false
                   };
                   
                   channel.postMessage(message);
                   console.log('📡 Sent stats update via BroadcastChannel:', message);
                   console.log('📡 Channel state:', channel ? 'open' : 'closed');
                   
-                  // Also store in localStorage as fallback
+                  // Also store in localStorage as fallback for cross-tab communication
                   localStorage.setItem('gameist_stats_update_needed', JSON.stringify(message));
                   console.log('💾 Stored fallback in localStorage:', message);
                 } catch (error) {
@@ -5246,7 +5250,8 @@
                     userId: user.uid,
                     game: 'elementist',
                     score: stats.bestScore,
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    firestoreSuccess: false
                   }));
                 }
               })

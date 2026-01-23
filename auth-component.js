@@ -248,24 +248,39 @@ class GameistAuth {
             
             console.log('📄 Document data to save:', docData);
             
-            // Add timeout to detect hanging Firestore operation
-            const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Firestore write timeout after 10 seconds')), 10000);
-            });
+            // Try multiple times with shorter timeout
+            for (let attempt = 1; attempt <= 3; attempt++) {
+                try {
+                    console.log(`🔄 Firestore attempt ${attempt}/3`);
+                    
+                    const timeoutPromise = new Promise((_, reject) => {
+                        setTimeout(() => reject(new Error('Firestore write timeout')), 3000);
+                    });
+                    
+                    const writePromise = this.db.collection('leaderboard').add(docData);
+                    const result = await Promise.race([writePromise, timeoutPromise]);
+                    
+                    console.log('✅ Score saved to leaderboard:', score);
+                    console.log('📄 Document ID:', result.id);
+                    return result;
+                    
+                } catch (attemptError) {
+                    console.error(`❌ Attempt ${attempt} failed:`, attemptError.message);
+                    if (attempt < 3) {
+                        console.log(`⏳ Waiting ${attempt * 2} seconds before retry...`);
+                        await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+                    } else {
+                        throw attemptError;
+                    }
+                }
+            }
             
-            const writePromise = this.db.collection('leaderboard').add(docData);
-            
-            const result = await Promise.race([writePromise, timeoutPromise]);
-            
-            console.log('✅ Score saved to leaderboard:', score);
-            console.log('📄 Document ID:', result.id);
-            return result;
         } catch (error) {
-            console.error('❌ Failed to save score:', error);
+            console.error('❌ Failed to save score after 3 attempts:', error);
             console.error('❌ Error code:', error.code);
             console.error('❌ Error message:', error.message);
             
-            if (error.message === 'Firestore write timeout after 10 seconds') {
+            if (error.message === 'Firestore write timeout') {
                 console.error('❌ Firestore write operation timed out - possible network issue');
             }
             
