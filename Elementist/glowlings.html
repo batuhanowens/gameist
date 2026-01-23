@@ -5265,10 +5265,21 @@
                 console.log('✅ Elementist best score synced to main index:', stats.bestScore);
                 console.log('📄 Firestore save result:', result);
                 
-                // Verify the save immediately
-                setTimeout(() => {
-                  verifyScoreInFirestore(user.uid, stats.bestScore);
-                }, 1000);
+                // If Firestore failed, save to localStorage
+                if (result === false) {
+                  console.log('💾 Saving to localStorage fallback...');
+                  const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
+                  localScores.push({
+                    userId: user.uid,
+                    displayName: user.displayName,
+                    email: user.email,
+                    score: stats.bestScore,
+                    game: 'elementist',
+                    timestamp: Date.now()
+                  });
+                  localStorage.setItem('gameist_local_scores', JSON.stringify(localScores));
+                  console.log('✅ Score saved to localStorage fallback');
+                }
                 
                 // Notify main page about the update using BroadcastChannel
                 try {

@@ -982,10 +982,19 @@
             .get();
           
           const scores = snapshot.docs.map(doc => doc.data());
-          console.log('📈 Found scores:', scores.length, scores);
+          console.log('📈 Found scores from Firestore:', scores.length);
           
-          const totalScore = scores.reduce((sum, score) => sum + score.score, 0);
-          const gamesPlayed = new Set(scores.map(s => s.game)).size;
+          // Also check localStorage for fallback scores
+          const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
+          const userLocalScores = localScores.filter(score => score.userId === userId);
+          console.log('📈 Found scores from localStorage:', userLocalScores.length);
+          
+          // Combine scores
+          const allScores = [...scores, ...userLocalScores];
+          console.log('📈 Total combined scores:', allScores.length);
+          
+          const totalScore = allScores.reduce((sum, score) => sum + score.score, 0);
+          const gamesPlayed = new Set(allScores.map(s => s.game)).size;
           
           console.log('📊 Calculated stats:', { totalScore, gamesPlayed });
           
@@ -1017,7 +1026,7 @@
           
           // Game-specific stats
           const gameStatsMap = {};
-          scores.forEach(score => {
+          allScores.forEach(score => {
             if (!gameStatsMap[score.game]) {
               gameStatsMap[score.game] = { count: 0, highScore: 0 };
             }
