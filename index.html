@@ -853,12 +853,22 @@
         const savedUser = localStorage.getItem('gameist_user');
         if (savedUser) {
           const user = JSON.parse(savedUser);
-          console.log('🔄 Manual stats refresh for:', user.displayName);
+          console.log('🔄 Manual refresh triggered for user:', user.displayName);
           loadUserStats(user.uid);
         } else {
-          console.log('❌ No user found for stats refresh');
+          console.log('❌ No saved user found for refresh');
         }
       });
+
+      // Manual test button for debugging
+      setTimeout(() => {
+        const savedUser = localStorage.getItem('gameist_user');
+        if (savedUser) {
+          const user = JSON.parse(savedUser);
+          console.log('🧪 Auto-test loadUserStats for user:', user.displayName);
+          loadUserStats(user.uid);
+        }
+      }, 2000);
 
       // Show profile modal
       function showProfileModal(user) {
