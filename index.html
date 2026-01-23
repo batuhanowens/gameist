@@ -1210,9 +1210,46 @@
       // Start listening for stats updates
       listenForStatsUpdates();
       
-      // Dynamic Player Count System
+      // Dynamic Player Count System - Real-time with gameStats collection
+      function initializeGameStats() {
+        console.log('� Initializing gameStats collection...');
+        
+        const database = window.gameistDB || db;
+        if (!database) {
+          console.error('❌ Database not available for gameStats initialization');
+          return;
+        }
+        
+        // Create gameStats documents if they don't exist
+        const games = [
+          { id: 'elementist', count: 1200 },
+          { id: '2048', count: 5000 },
+          { id: 'wordlist', count: 850 },
+          { id: 'bilardist', count: 650 }
+        ];
+        
+        games.forEach(async (game) => {
+          try {
+            const docRef = database.collection('gameStats').doc(game.id);
+            const doc = await docRef.get();
+            
+            if (!doc.exists) {
+              await docRef.set({
+                playerCount: game.count,
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+              });
+              console.log(`✅ Created gameStats document for ${game.id} with count ${game.count}`);
+            } else {
+              console.log(`ℹ️ gameStats document for ${game.id} already exists`);
+            }
+          } catch (error) {
+            console.error(`❌ Error creating gameStats for ${game.id}:`, error);
+          }
+        });
+      }
+      
       function updatePlayerCounts() {
-        console.log('📊 Updating player counts from Firebase...');
+        console.log('📊 Setting up real-time player count listener...');
         
         const database = window.gameistDB || db;
         if (!database) {
@@ -1220,74 +1257,57 @@
           return;
         }
         
-        // Get unique player counts per game
-        const games = ['elementist', '2048', 'wordlist', 'bilardist'];
-        
-        games.forEach(game => {
-          database.collection('leaderboard')
-            .where('game', '==', game)
-            .get()
-            .then((snapshot) => {
-              const uniqueUsers = new Set();
-              snapshot.forEach(doc => {
-                uniqueUsers.add(doc.data().userId);
-              });
-              
-              const playerCount = uniqueUsers.size;
-              const countElement = document.querySelector(`[data-game="${game}"] .count-text`);
-              
-              if (countElement) {
-                // Format the number (e.g., 1500 -> 1.5K)
-                let formattedCount = playerCount.toString();
-                if (playerCount >= 1000) {
-                  formattedCount = (playerCount / 1000).toFixed(1) + 'K';
-                }
-                
-                countElement.textContent = formattedCount + '+';
-                console.log(`✅ Updated ${game} player count: ${playerCount} (${formattedCount}+)`);
-              } else {
-                console.warn(`⚠️ Player count element not found for game: ${game}`);
+        // Set up real-time listener for gameStats
+        database.collection('gameStats').onSnapshot((snapshot) => {
+          console.log('🔄 Received gameStats update');
+          
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            const countElement = document.querySelector(`[data-game="${doc.id.toLowerCase()}"] .count-text`);
+            
+            if (countElement) {
+              const playerCount = data.playerCount || 0;
+              // Format the number (e.g., 1500 -> 1.5K)
+              let formattedCount = playerCount.toString();
+              if (playerCount >= 1000) {
+                formattedCount = (playerCount / 1000).toFixed(1) + 'K';
               }
-            })
-            .catch((error) => {
-              console.error(`❌ Error getting player count for ${game}:`, error);
-              // Fallback to default values
-              const countElement = document.querySelector(`[data-game="${game}"] .count-text`);
-              if (countElement) {
-                const fallbackCounts = {
-                  'elementist': '1.2K',
-                  '2048': '5K',
-                  'wordlist': '850',
-                  'bilardist': '650'
-                };
-                countElement.textContent = fallbackCounts[game] + '+';
-              }
-            });
+              
+              countElement.textContent = formattedCount + '+';
+              console.log(`✅ Updated ${doc.id} player count: ${playerCount} (${formattedCount}+)`);
+            } else {
+              console.warn(`⚠️ Player count element not found for game: ${doc.id}`);
+            }
+          });
+        }, (error) => {
+          console.error('❌ Error in gameStats listener:', error);
+          // Fallback to default values
+          const fallbackCounts = {
+            'elementist': '1.2K',
+            '2048': '5K',
+            'wordlist': '850',
+            'bilardist': '650'
+          };
+          
+          Object.keys(fallbackCounts).forEach(game => {
+            const countElement = document.querySelector(`[data-game="${game}"] .count-text`);
+            if (countElement) {
+              countElement.textContent = fallbackCounts[game] + '+';
+            }
+          });
         });
       }
       
-      // Initialize player counts on page load
-      updatePlayerCounts();
+      // Initialize gameStats and start listening
+      initializeGameStats();
+      setTimeout(updatePlayerCounts, 2000); // Wait for initialization
       
       // Update player counts when user logs in
       firebase.auth().onAuthStateChanged((user) => {
         if (user) {
-          setTimeout(() => {
-            updatePlayerCounts();
-          }, 2000);
-        }
-      });
-      
-      // Update player counts every 30 seconds
-      setInterval(updatePlayerCounts, 30000);
-      
-      // Also update when BroadcastChannel message is received
-      gameistChannel.onmessage = (event) => {
-        if (event.data && event.data.type === 'statsUpdate') {
-          console.log('📊 Received stats update, refreshing player counts...');
           setTimeout(updatePlayerCounts, 1000);
         }
-      };
+      });
 
       // Check for redirect result (when using signInWithRedirect) - Enhanced
       firebase.auth().getRedirectResult()
