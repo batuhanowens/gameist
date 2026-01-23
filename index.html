@@ -1063,6 +1063,57 @@
 
       // Initialize session check
       checkSavedSession();
+      
+      // Listen for stats updates from other pages
+      function listenForStatsUpdates() {
+        // Check localStorage for updates
+        setInterval(() => {
+          const updateFlag = localStorage.getItem('gameist_stats_update_needed');
+          if (updateFlag) {
+            try {
+              const updateData = JSON.parse(updateFlag);
+              const currentTime = Date.now();
+              
+              // Only process updates from last 5 seconds
+              if (currentTime - updateData.timestamp < 5000) {
+                console.log('📊 Processing stats update from game:', updateData.game);
+                
+                const savedUser = localStorage.getItem('gameist_user');
+                if (savedUser) {
+                  const user = JSON.parse(savedUser);
+                  if (user.uid === updateData.userId) {
+                    loadUserStats(user.uid);
+                  }
+                }
+                
+                // Clear the flag
+                localStorage.removeItem('gameist_stats_update_needed');
+              }
+            } catch (error) {
+              console.error('❌ Error processing stats update:', error);
+              localStorage.removeItem('gameist_stats_update_needed');
+            }
+          }
+        }, 1000);
+        
+        // Listen for postMessage events
+        window.addEventListener('message', (event) => {
+          if (event.data && event.data.type === 'statsUpdate') {
+            console.log('📊 Received stats update via postMessage:', event.data);
+            
+            const savedUser = localStorage.getItem('gameist_user');
+            if (savedUser) {
+              const user = JSON.parse(savedUser);
+              if (user.uid === event.data.userId) {
+                loadUserStats(user.uid);
+              }
+            }
+          }
+        });
+      }
+      
+      // Start listening for stats updates
+      listenForStatsUpdates();
 
       // Check for redirect result (when using signInWithRedirect) - Enhanced
       firebase.auth().getRedirectResult()

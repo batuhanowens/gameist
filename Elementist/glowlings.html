@@ -5010,6 +5010,9 @@
                     .then(() => {
                       console.log('✅ Elementist score saved to leaderboard:', score);
                       showScoreSavedNotification();
+                      
+                      // Notify main page about the score update
+                      notifyMainPageStatsUpdate(user.uid);
                     })
                     .catch(error => {
                       console.error('❌ Failed to save Elementist score:', error);
@@ -5041,6 +5044,9 @@
                             .then(() => {
                               console.log('✅ Elementist score saved on game over:', score);
                               showScoreSavedNotification();
+                              
+                              // Notify main page about the score update
+                              notifyMainPageStatsUpdate(user.uid);
                             })
                             .catch(error => {
                               console.error('❌ Failed to save Elementist score on game over:', error);
@@ -5053,6 +5059,31 @@
               });
               
               observer.observe(gameOverScreen, { attributes: true });
+            }
+            
+            // Cross-page communication function
+            function notifyMainPageStatsUpdate(userId) {
+              try {
+                // Store a flag in localStorage to notify main page
+                localStorage.setItem('gameist_stats_update_needed', JSON.stringify({
+                  userId: userId,
+                  timestamp: Date.now(),
+                  game: 'elementist'
+                }));
+                
+                // Also try to notify via postMessage if main page is open
+                if (window.opener && !window.opener.closed) {
+                  window.opener.postMessage({
+                    type: 'statsUpdate',
+                    userId: userId,
+                    game: 'elementist'
+                  }, '*');
+                }
+                
+                console.log('📢 Notified main page about stats update');
+              } catch (error) {
+                console.error('❌ Failed to notify main page:', error);
+              }
             }
             
             // Periodic score save (every 30 seconds) - only for logged in users
