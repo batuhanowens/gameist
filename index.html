@@ -989,8 +989,13 @@
           const userLocalScores = localScores.filter(score => score.userId === userId);
           console.log('📈 Found scores from localStorage:', userLocalScores.length);
           
-          // Combine scores
-          const allScores = [...scores, ...userLocalScores];
+          // Check cloud storage fallback for cross-device sync
+          const cloudKey = `gameist_scores_${userId}`;
+          const cloudScores = JSON.parse(localStorage.getItem(cloudKey) || '[]');
+          console.log('📈 Found scores from cloud storage fallback:', cloudScores.length);
+          
+          // Combine all scores
+          const allScores = [...scores, ...userLocalScores, ...cloudScores];
           console.log('📈 Total combined scores:', allScores.length);
           
           const totalScore = allScores.reduce((sum, score) => sum + score.score, 0);
@@ -1147,6 +1152,11 @@
               if (currentUser && currentUser.uid === event.data.userId) {
                 console.log('✅ Stats update matches current user, reloading stats...');
                 loadUserStats(currentUser.uid);
+                
+                // If Firestore failed, sync to localStorage for cross-device sync
+                if (!event.data.firestoreSuccess) {
+                  syncToCloudStorage(event.data);
+                }
               } else {
                 console.log('ℹ️ Stats update for different user, ignoring');
               }
@@ -1161,7 +1171,7 @@
         } catch (error) {
           console.error('❌ Failed to initialize BroadcastChannel listener:', error);
           // Fallback to localStorage polling
-          console.log('� Falling back to localStorage polling...');
+          console.log('🔄 Falling back to localStorage polling...');
           
           setInterval(() => {
             const updateNeeded = localStorage.getItem('gameist_stats_update_needed');
@@ -1175,6 +1185,11 @@
                   console.log('✅ Processing localStorage stats update...');
                   loadUserStats(currentUser.uid);
                   localStorage.removeItem('gameist_stats_update_needed');
+                  
+                  // If Firestore failed, sync to cloud storage
+                  if (!data.firestoreSuccess) {
+                    syncToCloudStorage(data);
+                  }
                 }
               } catch (error) {
                 console.error('❌ Error processing localStorage update:', error);
@@ -1182,6 +1197,32 @@
               }
             }
           }, 1000);
+        }
+      }
+      
+      // Sync scores to cloud storage for cross-device sync when Firestore is down
+      function syncToCloudStorage(scoreData) {
+        try {
+          console.log('☁️ Syncing to cloud storage fallback...');
+          
+          // Use a simple cloud storage solution (can be enhanced with Firebase Storage later)
+          const cloudKey = `gameist_scores_${scoreData.userId}`;
+          const existingData = JSON.parse(localStorage.getItem(cloudKey) || '[]');
+          
+          // Add new score if not already exists
+          const exists = existingData.some(score => 
+            score.score === scoreData.score && 
+            score.game === scoreData.game && 
+            Math.abs(score.timestamp - scoreData.timestamp) < 5000
+          );
+          
+          if (!exists) {
+            existingData.push(scoreData);
+            localStorage.setItem(cloudKey, JSON.stringify(existingData));
+            console.log('✅ Score synced to cloud storage fallback');
+          }
+        } catch (error) {
+          console.error('❌ Error syncing to cloud storage:', error);
         }
       }
       
