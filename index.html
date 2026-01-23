@@ -637,9 +637,11 @@
       </span>
     </footer>
 
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="main.js" defer></script>
     <script src="hub-i18n.js" defer></script>
     <script src="auth-i18n.js" defer></script>
@@ -994,8 +996,29 @@
           const cloudScores = JSON.parse(localStorage.getItem(cloudKey) || '[]');
           console.log('📈 Found scores from cloud storage fallback:', cloudScores.length);
           
+          // Check Firebase Realtime Database for cross-device sync
+          let realtimeScores = [];
+          try {
+            const database = firebase.database();
+            const userScoresRef = database.ref(`userScores/${userId}`);
+            
+            const snapshot = await userScoresRef.once('value');
+            const data = snapshot.val();
+            
+            if (data) {
+              realtimeScores = Object.values(data).map(score => ({
+                ...score,
+                userId: userId,
+                timestamp: score.timestamp || Date.now()
+              }));
+              console.log('📈 Found scores from Realtime Database:', realtimeScores.length);
+            }
+          } catch (error) {
+            console.log('ℹ️ Realtime Database not available:', error.message);
+          }
+          
           // Combine all scores
-          const allScores = [...scores, ...userLocalScores, ...cloudScores];
+          const allScores = [...scores, ...userLocalScores, ...cloudScores, ...realtimeScores];
           console.log('📈 Total combined scores:', allScores.length);
           
           const totalScore = allScores.reduce((sum, score) => sum + score.score, 0);
@@ -1203,26 +1226,44 @@
       // Sync scores to cloud storage for cross-device sync when Firestore is down
       function syncToCloudStorage(scoreData) {
         try {
-          console.log('☁️ Syncing to cloud storage fallback...');
+          console.log('☁️ Syncing to Firebase Realtime Database fallback...');
           
-          // Use a simple cloud storage solution (can be enhanced with Firebase Storage later)
-          const cloudKey = `gameist_scores_${scoreData.userId}`;
-          const existingData = JSON.parse(localStorage.getItem(cloudKey) || '[]');
+          // Use Firebase Realtime Database as fallback for cross-device sync
+          const database = firebase.database();
+          const userScoresRef = database.ref(`userScores/${scoreData.userId}`);
           
-          // Add new score if not already exists
-          const exists = existingData.some(score => 
-            score.score === scoreData.score && 
-            score.game === scoreData.game && 
-            Math.abs(score.timestamp - scoreData.timestamp) < 5000
-          );
+          // Push the score to Realtime Database
+          const newScoreRef = userScoresRef.push();
+          newScoreRef.set({
+            score: scoreData.score,
+            game: scoreData.game,
+            timestamp: scoreData.timestamp,
+            displayName: scoreData.displayName || 'Unknown',
+            firestoreFailed: true
+          }).then(() => {
+            console.log('✅ Score synced to Firebase Realtime Database fallback');
+          }).catch(error => {
+            console.error('❌ Error syncing to Realtime Database:', error);
+            
+            // Final fallback: localStorage (device only)
+            const cloudKey = `gameist_scores_${scoreData.userId}`;
+            const existingData = JSON.parse(localStorage.getItem(cloudKey) || '[]');
+            
+            const exists = existingData.some(score => 
+              score.score === scoreData.score && 
+              score.game === scoreData.game && 
+              Math.abs(score.timestamp - scoreData.timestamp) < 5000
+            );
+            
+            if (!exists) {
+              existingData.push(scoreData);
+              localStorage.setItem(cloudKey, JSON.stringify(existingData));
+              console.log('⚠️ Score saved to localStorage only (device sync)');
+            }
+          });
           
-          if (!exists) {
-            existingData.push(scoreData);
-            localStorage.setItem(cloudKey, JSON.stringify(existingData));
-            console.log('✅ Score synced to cloud storage fallback');
-          }
         } catch (error) {
-          console.error('❌ Error syncing to cloud storage:', error);
+          console.error('❌ Error in cloud storage sync:', error);
         }
       }
       
