@@ -1117,9 +1117,28 @@
       // Initialize session check
       checkSavedSession();
       
+      // Create BroadcastChannel for cross-page communication
+      const gameistChannel = new BroadcastChannel('gameist_stats');
+      
       // Listen for stats updates from other pages
       function listenForStatsUpdates() {
-        // Check localStorage for updates
+        // Listen for messages from BroadcastChannel
+        gameistChannel.onmessage = (event) => {
+          if (event.data && event.data.type === 'statsUpdate') {
+            console.log('📊 Received stats update via BroadcastChannel:', event.data);
+            
+            const savedUser = localStorage.getItem('gameist_user');
+            if (savedUser) {
+              const user = JSON.parse(savedUser);
+              if (user.uid === event.data.userId) {
+                console.log('🔄 Loading stats for user:', user.displayName);
+                loadUserStats(user.uid);
+              }
+            }
+          }
+        };
+        
+        // Also check localStorage for updates (fallback)
         setInterval(() => {
           const updateFlag = localStorage.getItem('gameist_stats_update_needed');
           if (updateFlag) {
@@ -1149,20 +1168,7 @@
           }
         }, 1000);
         
-        // Listen for postMessage events
-        window.addEventListener('message', (event) => {
-          if (event.data && event.data.type === 'statsUpdate') {
-            console.log('📊 Received stats update via postMessage:', event.data);
-            
-            const savedUser = localStorage.getItem('gameist_user');
-            if (savedUser) {
-              const user = JSON.parse(savedUser);
-              if (user.uid === event.data.userId) {
-                loadUserStats(user.uid);
-              }
-            }
-          }
-        });
+        console.log('� BroadcastChannel stats listener initialized');
       }
       
       // Start listening for stats updates

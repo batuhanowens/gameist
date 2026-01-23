@@ -5070,26 +5070,26 @@
               observer.observe(gameOverScreen, { attributes: true });
             }
             
-            // Cross-page communication function
+            // Cross-page communication function using BroadcastChannel
             function notifyMainPageStatsUpdate(userId) {
               try {
-                // Store a flag in localStorage to notify main page
-                localStorage.setItem('gameist_stats_update_needed', JSON.stringify({
+                // Use BroadcastChannel for reliable communication
+                const channel = new BroadcastChannel('gameist_stats');
+                const message = {
+                  type: 'statsUpdate',
                   userId: userId,
-                  timestamp: Date.now(),
-                  game: 'elementist'
-                }));
+                  game: 'elementist',
+                  score: getElementistScore(),
+                  timestamp: Date.now()
+                };
                 
-                // Also try to notify via postMessage if main page is open
-                if (window.opener && !window.opener.closed) {
-                  window.opener.postMessage({
-                    type: 'statsUpdate',
-                    userId: userId,
-                    game: 'elementist'
-                  }, '*');
-                }
+                channel.postMessage(message);
+                console.log('📡 Sent stats update via BroadcastChannel:', message);
                 
-                console.log('📢 Notified main page about stats update');
+                // Also store in localStorage as fallback
+                localStorage.setItem('gameist_stats_update_needed', JSON.stringify(message));
+                
+                console.log('📢 Notified main page about stats update via BroadcastChannel');
               } catch (error) {
                 console.error('❌ Failed to notify main page:', error);
               }
@@ -5204,8 +5204,21 @@
               .then(() => {
                 console.log('✅ Elementist best score synced to main index:', stats.bestScore);
                 
-                // Notify main page about the update
-                notifyMainPageStatsUpdate(user.uid);
+                // Notify main page about the update using BroadcastChannel
+                const channel = new BroadcastChannel('gameist_stats');
+                const message = {
+                  type: 'statsUpdate',
+                  userId: user.uid,
+                  game: 'elementist',
+                  score: stats.bestScore,
+                  timestamp: Date.now()
+                };
+                
+                channel.postMessage(message);
+                console.log('📡 Sent stats update via BroadcastChannel:', message);
+                
+                // Also store in localStorage as fallback
+                localStorage.setItem('gameist_stats_update_needed', JSON.stringify(message));
               })
               .catch(error => {
                 console.error('❌ Failed to sync Elementist stats:', error);
