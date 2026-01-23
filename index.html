@@ -1041,10 +1041,12 @@
             console.log('✅ Updated game stats HTML');
           }
           
-          console.log('✅ User stats loaded successfully');
+          console.log('✅ User stats loading completed');
           
         } catch (error) {
           console.error('❌ Error loading user stats:', error);
+          console.error('❌ Error details:', error.message);
+          console.error('❌ Error stack:', error.stack);
         }
       }
 
