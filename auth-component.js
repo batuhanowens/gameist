@@ -248,7 +248,15 @@ class GameistAuth {
             
             console.log('📄 Document data to save:', docData);
             
-            const result = await this.db.collection('leaderboard').add(docData);
+            // Add timeout to detect hanging Firestore operation
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Firestore write timeout after 10 seconds')), 10000);
+            });
+            
+            const writePromise = this.db.collection('leaderboard').add(docData);
+            
+            const result = await Promise.race([writePromise, timeoutPromise]);
+            
             console.log('✅ Score saved to leaderboard:', score);
             console.log('📄 Document ID:', result.id);
             return result;
@@ -256,6 +264,11 @@ class GameistAuth {
             console.error('❌ Failed to save score:', error);
             console.error('❌ Error code:', error.code);
             console.error('❌ Error message:', error.message);
+            
+            if (error.message === 'Firestore write timeout after 10 seconds') {
+                console.error('❌ Firestore write operation timed out - possible network issue');
+            }
+            
             return false;
         }
     }
