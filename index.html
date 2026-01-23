@@ -1296,6 +1296,9 @@
         }
       }, 30000);
 
+      // Immediate call to check saved session and load stats
+      checkSavedSession();
+
       // Check for redirect result (when using signInWithRedirect) - Enhanced
       firebase.auth().getRedirectResult()
         .then((result) => {
