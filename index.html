@@ -688,7 +688,6 @@
           await firebase.auth().signOut();
           document.getElementById('googleLogin').style.display = 'inline-flex';
           document.getElementById('userInfo').style.display = 'none';
-          document.getElementById('authStatus').style.display = 'none';
           console.log("✅ User signed out successfully");
         } catch (error) {
           console.error("❌ Sign out error:", error);
@@ -1098,7 +1097,7 @@
           console.log('✅ User stats loaded successfully');
           
         } catch (error) {
-          console.error('❌ Error loading user stats:', error);
+          console.error('Error loading user stats:', error);
         }
       }
 
