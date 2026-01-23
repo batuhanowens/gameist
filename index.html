@@ -202,18 +202,27 @@
               </svg>
               Google ile Giriş Yap
             </button>
-            <div id="userInfo" style="display: none; margin-top: 10px;">
-              <div style="padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px; justify-content: center;">
-                  <img id="userPhoto" src="" alt="User" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.3);">
+            <div id="userInfo" style="display: none; margin-top: 15px;">
+              <div style="padding: 16px; background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%); border-radius: 12px; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.1); transition: all 0.3s ease;">
+                <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 12px; justify-content: center;">
+                  <div style="position: relative;">
+                    <img id="userPhoto" src="" alt="User" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.3); box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                    <div style="position: absolute; bottom: -2px; right: -2px; width: 12px; height: 12px; background: #4ade80; border: 2px solid rgba(255,255,255,0.9); border-radius: 50%;"></div>
+                  </div>
                   <div style="text-align: left;">
-                    <div style="color: white; font-weight: 600; font-size: 14px;">Hoş geldin,</div>
-                    <div id="userName" style="color: white; font-weight: 500; font-size: 16px;"></div>
+                    <div style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;" data-i18n="welcome_text">Hoş geldin,</div>
+                    <div id="userName" style="color: white; font-weight: 700; font-size: 18px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
+                    <div id="userEmail" style="color: rgba(255,255,255,0.7); font-size: 13px; margin-top: 2px;"></div>
                   </div>
                 </div>
-                <button id="logout" style="padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.3s ease;">
-                  Çıkış Yap
-                </button>
+                <div style="display: flex; gap: 8px; justify-content: center;">
+                  <button id="logout" style="padding: 10px 18px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(239,68,68,0.3);">
+                    <span data-i18n="logout_button">Çıkış Yap</span>
+                  </button>
+                  <button id="profileBtn" style="padding: 10px 18px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(59,130,246,0.3);">
+                    <span data-i18n="profile_button">Profil</span>
+                  </button>
+                </div>
               </div>
             </div>
             <div id="authStatus" style="margin-top: 8px; font-size: 12px; color: rgba(255,255,255,0.7); display: none;"></div>
@@ -581,6 +590,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="main.js" defer></script>
     <script src="hub-i18n.js" defer></script>
+    <script src="auth-i18n.js" defer></script>
     
     <!-- Firebase Configuration -->
     <script>
@@ -636,16 +646,17 @@
         const credential = result.credential;
         const token = credential ? credential.accessToken : 'N/A';
         
-        // Update UI
+        // Update UI with user info
         document.getElementById('userName').textContent = user.displayName;
+        document.getElementById('userEmail').textContent = user.email;
         document.getElementById('userPhoto').src = user.photoURL;
         document.getElementById('googleLogin').style.display = 'none';
         document.getElementById('userInfo').style.display = 'block';
         
-        // Update status
+        // Update status with translation
         const authStatus = document.getElementById('authStatus');
         authStatus.style.display = 'block';
-        authStatus.innerHTML = '✅ Giriş başarılı!';
+        authStatus.innerHTML = '✅ ' + getAuthTranslation('login_success');
         
         console.log("✅ Authentication successful:", {
           displayName: user.displayName,
@@ -653,6 +664,14 @@
           uid: user.uid,
           token: token.substring(0, 20) + '...'
         });
+        
+        // Save user session for cross-page access
+        localStorage.setItem('gameist_user', JSON.stringify({
+          displayName: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+          uid: user.uid
+        }));
         
         // Leaderboard functionality ready
         if (db) {
@@ -668,34 +687,34 @@
         }, 3000);
       }
 
-      // Handle authentication errors
+      // Handle authentication errors with translations
       function handleAuthError(error) {
         console.error("❌ Authentication error:", error);
         
         const authStatus = document.getElementById('authStatus');
         authStatus.style.display = 'block';
         
-        let errorMessage = error.message;
+        let errorMessage;
         
-        // User-friendly error messages
+        // Use translated error messages
         switch (error.code) {
           case 'auth/popup-closed-by-user':
-            errorMessage = 'Popup kapatıldı. Lütfen tekrar deneyin.';
+            errorMessage = getAuthTranslation('popup_closed');
             break;
           case 'auth/popup-blocked':
-            errorMessage = 'Popup engellendi. Lütfen popup engelleyiciyi devre dışı bırakın.';
+            errorMessage = getAuthTranslation('popup_blocked');
             break;
           case 'auth/cancelled-popup-request':
-            errorMessage = 'İptal edildi. Lütfen tekrar deneyin.';
+            errorMessage = getAuthTranslation('popup_closed');
             break;
           case 'auth/unauthorized-domain':
-            errorMessage = 'Domain yetkili değil. Firebase Console\'a domain ekleyin.';
+            errorMessage = getAuthTranslation('unauthorized_domain');
             break;
           default:
-            errorMessage = `Giriş hatası: ${error.message}`;
+            errorMessage = getAuthTranslation('login_failed') + ': ' + error.message;
         }
         
-        authStatus.innerHTML = `❌ ${errorMessage}`;
+        authStatus.innerHTML = '❌ ' + errorMessage;
         
         // Hide status after 5 seconds
         setTimeout(() => {
@@ -706,19 +725,60 @@
       // Listen for authentication state changes
       firebase.auth().onAuthStateChanged((user) => {
         if (user) {
-          // User is signed in
+          // User is signed in - update UI
           document.getElementById('userName').textContent = user.displayName;
+          document.getElementById('userEmail').textContent = user.email;
           document.getElementById('userPhoto').src = user.photoURL;
           document.getElementById('googleLogin').style.display = 'none';
           document.getElementById('userInfo').style.display = 'block';
+          
+          // Save session for cross-page access
+          localStorage.setItem('gameist_user', JSON.stringify({
+            displayName: user.displayName,
+            email: user.email,
+            photoURL: user.photoURL,
+            uid: user.uid
+          }));
+          
           console.log("✅ User session active:", user.displayName);
         } else {
-          // User is signed out
+          // User is signed out - clear session
           document.getElementById('googleLogin').style.display = 'inline-flex';
           document.getElementById('userInfo').style.display = 'none';
+          localStorage.removeItem('gameist_user');
           console.log("ℹ️ No active user session");
         }
       });
+
+      // Check for saved session on page load
+      function checkSavedSession() {
+        const savedUser = localStorage.getItem('gameist_user');
+        if (savedUser) {
+          try {
+            const user = JSON.parse(savedUser);
+            console.log("🔄 Restoring saved session:", user.displayName);
+            
+            // Update UI with saved data
+            document.getElementById('userName').textContent = user.displayName;
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('userPhoto').src = user.photoURL;
+            document.getElementById('googleLogin').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'block';
+          } catch (e) {
+            console.error("❌ Failed to restore session:", e);
+            localStorage.removeItem('gameist_user');
+          }
+        }
+      }
+
+      // Profile button handler
+      document.getElementById('profileBtn').addEventListener('click', function() {
+        const user = JSON.parse(localStorage.getItem('gameist_user') || '{}');
+        alert(`👤 Profile\n\nName: ${user.displayName}\nEmail: ${user.email}\nUID: ${user.uid}`);
+      });
+
+      // Initialize session check
+      checkSavedSession();
 
       // Check for redirect result (when using signInWithRedirect) - Enhanced
       firebase.auth().getRedirectResult()
