@@ -1000,6 +1000,7 @@
           // Check Firebase Realtime Database for cross-device sync
           let realtimeScores = [];
           try {
+            console.log('🔍 Checking Realtime Database for cross-device sync...');
             const database = firebase.database();
             const userScoresRef = database.ref(`userScores/${userId}`);
             
@@ -1013,6 +1014,11 @@
                 timestamp: score.timestamp || Date.now()
               }));
               console.log('📈 Found scores from Realtime Database:', realtimeScores.length);
+              realtimeScores.forEach(score => {
+                console.log(`📄 Realtime score: ${score.game} - ${score.score} pts`);
+              });
+            } else {
+              console.log('📭 No scores found in Realtime Database');
             }
           } catch (error) {
             console.log('ℹ️ Realtime Database not available:', error.message);
