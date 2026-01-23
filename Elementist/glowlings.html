@@ -5304,6 +5304,11 @@
                 console.error('❌ Failed to sync Elementist stats:', error);
                 console.error('❌ Error details:', error.code, error.message);
               });
+            
+            // Add timeout to detect hanging promise
+            setTimeout(() => {
+              console.log('⏰ Checking if saveScore completed...');
+            }, 5000);
           }
         }
         
