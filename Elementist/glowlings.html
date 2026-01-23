@@ -3321,6 +3321,66 @@
     <script src="glowlings.js"></script>
     <!-- Enhanced hooks after core game -->
     <script src="glowlings-enhanced.js"></script>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyD7ckcqdZWfnUx5r8uKmvu9Ikax1x5Qidk",
+        authDomain: "gameist.firebaseapp.com",
+        projectId: "gameist",
+        storageBucket: "gameist.firebasestorage.app",
+        messagingSenderId: "525659299937",
+        appId: "1:525659299937:web:1c8343a25be2a994bcca20",
+        measurementId: "G-WE9R0GWKM6"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      window.auth = getAuth(app);
+      window.db = getFirestore(app);
+
+      console.log('🔥 Firebase initialized in Elementist with module system');
+      
+      // Make auth state available globally
+      onAuthStateChanged(window.auth, (user) => {
+        if (user) {
+          console.log('✅ User authenticated in Elementist:', user.displayName, user.uid);
+          window.currentUser = user;
+        } else {
+          console.log('ℹ️ No user authenticated in Elementist');
+          window.currentUser = null;
+        }
+      });
+
+      // Global score save function
+      window.saveScoreToFirebase = function(score) {
+        const user = window.auth.currentUser;
+        if (!user) {
+          console.log("❌ No user logged in");
+          return;
+        }
+
+        setDoc(
+          doc(window.db, "leaderboard", user.uid + "_" + Date.now()),
+          {
+            userId: user.uid,
+            displayName: user.displayName,
+            email: user.email,
+            score: score,
+            game: 'elementist',
+            updatedAt: Date.now()
+          },
+          { merge: true }
+        ).then(() => {
+          console.log('✅ Score saved to Firebase:', score);
+        }).catch(error => {
+          console.error('❌ Failed to save score:', error);
+        });
+      };
+    </script>
     <script>
       (function(){
         const bar = document.getElementById('consumableBar');
@@ -5009,26 +5069,11 @@
               }
             }
             
-            // Direct Firebase score save function (bypass auth-component)
+            // Direct Firebase score save function using new module system
             function saveScoreDirectly() {
               try {
                 console.log('🔥 Direct Firebase save attempt using Elementist native stats');
                 
-                // Get Firebase from window (should be loaded by auth-component)
-                if (typeof firebase === 'undefined') {
-                  console.error('❌ Firebase not loaded');
-                  return false;
-                }
-                
-                const auth = firebase.auth();
-                const db = firebase.firestore();
-                
-                if (!auth.currentUser) {
-                  console.error('❌ No user logged in');
-                  return false;
-                }
-                
-                const user = auth.currentUser;
                 const bestScore = getElementistBestScore();
                 const bestWave = getElementistBestWave();
                 
@@ -5037,31 +5082,20 @@
                   return false;
                 }
                 
-                console.log('👤 Current user:', user.displayName, user.uid);
                 console.log('📊 Best score:', bestScore, 'Best wave:', bestWave);
                 
-                // Save to leaderboard collection
-                db.collection('leaderboard').add({
-                  userId: user.uid,
-                  displayName: user.displayName,
-                  email: user.email,
-                  score: bestScore,
-                  game: 'elementist',
-                  wave: bestWave,
-                  timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                })
-                .then((docRef) => {
-                  console.log('✅ Elementist best score saved to Firebase:', docRef.id);
+                // Use the new global save function
+                if (window.saveScoreToFirebase) {
+                  window.saveScoreToFirebase(bestScore);
                   showScoreSavedNotification();
                   
                   // Notify main page
-                  notifyMainPageStatsUpdate(user.uid);
-                })
-                .catch((error) => {
-                  console.error('❌ Direct save failed:', error);
-                });
-                
-                return true;
+                  notifyMainPageStatsUpdate(window.auth.currentUser?.uid);
+                  return true;
+                } else {
+                  console.error('❌ saveScoreToFirebase function not available');
+                  return false;
+                }
               } catch (error) {
                 console.error('❌ Error in direct save:', error);
                 return false;

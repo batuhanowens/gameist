@@ -637,15 +637,13 @@
       </span>
     </footer>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="main.js" defer></script>
-    <script src="hub-i18n.js" defer></script>
-    <script src="auth-i18n.js" defer></script>
-    
-    <!-- Firebase Configuration -->
-    <script>
+    <!-- Firebase SDKs -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
       const firebaseConfig = {
         apiKey: "AIzaSyD7ckcqdZWfnUx5r8uKmvu9Ikax1x5Qidk",
         authDomain: "gameist.firebaseapp.com",
@@ -655,7 +653,29 @@
         appId: "1:525659299937:web:1c8343a25be2a994bcca20",
         measurementId: "G-WE9R0GWKM6"
       };
-      firebase.initializeApp(firebaseConfig);
+
+      const app = initializeApp(firebaseConfig);
+      window.auth = getAuth(app);
+      window.db = getFirestore(app);
+
+      console.log('🔥 Firebase initialized with module system');
+      
+      // Make auth state available globally
+      onAuthStateChanged(window.auth, (user) => {
+        if (user) {
+          console.log('✅ User authenticated:', user.displayName, user.uid);
+          window.currentUser = user;
+        } else {
+          console.log('ℹ️ No user authenticated');
+          window.currentUser = null;
+        }
+      });
+    </script>
+
+    <!-- Legacy Firebase for existing auth system -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
       // Firebase Authentication Logic
       const provider = new firebase.auth.GoogleAuthProvider();
