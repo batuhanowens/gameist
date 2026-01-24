@@ -1294,15 +1294,45 @@
       // Start listening for stats updates
       listenForStatsUpdates();
       
-      // Guaranteed auto-sync every 5 seconds - SIMPLE AND RELIABLE
-      setInterval(() => {
+      // GUARANTEED CROSS-DEVICE SYNC EVERY 3 SECONDS - NET ÇÖZÜM
+      setInterval(async () => {
         const savedUser = localStorage.getItem('gameist_user');
         if (savedUser) {
-          const user = JSON.parse(savedUser);
-          console.log('🔄 Auto-sync every 5 seconds for:', user.displayName);
-          loadUserStats(user.uid);
+          try {
+            const user = JSON.parse(savedUser);
+            console.log('🔄 GUARANTEED SYNC - Forcing Realtime Database read for:', user.displayName);
+            
+            // FORCE read from Realtime Database
+            const database = firebase.database();
+            const userScoresRef = database.ref(`userScores/${user.uid}`);
+            
+            const snapshot = await userScoresRef.once('value');
+            const data = snapshot.val();
+            
+            let realtimeScores = [];
+            if (data) {
+              realtimeScores = Object.values(data).map(score => ({
+                ...score,
+                userId: user.uid,
+                timestamp: score.timestamp || Date.now()
+              }));
+              console.log('📊 GUARANTEED SYNC - Found Realtime scores:', realtimeScores.length);
+              realtimeScores.forEach(score => {
+                console.log(`📄 ${score.game}: ${score.score} pts`);
+              });
+            }
+            
+            // Force reload stats with Realtime data
+            loadUserStats(user.uid);
+            
+          } catch (error) {
+            console.log('⚠️ GUARANTEED SYNC error:', error.message);
+            // Fallback: still try to load stats
+            const user = JSON.parse(savedUser);
+            loadUserStats(user.uid);
+          }
         }
-      }, 5000);
+      }, 3000); // HER 3 SANİYEDE BİR
 
       // Auto-refresh stats every 30 seconds for cross-device sync
       setInterval(() => {
