@@ -1647,6 +1647,17 @@
             saveLB(trimmed);
             renderPanel();
 
+            // Save score to Gameist leaderboard
+            if (typeof window.saveScore === 'function') {
+              window.saveScore('elementist', score).then(success => {
+                if (success) {
+                  console.log('✅ Elementist score saved to leaderboard:', score);
+                }
+              });
+            } else {
+              console.log('⚠️ saveScore function not available');
+            }
+
             if(finalStats){
               const extra = `\n<div style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(51,65,85,0.45); color:#cbd5e1; font-size:13px; line-height:1.55;">`+
                 `<div><strong>Run Time</strong>: ${formatMs(dur)}</div>`+

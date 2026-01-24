@@ -693,6 +693,56 @@
           });
       });
 
+      // Simple score saving function
+      async function saveScore(gameName, score) {
+        const savedUser = localStorage.getItem('gameist_user');
+        if (!savedUser) {
+          console.log('❌ User not logged in');
+          return false;
+        }
+
+        const user = JSON.parse(savedUser);
+        
+        try {
+          const database = firebase.firestore();
+          await database.collection('leaderboard').add({
+            userId: user.uid,
+            displayName: user.displayName,
+            email: user.email,
+            score: score,
+            game: gameName,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          
+          console.log(`✅ Score saved: ${gameName} - ${score}`);
+          
+          // Reload stats after saving
+          loadUserStats(user.uid);
+          return true;
+          
+        } catch (error) {
+          console.error('❌ Failed to save score:', error);
+          
+          // Fallback to localStorage
+          const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
+          localScores.push({
+            userId: user.uid,
+            displayName: user.displayName,
+            score: score,
+            game: gameName,
+            timestamp: Date.now()
+          });
+          localStorage.setItem('gameist_local_scores', JSON.stringify(localScores));
+          console.log('✅ Score saved to localStorage fallback');
+          
+          loadUserStats(user.uid);
+          return true;
+        }
+      }
+
+      // Make saveScore global for games to use
+      window.saveScore = saveScore;
+
       // Logout
       document.getElementById('logout').addEventListener('click', function() {
         firebase.auth().signOut()
