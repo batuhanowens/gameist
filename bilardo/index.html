@@ -1043,6 +1043,100 @@
     </div>
 
     <script src="js/game.js"></script>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="../auth-component.js?v=2"></script>
+    
+    <script>
+      // Firebase Configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyD7ckcqdZWfnUx5r8uKmvu9Ikax1x5Qidk",
+        authDomain: "gameist.firebaseapp.com",
+        projectId: "gameist",
+        storageBucket: "gameist.firebasestorage.app",
+        messagingSenderId: "525659299937",
+        appId: "1:525659299937:web:1c8343a25be2a994bcca20",
+        measurementId: "G-WE9R0GWKM6",
+        databaseURL: "https://gameist-default-rtdb.firebaseio.com/"
+      };
+      firebase.initializeApp(firebaseConfig);
+      
+      // Bilardo Cross-Device Sync
+      let bilardoAuth;
+      
+      // Initialize auth when game loads
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          if (window.gameistAuth) {
+            bilardoAuth = window.gameistAuth;
+            console.log('🔥 Bilardo Cross-Device Sync initialized');
+            setupBilardoSync();
+          }
+        }, 1000);
+      });
+      
+      function setupBilardoSync() {
+        // Listen for game events (win/loss)
+        setInterval(() => {
+          if (window.game && bilardoAuth) {
+            const score = window.game.score || 0;
+            const lastSyncedScore = localStorage.getItem('bilardo_last_synced_score') || 0;
+            
+            if (score > parseInt(lastSyncedScore)) {
+              saveBilardoScoreToRealtime(score);
+            }
+          }
+        }, 5000);
+      }
+      
+      async function saveBilardoScoreToRealtime(score) {
+        try {
+          const user = firebase.auth().currentUser;
+          if (!user) return;
+          
+          console.log('💾 Saving Bilardo score to Realtime Database:', score);
+          
+          const database = firebase.database();
+          const userScoresRef = database.ref(`userScores/${user.uid}`);
+          const newScoreRef = userScoresRef.push();
+          
+          await newScoreRef.set({
+            userId: user.uid,
+            displayName: user.displayName,
+            email: user.email,
+            score: score,
+            game: 'bilardist',
+            timestamp: Date.now(),
+            fromBilardo: true
+          });
+          
+          localStorage.setItem('bilardo_last_synced_score', score);
+          console.log('✅ Bilardo score saved to Realtime Database');
+          
+          // Notify main menu
+          try {
+            const channel = new BroadcastChannel('gameist_stats');
+            channel.postMessage({
+              type: 'statsUpdate',
+              userId: user.uid,
+              game: 'bilardist',
+              score: score,
+              timestamp: Date.now(),
+              firestoreSuccess: true
+            });
+          } catch (error) {
+            console.log('BroadcastChannel not available');
+          }
+          
+        } catch (error) {
+          console.error('❌ Error saving Bilardo score:', error);
+        }
+      }
+    </script>
     </div>
 
     <script>

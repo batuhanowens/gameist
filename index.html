@@ -1295,6 +1295,48 @@
         }
       }, 30000);
 
+      // Realtime Database auto-sync listener for instant cross-device updates
+      function setupRealtimeListener() {
+        const savedUser = localStorage.getItem('gameist_user');
+        if (savedUser) {
+          try {
+            const user = JSON.parse(savedUser);
+            console.log('🔥 Setting up Realtime Database listener for user:', user.displayName);
+            
+            const database = firebase.database();
+            const userScoresRef = database.ref(`userScores/${user.uid}`);
+            
+            // Listen for real-time updates
+            userScoresRef.on('value', (snapshot) => {
+              console.log('📡 Realtime Database update detected!');
+              const data = snapshot.val();
+              
+              if (data) {
+                const scores = Object.values(data);
+                console.log('📊 Realtime scores updated:', scores.length);
+                
+                // Reload stats immediately
+                loadUserStats(user.uid);
+              }
+            });
+            
+            console.log('✅ Realtime Database listener active');
+          } catch (error) {
+            console.error('❌ Error setting up Realtime listener:', error);
+          }
+        }
+      }
+
+      // Setup listener when user is available
+      firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+          setupRealtimeListener();
+        }
+      });
+
+      // Also setup on page load if user is already logged in
+      setupRealtimeListener();
+
       // Immediate call to check saved session and load stats
       checkSavedSession();
 
