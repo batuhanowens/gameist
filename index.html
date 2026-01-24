@@ -193,7 +193,8 @@
 
           <!-- Firebase Authentication -->
           <div class="auth-section" style="margin-top: 20px; text-align: center;">
-            <!-- Google login button removed - using auth-component instead -->
+            <!-- Auth component will create login button here -->
+            <div id="gameist-auth-container"></div>
             <div id="userInfo" style="display: none; margin-top: 20px;">
               <div style="padding: 20px; background: linear-gradient(145deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 100%); border-radius: 16px; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden;">
                 <!-- Animated background gradient -->
@@ -634,10 +635,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="auth-component.js?v=3"></script>
     <script src="main.js?v=3"></script>
     <script src="hub-i18n.js?v=3"></script>
     <script src="auth-i18n.js?v=3"></script>
-    <script src="auth-component.js?v=3"></script>
     
     <!-- Firebase Configuration -->
     <script>
