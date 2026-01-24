@@ -1037,10 +1037,18 @@
           const allScores = [...scores, ...userLocalScores, ...cloudScores, ...realtimeScores];
           console.log('📈 Total combined scores:', allScores.length);
           
-          const totalScore = allScores.reduce((sum, score) => sum + score.score, 0);
-          const gamesPlayed = new Set(allScores.map(s => s.game)).size;
+          // Calculate highest score per game (not sum of all scores)
+          const gameHighScores = {};
+          allScores.forEach(score => {
+            if (!gameHighScores[score.game] || score.score > gameHighScores[score.game]) {
+              gameHighScores[score.game] = score.score;
+            }
+          });
           
-          console.log('📊 Calculated stats:', { totalScore, gamesPlayed });
+          const totalScore = Object.values(gameHighScores).reduce((sum, score) => sum + score, 0);
+          const gamesPlayed = Object.keys(gameHighScores).length;
+          
+          console.log('📊 Calculated stats:', { totalScore, gamesPlayed, gameHighScores });
           
           // Update modal stats
           const modalTotalScore = document.getElementById('modalTotalScore');
