@@ -661,198 +661,27 @@
       };
       firebase.initializeApp(firebaseConfig);
 
-      // Simple Google login
-      document.getElementById('googleLogin').addEventListener('click', function() {
-        firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider())
-          .then((result) => {
-            const user = result.user;
-            document.getElementById('userName').textContent = user.displayName;
-            document.getElementById('userEmailText').textContent = user.email;
-            document.getElementById('userPhoto').src = user.photoURL;
-            document.getElementById('googleLogin').style.display = 'none';
-            document.getElementById('userInfo').style.display = 'block';
-            
-            localStorage.setItem('gameist_user', JSON.stringify({
-              displayName: user.displayName,
-              email: user.email,
-              photoURL: user.photoURL,
-              uid: user.uid
-            }));
-            
-            console.log("✅ Giriş başarılı:", user.displayName);
-            loadUserStats(user.uid);
-          })
-          .catch((error) => {
-            console.error("❌ Giriş hatası:", error);
-            const authStatus = document.getElementById('authStatus');
-            authStatus.style.display = 'block';
-            authStatus.innerHTML = '❌ Giriş başarısız: ' + error.message;
-            setTimeout(() => {
-              authStatus.style.display = 'none';
-            }, 3000);
-          });
+      // Firebase Authentication Logic
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.addScope('email');
+      provider.addScope('profile');
+      
+      // Custom redirect URI for better compatibility
+      provider.setCustomParameters({
+        'redirect_uri': window.location.origin
       });
 
-      // Simple score saving function
-      async function saveScore(gameName, score) {
-        const savedUser = localStorage.getItem('gameist_user');
-        if (!savedUser) {
-          console.log('❌ User not logged in');
-          return false;
-        }
-
-        const user = JSON.parse(savedUser);
-        
-        try {
-          const database = firebase.firestore();
-          await database.collection('leaderboard').add({
-            userId: user.uid,
-            displayName: user.displayName,
-            email: user.email,
-            score: score,
-            game: gameName,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          
-          console.log(`✅ Score saved: ${gameName} - ${score}`);
-          
-          // Reload stats after saving
-          loadUserStats(user.uid);
-          return true;
-          
-        } catch (error) {
-          console.error('❌ Failed to save score:', error);
-          
-          // Fallback to localStorage
-          const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
-          localScores.push({
-            userId: user.uid,
-            displayName: user.displayName,
-            score: score,
-            game: gameName,
-            timestamp: Date.now()
-          });
-          localStorage.setItem('gameist_local_scores', JSON.stringify(localScores));
-          console.log('✅ Score saved to localStorage fallback');
-          
-          loadUserStats(user.uid);
-          return true;
-        }
+      // Initialize Firestore for leaderboard
+      let db;
+      try {
+        db = firebase.firestore();
+        console.log("✅ Firestore initialized - leaderboard ready");
+      } catch (error) {
+        console.error("❌ Firestore initialization failed:", error);
       }
 
-      // Make saveScore global for games to use
-      window.saveScore = saveScore;
-
-      // Logout
-      document.getElementById('logout').addEventListener('click', function() {
-        firebase.auth().signOut()
-          .then(() => {
-            document.getElementById('googleLogin').style.display = 'inline-flex';
-            document.getElementById('userInfo').style.display = 'none';
-            localStorage.removeItem('gameist_user');
-          });
-      });
-
-      // Check saved session
-      window.addEventListener('load', function() {
-        const savedUser = localStorage.getItem('gameist_user');
-        if (savedUser) {
-          const user = JSON.parse(savedUser);
-          document.getElementById('userName').textContent = user.displayName;
-          document.getElementById('userEmailText').textContent = user.email;
-          document.getElementById('userPhoto').src = user.photoURL;
-          document.getElementById('googleLogin').style.display = 'none';
-          document.getElementById('userInfo').style.display = 'block';
-          loadUserStats(user.uid);
-        }
-      });
-
-      // Load user statistics
-      async function loadUserStats(userId) {
-        console.log('📊 Loading user stats for:', userId);
-        
-        try {
-          const database = firebase.firestore();
-          if (!database) {
-            console.error('❌ Database not available');
-            return;
-          }
-          
-          let allScores = [];
-          
-          // 1. Load from Firestore (primary source)
-          try {
-            console.log('🔍 Loading from Firestore...');
-            const snapshot = await database.collection('leaderboard')
-              .where('userId', '==', userId)
-              .orderBy('timestamp', 'desc')
-              .get();
-            
-            const firestoreScores = snapshot.docs.map(doc => ({
-              ...doc.data(),
-              source: 'firestore'
-            }));
-            allScores.push(...firestoreScores);
-            console.log('📈 Found scores from Firestore:', firestoreScores.length);
-            
-          } catch (error) {
-            console.error('❌ Firestore query failed:', error);
-          }
-          
-          // 2. Load from localStorage (fallback)
-          try {
-            const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
-            const userLocalScores = localScores.filter(score => score.userId === userId);
-            
-            userLocalScores.forEach(localScore => {
-              const isDuplicate = allScores.some(existingScore => 
-                existingScore.score === localScore.score && 
-                existingScore.game === localScore.game &&
-                Math.abs((existingScore.timestamp || 0) - (localScore.timestamp || 0)) < 5000
-              );
-              
-              if (!isDuplicate) {
-                allScores.push({
-                  ...localScore,
-                  source: 'localStorage'
-                });
-              }
-            });
-            
-            console.log('📈 Found scores from localStorage:', userLocalScores.length);
-          } catch (error) {
-            console.error('❌ Failed to load localStorage scores:', error);
-          }
-          
-          console.log('📈 Total combined scores:', allScores.length);
-          
-          // Calculate statistics
-          const totalScore = allScores.reduce((sum, score) => sum + (score.score || 0), 0);
-          const gamesPlayed = new Set(allScores.map(s => s.game)).size;
-          
-          console.log('📊 Calculated stats:', { totalScore, gamesPlayed });
-          
-          // Update UI elements
-          const userTotalScoreEl = document.getElementById('userTotalScore');
-          const userGamesPlayedEl = document.getElementById('userGamesPlayed');
-          
-          if (userTotalScoreEl) {
-            userTotalScoreEl.textContent = totalScore.toLocaleString();
-            console.log('✅ Updated main UI total score:', totalScore);
-          }
-          
-          if (userGamesPlayedEl) {
-            userGamesPlayedEl.textContent = gamesPlayed;
-            console.log('✅ Updated main UI games played:', gamesPlayed);
-          }
-          
-          console.log('✅ User stats loaded successfully');
-          
-        } catch (error) {
-          console.error('❌ Failed to load user stats:', error);
-        }
-      }
-    </script>
+      // Make db accessible globally for stats functions
+      window.gameistDB = db;
 
       // Logout button event listener
       document.getElementById('logout').addEventListener('click', async () => {
@@ -860,9 +689,9 @@
           await firebase.auth().signOut();
           document.getElementById('googleLogin').style.display = 'inline-flex';
           document.getElementById('userInfo').style.display = 'none';
-          console.log(" User signed out successfully");
+          console.log("✅ User signed out successfully");
         } catch (error) {
-          console.error(" Sign out error:", error);
+          console.error("❌ Sign out error:", error);
           const authStatus = document.getElementById('authStatus');
           authStatus.style.display = 'block';
           authStatus.innerHTML = '❌ Çıkış hatası: ' + error.message;
@@ -983,25 +812,6 @@
           }));
           
           console.log("✅ User session active:", user.displayName);
-          
-          // Load and sync user stats immediately
-          loadUserStats(user.uid);
-          
-          // Auto-sync every 30 seconds for real-time updates
-          setInterval(() => {
-            console.log('🔄 Auto-syncing user stats...');
-            loadUserStats(user.uid);
-          }, 30000);
-          
-          // Sync pending scores from localStorage
-          if (window.gameistAuth && window.gameistAuth.syncPendingScores) {
-            setTimeout(() => {
-              window.gameistAuth.syncPendingScores().then(() => {
-                // Reload stats after syncing
-                loadUserStats(user.uid);
-              });
-            }, 1000);
-          }
         } else {
           // User is signed out - clear session
           document.getElementById('googleLogin').style.display = 'inline-flex';
@@ -1026,24 +836,9 @@
             document.getElementById('googleLogin').style.display = 'none';
             document.getElementById('userInfo').style.display = 'block';
             
-            // Load user stats immediately when session is restored
+            // Load user stats when session is restored
             if (user.uid) {
               loadUserStats(user.uid);
-              
-              // Auto-sync every 30 seconds
-              setInterval(() => {
-                console.log('🔄 Auto-syncing user stats...');
-                loadUserStats(user.uid);
-              }, 30000);
-              
-              // Sync pending scores
-              if (window.gameistAuth && window.gameistAuth.syncPendingScores) {
-                setTimeout(() => {
-                  window.gameistAuth.syncPendingScores().then(() => {
-                    loadUserStats(user.uid);
-                  });
-                }, 2000);
-              }
             }
           } catch (e) {
             console.error("❌ Failed to restore session:", e);
@@ -1069,43 +864,21 @@
         if (savedUser) {
           const user = JSON.parse(savedUser);
           console.log('🔄 Manual refresh triggered for user:', user.displayName);
-          
-          // Show loading state
-          const userTotalScoreEl = document.getElementById('userTotalScore');
-          const userGamesPlayedEl = document.getElementById('userGamesPlayed');
-          if (userTotalScoreEl) userTotalScoreEl.textContent = 'Yükleniyor...';
-          if (userGamesPlayedEl) userGamesPlayedEl.textContent = 'Yükleniyor...';
-          
-          // Force sync pending scores first
-          if (window.gameistAuth && window.gameistAuth.syncPendingScores) {
-            window.gameistAuth.syncPendingScores().then(() => {
-              // Then reload stats
-              loadUserStats(user.uid);
-            });
-          } else {
-            loadUserStats(user.uid);
-          }
+          loadUserStats(user.uid);
         } else {
           console.log('❌ No saved user found for refresh');
         }
       });
 
-      // Initialize session check and auto-sync
+      // Manual test button for debugging
       setTimeout(() => {
-        checkSavedSession();
-        
-        // Auto-sync every 30 seconds for all logged-in users
         const savedUser = localStorage.getItem('gameist_user');
         if (savedUser) {
           const user = JSON.parse(savedUser);
-          if (user.uid) {
-            setInterval(() => {
-              console.log('🔄 Periodic auto-sync...');
-              loadUserStats(user.uid);
-            }, 30000);
-          }
+          console.log('🧪 Auto-test loadUserStats for user:', user.displayName);
+          loadUserStats(user.uid);
         }
-      }, 1000);
+      }, 2000);
 
       // Show profile modal
       function showProfileModal(user) {
@@ -1608,6 +1381,54 @@
             handleAuthError(error);
           }
         });
+
+      // Enhanced popup blocker detection
+      document.getElementById('googleLogin').addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const authStatus = document.getElementById('authStatus');
+        authStatus.style.display = 'block';
+        authStatus.innerHTML = '🔄 Google giriş başlatılıyor...';
+        
+        // Force user gesture for popup
+        const userGesture = new Promise((resolve) => {
+          setTimeout(resolve, 100);
+        });
+        
+        userGesture.then(() => {
+          // Try popup with explicit user gesture
+          firebase.auth().signInWithPopup(provider)
+            .then((result) => {
+              console.log("✅ Popup successful");
+              handleAuthSuccess(result);
+            })
+            .catch((error) => {
+              console.error("❌ Popup failed:", error);
+              
+              // Immediate redirect fallback
+              if (error.code === 'auth/popup-closed-by-user' || 
+                  error.code === 'auth/popup-blocked' ||
+                  error.code === 'auth/cancelled-popup-request') {
+                
+                console.log("🔄 Trying redirect method...");
+                authStatus.innerHTML = '🔄 Popup engellendi, yönlendiriliyor...';
+                
+                // Use redirect as fallback
+                firebase.auth().signInWithRedirect(provider)
+                  .then(() => {
+                    console.log("✅ Redirect initiated");
+                    authStatus.innerHTML = '🔄 Yönlendirme başlatıldı...';
+                  })
+                  .catch((redirectError) => {
+                    console.error("❌ Redirect failed:", redirectError);
+                    handleAuthError(redirectError);
+                  });
+              } else {
+                handleAuthError(error);
+              }
+            });
+        });
+      });
 
       // Leaderboard helper functions (ready for implementation)
       function saveUserScore(userId, displayName, score) {
