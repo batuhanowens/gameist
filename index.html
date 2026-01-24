@@ -1037,17 +1037,25 @@
           const allScores = [...scores, ...userLocalScores, ...cloudScores, ...realtimeScores];
           console.log('📈 Total combined scores:', allScores.length);
           
-          const totalScore = allScores.reduce((sum, score) => sum + score.score, 0);
+          // Calculate HIGHEST score per game (not total)
+          const gameHighScores = {};
+          allScores.forEach(score => {
+            if (!gameHighScores[score.game] || gameHighScores[score.game] < score.score) {
+              gameHighScores[score.game] = score.score;
+            }
+          });
+          
+          const highestScore = Object.values(gameHighScores).reduce((sum, score) => sum + score, 0);
           const gamesPlayed = new Set(allScores.map(s => s.game)).size;
           
-          console.log('📊 Calculated stats:', { totalScore, gamesPlayed });
+          console.log('📊 Calculated stats:', { highestScore, gamesPlayed, gameHighScores });
           
           // Update modal stats
           const modalTotalScore = document.getElementById('modalTotalScore');
           const modalGamesPlayed = document.getElementById('modalGamesPlayed');
           const gameStats = document.getElementById('gameStats');
           
-          if (modalTotalScore) modalTotalScore.textContent = totalScore.toLocaleString();
+          if (modalTotalScore) modalTotalScore.textContent = highestScore.toLocaleString();
           if (modalGamesPlayed) modalGamesPlayed.textContent = gamesPlayed;
           
           // Update main UI stats
@@ -1055,8 +1063,8 @@
           const userGamesPlayedEl = document.getElementById('userGamesPlayed');
           
           if (userTotalScoreEl) {
-            userTotalScoreEl.textContent = totalScore.toLocaleString();
-            console.log('✅ Updated main UI total score:', totalScore);
+            userTotalScoreEl.textContent = highestScore.toLocaleString();
+            console.log('✅ Updated main UI highest score:', highestScore);
           } else {
             console.error('❌ userTotalScore element not found');
           }
