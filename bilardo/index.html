@@ -52,7 +52,13 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9478711342689131"
          crossorigin="anonymous"></script>
     <link rel="icon" href="img/bilardist.png" type="image/png" />
-    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Firebase SDKs for cross-device sync -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="../auth-component.js?v=3"></script>
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
@@ -1057,6 +1063,167 @@
           window.location.href = "../index.html";
         });
       })();
+    </script>
+
+    <!-- Score saving for Bilardo game -->
+    <script>
+      // Wait for auth component to load
+      setTimeout(() => {
+        if (window.gameistAuth) {
+          console.log('🎮 Bilardo: Auth component loaded, setting up score saving...');
+          
+          // Hook into game over screen
+          const gameOverScreen = document.getElementById('gameOverScreen');
+          if (gameOverScreen) {
+            const observer = new MutationObserver((mutations) => {
+              mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                  if (!gameOverScreen.classList.contains('hidden')) {
+                    console.log('🎮 Bilardo: Game over screen shown');
+                    setTimeout(() => saveBilardoScore(), 1000);
+                  }
+                }
+              });
+            });
+            
+            observer.observe(gameOverScreen, { attributes: true });
+          }
+
+          // Also check periodically for game over
+          setInterval(() => {
+            const gameOverScreen = document.getElementById('gameOverScreen');
+            if (gameOverScreen && !gameOverScreen.classList.contains('hidden')) {
+              const score = getBilardoScore();
+              if (score > 0) {
+                saveBilardoScore();
+              }
+            }
+          }, 3000);
+
+          // Hook into play again button
+          const playAgainBtn = document.getElementById('playAgain');
+          if (playAgainBtn) {
+            playAgainBtn.addEventListener('click', () => {
+              sessionStorage.removeItem('bilardo_score_saved');
+            });
+          }
+
+          // Hook into back to main menu button
+          const backToMainMenuBtn = document.getElementById('backToMainMenu');
+          if (backToMainMenuBtn) {
+            backToMainMenuBtn.addEventListener('click', () => {
+              sessionStorage.removeItem('bilardo_score_saved');
+            });
+          }
+        }
+      }, 3000);
+
+      function getBilardoScore() {
+        // Try to get score from final score element
+        const finalScoreEl = document.getElementById('finalScore');
+        if (finalScoreEl && finalScoreEl.textContent) {
+          const scoreText = finalScoreEl.textContent;
+          const score = parseInt(scoreText.replace(/[^0-9]/g, ''));
+          if (!isNaN(score) && score > 0) {
+            console.log('🎮 Bilardo: Score found:', score);
+            return score;
+          }
+        }
+
+        // Alternative: look for score in other elements
+        const scoreElements = [
+          document.querySelector('.final-score'),
+          document.querySelector('[class*="score"]'),
+          document.querySelector('#finalScore')
+        ];
+
+        for (const el of scoreElements) {
+          if (el && el.textContent) {
+            const score = parseInt(el.textContent.replace(/[^0-9]/g, ''));
+            if (!isNaN(score) && score > 0) {
+              return score;
+            }
+          }
+        }
+
+        return 0;
+      }
+
+      async function saveBilardoScore() {
+        // Prevent duplicate saves
+        const alreadySaved = sessionStorage.getItem('bilardo_score_saved');
+        if (alreadySaved === 'true') {
+          return;
+        }
+
+        const score = getBilardoScore();
+        if (score <= 0) {
+          console.log('🎮 Bilardo: No valid score to save');
+          return;
+        }
+
+        console.log('🎮 Bilardo: Attempting to save score:', score);
+
+        try {
+          const user = window.gameistAuth.getCurrentUser();
+          if (!user) {
+            console.log('🎮 Bilardo: User not logged in, score not saved');
+            return;
+          }
+
+          const result = await window.gameistAuth.saveScore('bilardist', score);
+          if (result !== false) {
+            console.log('✅ Bilardo score saved successfully:', score);
+            sessionStorage.setItem('bilardo_score_saved', 'true');
+            
+            // Show notification
+            showScoreSavedNotification('Bilardist', score);
+          } else {
+            console.log('⚠️ Bilardo score save failed, will sync later');
+          }
+        } catch (error) {
+          console.error('❌ Bilardo score save error:', error);
+        }
+      }
+
+      function showScoreSavedNotification(game, score) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: white;
+          padding: 15px 20px;
+          border-radius: 10px;
+          font-weight: 600;
+          z-index: 10000;
+          box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+          animation: slideIn 0.3s ease;
+        `;
+        notification.innerHTML = `✅ ${game} score saved: ${score}`;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.style.animation = 'slideOut 0.3s ease';
+          setTimeout(() => notification.remove(), 300);
+        }, 3000);
+      }
+
+      // Add CSS animations
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes slideIn {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+          from { transform: translateX(0); opacity: 1; }
+          to { transform: translateX(100%); opacity: 0; }
+        }
+      `;
+      document.head.appendChild(style);
     </script>
 
   </body>

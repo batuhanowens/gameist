@@ -49,7 +49,13 @@
     </script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9478711342689131"
          crossorigin="anonymous"></script>
-    <link rel="icon" href="./wordlist.png" type="image/png" />
+    <link rel="icon" href="./icons/favicon.ico" type="image/png" />
+    <!-- Firebase SDKs for cross-device sync -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="../auth-component.js?v=3"></script>
     <link rel="manifest" href="manifest.webmanifest" />
     <meta name="theme-color" content="#121213" />
     <link rel="stylesheet" href="style.css" />
@@ -429,6 +435,194 @@
       </div>
     </div>
   </div>
+
+  <!-- Score saving for Wordle game -->
+  <script>
+    // Wait for auth component to load
+    setTimeout(() => {
+      if (window.gameistAuth) {
+        console.log('🎮 Wordle: Auth component loaded, setting up score saving...');
+        
+        // Hook into game over events by monitoring message element
+        const messageEl = document.getElementById('message');
+        if (messageEl) {
+          const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+              if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                const message = messageEl.textContent || messageEl.innerText;
+                
+                // Check for win or lose messages
+                if (message.includes('Tebrikler') || message.includes('Harika') || 
+                    message.includes('Brilliant') || message.includes('Congratulations') ||
+                    message.includes('oyun bitti') || message.includes('game over') ||
+                    message.includes('kelime') || message.includes('word')) {
+                  
+                  console.log('🎮 Wordle: Game end detected:', message);
+                  setTimeout(() => saveWordleScore(), 1000);
+                }
+              }
+            });
+          });
+          
+          observer.observe(messageEl, {
+            childList: true,
+            characterData: true,
+            subtree: true
+          });
+        }
+
+        // Also check periodically for game completion
+        let wordleScoreSaved = false;
+        setInterval(() => {
+          if (!wordleScoreSaved) {
+            const score = getWordleScore();
+            if (score > 0) {
+              saveWordleScore();
+              wordleScoreSaved = true;
+              
+              // Reset flag when new game starts
+              setTimeout(() => {
+                wordleScoreSaved = false;
+              }, 5000);
+            }
+          }
+        }, 3000);
+
+        // Hook into new game button
+        const startGameBtn = document.getElementById('startGame');
+        if (startGameBtn) {
+          startGameBtn.addEventListener('click', () => {
+            wordleScoreSaved = false;
+            sessionStorage.removeItem('wordle_score_saved');
+          });
+        }
+      }
+    }, 3000);
+
+    function getWordleScore() {
+      // Wordle scoring: fewer attempts = higher score
+      // 6 attempts = 100 points, 5 attempts = 200 points, ..., 1 attempt = 600 points
+      const rows = document.querySelectorAll('#game-board .row');
+      let attempts = 0;
+      
+      for (let i = 0; i < rows.length; i++) {
+        const tiles = rows[i].querySelectorAll('.tile');
+        let hasContent = false;
+        
+        for (let j = 0; j < tiles.length; j++) {
+          if (tiles[j].textContent && tiles[j].textContent.trim() !== '') {
+            hasContent = true;
+            break;
+          }
+        }
+        
+        if (hasContent) {
+          attempts++;
+        }
+      }
+      
+      // Check if game is completed (all tiles filled in a row with correct colors)
+      for (let i = 0; i < rows.length; i++) {
+        const tiles = rows[i].querySelectorAll('.tile');
+        let hasCorrect = false;
+        let hasContent = false;
+        
+        for (let j = 0; j < tiles.length; j++) {
+          if (tiles[j].textContent && tiles[j].textContent.trim() !== '') {
+            hasContent = true;
+          }
+          if (tiles[j].classList.contains('correct')) {
+            hasCorrect = true;
+          }
+        }
+        
+        if (hasContent && hasCorrect) {
+          // Calculate score based on attempt number (1-based)
+          const score = Math.max(100, 600 - (i * 100));
+          console.log(`🎮 Wordle: Score calculated: ${score} (attempt ${i + 1})`);
+          return score;
+        }
+      }
+      
+      return 0;
+    }
+
+    async function saveWordleScore() {
+      // Prevent duplicate saves
+      const alreadySaved = sessionStorage.getItem('wordle_score_saved');
+      if (alreadySaved === 'true') {
+        return;
+      }
+
+      const score = getWordleScore();
+      if (score <= 0) {
+        console.log('🎮 Wordle: No valid score to save');
+        return;
+      }
+
+      console.log('🎮 Wordle: Attempting to save score:', score);
+
+      try {
+        const user = window.gameistAuth.getCurrentUser();
+        if (!user) {
+          console.log('🎮 Wordle: User not logged in, score not saved');
+          return;
+        }
+
+        const result = await window.gameistAuth.saveScore('wordlist', score);
+        if (result !== false) {
+          console.log('✅ Wordle score saved successfully:', score);
+          sessionStorage.setItem('wordle_score_saved', 'true');
+          
+          // Show notification
+          showScoreSavedNotification('Wordlist', score);
+        } else {
+          console.log('⚠️ Wordle score save failed, will sync later');
+        }
+      } catch (error) {
+        console.error('❌ Wordle score save error:', error);
+      }
+    }
+
+    function showScoreSavedNotification(game, score) {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        z-index: 10000;
+        box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        animation: slideIn 0.3s ease;
+      `;
+      notification.innerHTML = `✅ ${game} score saved: ${score}`;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
 
   </body>
 

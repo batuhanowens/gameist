@@ -41,6 +41,12 @@
          crossorigin="anonymous"></script>
     <base href="./">
     <link id="app-styles" rel="stylesheet" href="./styles.css">
+    <!-- Firebase SDKs for cross-device sync -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="../auth-component.js?v=3"></script>
     <!-- Removed web manifest for packaged Store build to avoid icon scanning conflicts -->
     <meta name="theme-color" content="#0D0D0D">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect rx='12' width='64' height='64' fill='%23f59f3a'/><text x='50%' y='54%' text-anchor='middle' font-family='Arial, Helvetica, sans-serif' font-size='24' font-weight='700' fill='%23ffffff'>PM</text></svg>">
@@ -397,6 +403,160 @@
           }, 200);
         } catch (_) {}
       })();
+    </script>
+
+    <!-- Score saving for 2048 game -->
+    <script>
+      // Wait for auth component to load
+      setTimeout(() => {
+        if (window.gameistAuth) {
+          console.log('🎮 2048: Auth component loaded, setting up score saving...');
+          
+          // Hook into game over events
+          const gameOverObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+              if (mutation.type === 'childList') {
+                const gameOverEl = document.querySelector('.game-over');
+                if (gameOverEl && gameOverEl.style.display !== 'none') {
+                  console.log('🎮 2048: Game over detected');
+                  save2048Score();
+                }
+              }
+            });
+          });
+
+          // Observe the game container for game over
+          const gameContainer = document.querySelector('.game-container');
+          if (gameContainer) {
+            gameOverObserver.observe(gameContainer, {
+              childList: true,
+              subtree: true
+            });
+          }
+
+          // Also check periodically for game over
+          setInterval(() => {
+            const gameOverEl = document.querySelector('.game-over');
+            if (gameOverEl && gameOverEl.style.display !== 'none') {
+              const score = getCurrent2048Score();
+              if (score > 0) {
+                save2048Score();
+              }
+            }
+          }, 2000);
+
+          // Hook into new game button to reset saved flag
+          const newGameBtn = document.getElementById('header-new-game');
+          if (newGameBtn) {
+            newGameBtn.addEventListener('click', () => {
+              sessionStorage.removeItem('2048_score_saved');
+            });
+          }
+
+          // Hook into try again button
+          const tryAgainBtn = document.getElementById('try-again');
+          if (tryAgainBtn) {
+            tryAgainBtn.addEventListener('click', () => {
+              sessionStorage.removeItem('2048_score_saved');
+            });
+          }
+        }
+      }, 3000);
+
+      function getCurrent2048Score() {
+        // Try to get score from various possible locations
+        const scoreElements = [
+          document.querySelector('.score'),
+          document.querySelector('.score-container'),
+          document.querySelector('[class*="score"]')
+        ];
+
+        for (const el of scoreElements) {
+          if (el && el.textContent) {
+            const score = parseInt(el.textContent.replace(/[^0-9]/g, ''));
+            if (!isNaN(score) && score > 0) {
+              return score;
+            }
+          }
+        }
+        return 0;
+      }
+
+      async function save2048Score() {
+        // Prevent duplicate saves
+        const alreadySaved = sessionStorage.getItem('2048_score_saved');
+        if (alreadySaved === 'true') {
+          return;
+        }
+
+        const score = getCurrent2048Score();
+        if (score <= 0) {
+          console.log('🎮 2048: No valid score to save');
+          return;
+        }
+
+        console.log('🎮 2048: Attempting to save score:', score);
+
+        try {
+          const user = window.gameistAuth.getCurrentUser();
+          if (!user) {
+            console.log('🎮 2048: User not logged in, score not saved');
+            return;
+          }
+
+          const result = await window.gameistAuth.saveScore('2048', score);
+          if (result !== false) {
+            console.log('✅ 2048 score saved successfully:', score);
+            sessionStorage.setItem('2048_score_saved', 'true');
+            
+            // Show notification
+            showScoreSavedNotification('2048', score);
+          } else {
+            console.log('⚠️ 2048 score save failed, will sync later');
+          }
+        } catch (error) {
+          console.error('❌ 2048 score save error:', error);
+        }
+      }
+
+      function showScoreSavedNotification(game, score) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: white;
+          padding: 15px 20px;
+          border-radius: 10px;
+          font-weight: 600;
+          z-index: 10000;
+          box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+          animation: slideIn 0.3s ease;
+        `;
+        notification.innerHTML = `✅ ${game} score saved: ${score}`;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.style.animation = 'slideOut 0.3s ease';
+          setTimeout(() => notification.remove(), 300);
+        }, 3000);
+      }
+
+      // Add CSS animations
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes slideIn {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+          from { transform: translateX(0); opacity: 1; }
+          to { transform: translateX(100%); opacity: 0; }
+        }
+      `;
+      document.head.appendChild(style);
     </script>
   </body>
 </html>

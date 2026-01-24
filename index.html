@@ -645,6 +645,7 @@
     <script src="main.js?v=3"></script>
     <script src="hub-i18n.js?v=3"></script>
     <script src="auth-i18n.js?v=3"></script>
+    <script src="auth-component.js?v=3"></script>
     
     <!-- Firebase Configuration -->
     <script>
@@ -732,6 +733,16 @@
         
         // Load and update user stats immediately after login
         loadUserStats(user.uid);
+        
+        // Sync any pending scores from localStorage
+        if (window.gameistAuth && window.gameistAuth.syncPendingScores) {
+          setTimeout(() => {
+            window.gameistAuth.syncPendingScores().then(() => {
+              // Reload stats after syncing
+              loadUserStats(user.uid);
+            });
+          }, 1000);
+        }
         
         // Leaderboard functionality ready
         if (db) {
@@ -976,7 +987,7 @@
         loadLeaderboard('all');
       }
 
-      // Load user statistics
+      // Load user statistics with improved cross-device sync
       async function loadUserStats(userId) {
         console.log('📊 Loading user stats for:', userId);
         
@@ -987,118 +998,174 @@
             return;
           }
           
-          console.log('🔍 Querying leaderboard for user:', userId);
-          const snapshot = await database.collection('leaderboard')
-            .where('userId', '==', userId)
-            .orderBy('timestamp', 'desc')
-            .get();
+          let allScores = [];
           
-          const scores = snapshot.docs.map(doc => doc.data());
-          console.log('📈 Found scores from Firestore:', scores.length);
-          
-          // Also check localStorage for fallback scores
-          const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
-          const userLocalScores = localScores.filter(score => score.userId === userId);
-          console.log('📈 Found scores from localStorage:', userLocalScores.length);
-          
-          // Check cloud storage fallback for cross-device sync
-          const cloudKey = `gameist_scores_${userId}`;
-          const cloudScores = JSON.parse(localStorage.getItem(cloudKey) || '[]');
-          console.log('📈 Found scores from cloud storage fallback:', cloudScores.length);
-          
-          // Check Firebase Realtime Database for cross-device sync
-          let realtimeScores = [];
+          // 1. Load from Firestore (primary source)
           try {
-            console.log('🔍 Checking Realtime Database for cross-device sync...');
-            const database = firebase.database();
-            const userScoresRef = database.ref(`userScores/${userId}`);
+            console.log('🔍 Loading from Firestore...');
+            const snapshot = await database.collection('leaderboard')
+              .where('userId', '==', userId)
+              .orderBy('timestamp', 'desc')
+              .get();
+            
+            const firestoreScores = snapshot.docs.map(doc => ({
+              ...doc.data(),
+              source: 'firestore'
+            }));
+            allScores.push(...firestoreScores);
+            console.log('📈 Found scores from Firestore:', firestoreScores.length);
+            
+          } catch (error) {
+            console.error('❌ Firestore query failed:', error);
+          }
+          
+          // 2. Load from Realtime Database (cross-device sync)
+          try {
+            console.log('🔍 Loading from Realtime Database...');
+            const realtimeDb = firebase.database();
+            const userScoresRef = realtimeDb.ref(`userScores/${userId}`);
             
             const snapshot = await userScoresRef.once('value');
             const data = snapshot.val();
             
             if (data) {
-              realtimeScores = Object.values(data).map(score => ({
+              const realtimeScores = Object.values(data).map(score => ({
                 ...score,
+                source: 'realtime',
                 userId: userId,
                 timestamp: score.timestamp || Date.now()
               }));
-              console.log('📈 Found scores from Realtime Database:', realtimeScores.length);
-              realtimeScores.forEach(score => {
-                console.log(`📄 Realtime score: ${score.game} - ${score.score} pts`);
+              
+              // Merge with existing scores, avoiding duplicates
+              realtimeScores.forEach(rtScore => {
+                const isDuplicate = allScores.some(existingScore => 
+                  existingScore.score === rtScore.score && 
+                  existingScore.game === rtScore.score.game &&
+                  Math.abs((existingScore.timestamp || 0) - (rtScore.timestamp || 0)) < 5000 // Within 5 seconds
+                );
+                
+                if (!isDuplicate) {
+                  allScores.push(rtScore);
+                }
               });
-            } else {
-              console.log('📭 No scores found in Realtime Database');
+              
+              console.log('� Found scores from Realtime Database:', realtimeScores.length);
             }
           } catch (error) {
             console.log('ℹ️ Realtime Database not available:', error.message);
           }
           
-          // Combine all scores
-          const allScores = [...scores, ...userLocalScores, ...cloudScores, ...realtimeScores];
+          // 3. Load from localStorage (fallback and pending scores)
+          try {
+            const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
+            const userLocalScores = localScores.filter(score => score.userId === userId);
+            
+            // Add local scores that aren't already in cloud data
+            userLocalScores.forEach(localScore => {
+              const isDuplicate = allScores.some(existingScore => 
+                existingScore.score === localScore.score && 
+                existingScore.game === localScore.game &&
+                Math.abs((existingScore.timestamp || 0) - (localScore.timestamp || 0)) < 5000
+              );
+              
+              if (!isDuplicate) {
+                allScores.push({
+                  ...localScore,
+                  source: 'localStorage'
+                });
+              }
+            });
+            
+            console.log('📈 Found scores from localStorage:', userLocalScores.length);
+          } catch (error) {
+            console.error('❌ Failed to load localStorage scores:', error);
+          }
+          
           console.log('📈 Total combined scores:', allScores.length);
           
-          const totalScore = allScores.reduce((sum, score) => sum + score.score, 0);
+          // Calculate statistics
+          const totalScore = allScores.reduce((sum, score) => sum + (score.score || 0), 0);
           const gamesPlayed = new Set(allScores.map(s => s.game)).size;
           
           console.log('📊 Calculated stats:', { totalScore, gamesPlayed });
           
-          // Update modal stats
-          const modalTotalScore = document.getElementById('modalTotalScore');
-          const modalGamesPlayed = document.getElementById('modalGamesPlayed');
-          const gameStats = document.getElementById('gameStats');
+          // Update UI elements
+          updateStatsUI(totalScore, gamesPlayed);
           
-          if (modalTotalScore) modalTotalScore.textContent = totalScore.toLocaleString();
-          if (modalGamesPlayed) modalGamesPlayed.textContent = gamesPlayed;
-          
-          // Update main UI stats
-          const userTotalScoreEl = document.getElementById('userTotalScore');
-          const userGamesPlayedEl = document.getElementById('userGamesPlayed');
-          
-          if (userTotalScoreEl) {
-            userTotalScoreEl.textContent = totalScore.toLocaleString();
-            console.log('✅ Updated main UI total score:', totalScore);
-          } else {
-            console.error('❌ userTotalScore element not found');
-          }
-          
-          if (userGamesPlayedEl) {
-            userGamesPlayedEl.textContent = gamesPlayed;
-            console.log('✅ Updated main UI games played:', gamesPlayed);
-          } else {
-            console.error('❌ userGamesPlayed element not found');
-          }
-          
-          // Game-specific stats
-          const gameStatsMap = {};
-          allScores.forEach(score => {
-            if (!gameStatsMap[score.game]) {
-              gameStatsMap[score.game] = { count: 0, highScore: 0 };
-            }
-            gameStatsMap[score.game].count++;
-            gameStatsMap[score.game].highScore = Math.max(gameStatsMap[score.game].highScore, score.score);
-          });
-          
-          console.log('🎮 Game stats map:', gameStatsMap);
-          
-          if (gameStats) {
-            let statsHTML = '';
-            for (const [game, stats] of Object.entries(gameStatsMap)) {
-              statsHTML += `
-                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                  <span>${game.charAt(0).toUpperCase() + game.slice(1)}</span>
-                  <span>${stats.highScore} (${stats.count} games)</span>
-                </div>
-              `;
-            }
-            gameStats.innerHTML = statsHTML || '<div>No games played yet</div>';
-            console.log('✅ Updated game stats HTML');
-          }
+          // Update game-specific statistics
+          updateGameStats(allScores);
           
           console.log('✅ User stats loaded successfully');
           
         } catch (error) {
-          console.error('Error loading user stats:', error);
+          console.error('❌ Failed to load user stats:', error);
+          
+          // Show error in UI
+          const userTotalScoreEl = document.getElementById('userTotalScore');
+          const userGamesPlayedEl = document.getElementById('userGamesPlayed');
+          
+          if (userTotalScoreEl) userTotalScoreEl.textContent = 'Error';
+          if (userGamesPlayedEl) userGamesPlayedEl.textContent = 'Error';
         }
+      }
+
+      // Update stats UI elements
+      function updateStatsUI(totalScore, gamesPlayed) {
+        // Update modal stats
+        const modalTotalScore = document.getElementById('modalTotalScore');
+        const modalGamesPlayed = document.getElementById('modalGamesPlayed');
+        
+        if (modalTotalScore) modalTotalScore.textContent = totalScore.toLocaleString();
+        if (modalGamesPlayed) modalGamesPlayed.textContent = gamesPlayed;
+        
+        // Update main UI stats
+        const userTotalScoreEl = document.getElementById('userTotalScore');
+        const userGamesPlayedEl = document.getElementById('userGamesPlayed');
+        
+        if (userTotalScoreEl) {
+          userTotalScoreEl.textContent = totalScore.toLocaleString();
+          console.log('✅ Updated main UI total score:', totalScore);
+        } else {
+          console.error('❌ userTotalScore element not found');
+        }
+        
+        if (userGamesPlayedEl) {
+          userGamesPlayedEl.textContent = gamesPlayed;
+          console.log('✅ Updated main UI games played:', gamesPlayed);
+        } else {
+          console.error('❌ userGamesPlayed element not found');
+        }
+      }
+
+      // Update game-specific statistics
+      function updateGameStats(allScores) {
+        const gameStats = document.getElementById('gameStats');
+        if (!gameStats) return;
+        
+        const gameStatsMap = {};
+        allScores.forEach(score => {
+          if (!gameStatsMap[score.game]) {
+            gameStatsMap[score.game] = { count: 0, highScore: 0, totalScore: 0 };
+          }
+          gameStatsMap[score.game].count++;
+          gameStatsMap[score.game].highScore = Math.max(gameStatsMap[score.game].highScore, score.score || 0);
+          gameStatsMap[score.game].totalScore += score.score || 0;
+        });
+        
+        console.log('🎮 Game stats map:', gameStatsMap);
+        
+        let statsHTML = '';
+        for (const [game, stats] of Object.entries(gameStatsMap)) {
+          const avgScore = Math.round(stats.totalScore / stats.count);
+          statsHTML += `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+              <span>${game.charAt(0).toUpperCase() + game.slice(1)}</span>
+              <span>Best: ${stats.highScore} (${stats.count} games, avg: ${avgScore})</span>
+            </div>
+          `;
+        }
+        gameStats.innerHTML = statsHTML || '<div>No games played yet</div>';
+        console.log('✅ Updated game stats HTML');
       }
 
       // Load leaderboard
