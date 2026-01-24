@@ -1033,22 +1033,31 @@
             console.log('ℹ️ Realtime Database not available:', error.message);
           }
           
-          // Combine all scores
+          // Combine all scores and sort by timestamp (newest first)
           const allScores = [...scores, ...userLocalScores, ...cloudScores, ...realtimeScores];
-          console.log('📈 Total combined scores:', allScores.length);
           
-          // Calculate HIGHEST score per game (not total)
+          // Sort by timestamp to get LATEST scores first
+          allScores.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+          
+          console.log('📈 Total combined scores:', allScores.length);
+          console.log('🕐 Latest scores first:', allScores.slice(0, 3).map(s => `${s.game}: ${s.score} (${new Date(s.timestamp).toLocaleTimeString()})`));
+          
+          // Calculate HIGHEST score per game (using LATEST scores)
           const gameHighScores = {};
           allScores.forEach(score => {
-            if (!gameHighScores[score.game] || gameHighScores[score.game] < score.score) {
-              gameHighScores[score.game] = score.score;
+            if (!gameHighScores[score.game] || gameHighScores[score.game].score < score.score) {
+              gameHighScores[score.game] = {
+                score: score.score,
+                timestamp: score.timestamp,
+                game: score.game
+              };
             }
           });
           
-          const highestScore = Object.values(gameHighScores).reduce((sum, score) => sum + score, 0);
+          const highestScore = Object.values(gameHighScores).reduce((sum, game) => sum + game.score, 0);
           const gamesPlayed = new Set(allScores.map(s => s.game)).size;
           
-          console.log('📊 Calculated stats:', { highestScore, gamesPlayed, gameHighScores });
+          console.log('📊 Calculated stats:', { highestScore, gamesPlayed, gameHighScores: Object.values(gameHighScores) });
           
           // Update modal stats
           const modalTotalScore = document.getElementById('modalTotalScore');

@@ -5199,54 +5199,55 @@
               return;
             }
             
+            // FAST SYNC: Save directly to Realtime Database FIRST (no waiting)
+            console.log('⚡ FAST SYNC: Saving directly to Realtime Database first...');
+            try {
+              const database = firebase.database();
+              const userScoresRef = database.ref(`userScores/${user.uid}`);
+              const newScoreRef = userScoresRef.push();
+              
+              newScoreRef.set({
+                userId: user.uid,
+                displayName: user.displayName,
+                email: user.email,
+                score: stats.bestScore,
+                game: 'elementist',
+                timestamp: Date.now(),
+                fastSync: true,
+                fromElementist: true
+              }).then(() => {
+                console.log('⚡ FAST SYNC: Score saved to Realtime Database immediately');
+                
+                // Notify main menu immediately
+                try {
+                  const channel = new BroadcastChannel('gameist_stats');
+                  channel.postMessage({
+                    type: 'statsUpdate',
+                    userId: user.uid,
+                    game: 'elementist',
+                    score: stats.bestScore,
+                    timestamp: Date.now(),
+                    firestoreSuccess: true,
+                    fastSync: true
+                  });
+                } catch (error) {
+                  console.log('BroadcastChannel not available');
+                }
+              });
+            } catch (error) {
+              console.error('❌ FAST SYNC failed:', error);
+            }
+
+            // Then save to Firestore (async, no blocking)
             window.gameistAuth.saveScore('elementist', stats.bestScore)
               .then((result) => {
-                console.log('✅ Elementist best score synced to main index:', stats.bestScore);
-                console.log('📄 Firestore save result:', result);
+                console.log('✅ Elementist best score synced to Firestore:', stats.bestScore);
                 
-                // If all Firestore attempts failed, save to localStorage AND Realtime Database
+                // If Firestore failed, we already saved to Realtime Database above
                 if (result === false) {
-                  console.log('💾 All Firestore attempts failed, saving to localStorage fallback...');
-                  const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
-                  localScores.push({
-                    userId: user.uid,
-                    displayName: user.displayName,
-                    email: user.email,
-                    score: stats.bestScore,
-                    game: 'elementist',
-                    timestamp: Date.now(),
-                    firestoreFailed: true
-                  });
-                  localStorage.setItem('gameist_local_scores', JSON.stringify(localScores));
-                  console.log('✅ Score saved to localStorage fallback (will sync to Firestore later)');
-                } else {
-                  console.log('🎯 Score successfully saved to Firestore');
+                  console.log('💾 Firestore failed, but Realtime Database already has the score');
                 }
-                
-                // ALWAYS save to Realtime Database for cross-device sync
-                console.log('☁️ Always saving to Realtime Database for cross-device sync...');
-                try {
-                  const database = firebase.database();
-                  const userScoresRef = database.ref(`userScores/${user.uid}`);
-                  const newScoreRef = userScoresRef.push();
-                  
-                  newScoreRef.set({
-                    userId: user.uid,
-                    displayName: user.displayName,
-                    email: user.email,
-                    score: stats.bestScore,
-                    game: 'elementist',
-                    timestamp: Date.now(),
-                    firestoreSuccess: result !== false,
-                    fromElementist: true
-                  }).then(() => {
-                    console.log('✅ Score saved to Realtime Database for cross-device sync');
-                  }).catch(rtError => {
-                    console.error('❌ Realtime Database sync failed:', rtError);
-                  });
-                } catch (rtError) {
-                  console.error('❌ Realtime Database sync failed:', rtError);
-                }
+              });
                 
                 // Notify main page about the update using BroadcastChannel
                 try {
@@ -5279,17 +5280,9 @@
                     firestoreSuccess: false
                   }));
                 }
-              })
-              .catch(error => {
-                console.error('❌ Failed to sync Elementist stats:', error);
-                console.error('❌ Error details:', error.code, error.message);
               });
-            
-            // Add timeout to detect hanging promise
-            setTimeout(() => {
-              console.log('⏰ Checking if saveScore completed...');
-            }, 5000);
-          }
+            }
+          });
         }
         
         // Monitor stats changes every 5 seconds
