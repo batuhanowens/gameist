@@ -5224,13 +5224,16 @@
                 }
                 
                 // ALWAYS save to Realtime Database for cross-device sync
-                console.log('☁️ Always saving to Realtime Database for cross-device sync...');
+                console.log('☁️ ALWAYS saving to Realtime Database for cross-device sync...');
+                console.log('📊 Score to save:', stats.bestScore);
+                console.log('👤 User:', user.uid, user.displayName);
+                
                 try {
                   const database = firebase.database();
                   const userScoresRef = database.ref(`userScores/${user.uid}`);
                   const newScoreRef = userScoresRef.push();
                   
-                  newScoreRef.set({
+                  const scoreData = {
                     userId: user.uid,
                     displayName: user.displayName,
                     email: user.email,
@@ -5238,14 +5241,22 @@
                     game: 'elementist',
                     timestamp: Date.now(),
                     firestoreSuccess: result !== false,
-                    fromElementist: true
-                  }).then(() => {
+                    fromElementist: true,
+                    debugSave: true
+                  };
+                  
+                  console.log('💾 Score data:', scoreData);
+                  
+                  newScoreRef.set(scoreData).then(() => {
                     console.log('✅ Score saved to Realtime Database for cross-device sync');
+                    console.log('🔗 Saved at path:', `userScores/${user.uid}/${newScoreRef.key}`);
                   }).catch(rtError => {
                     console.error('❌ Realtime Database sync failed:', rtError);
+                    console.error('❌ Error details:', rtError.message);
                   });
                 } catch (rtError) {
                   console.error('❌ Realtime Database sync failed:', rtError);
+                  console.error('❌ Error details:', rtError.message);
                 }
                 
                 // Notify main page about the update using BroadcastChannel
