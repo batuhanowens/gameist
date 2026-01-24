@@ -65,6 +65,11 @@ class GameistAuth {
         this.db = firebase.firestore();
         this.realtimeDb = firebase.database();
         this.provider = new firebase.auth.GoogleAuthProvider();
+        this.provider.addScope('email');
+        this.provider.addScope('profile');
+        this.provider.setCustomParameters({
+          'prompt': 'select_account'
+        });
         
         console.log('🔥 Firebase initialized for game page');
     }

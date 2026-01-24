@@ -666,9 +666,9 @@
       provider.addScope('email');
       provider.addScope('profile');
       
-      // Custom redirect URI for better compatibility
+      // Fix for auth/argument-error
       provider.setCustomParameters({
-        'redirect_uri': window.location.origin
+        'prompt': 'select_account'
       });
 
       // Initialize Firestore for leaderboard
@@ -683,15 +683,25 @@
       // Make db accessible globally for stats functions
       window.gameistDB = db;
 
+      // Google login button event listener
+      document.getElementById('googleLogin').addEventListener('click', async () => {
+        try {
+          const result = await firebase.auth().signInWithPopup(provider);
+          handleAuthSuccess(result);
+        } catch (error) {
+          handleAuthError(error);
+        }
+      });
+
       // Logout button event listener
       document.getElementById('logout').addEventListener('click', async () => {
         try {
           await firebase.auth().signOut();
           document.getElementById('googleLogin').style.display = 'inline-flex';
           document.getElementById('userInfo').style.display = 'none';
-          console.log("✅ User signed out successfully");
+          console.log(" User signed out successfully");
         } catch (error) {
-          console.error("❌ Sign out error:", error);
+          console.error(" Sign out error:", error);
           const authStatus = document.getElementById('authStatus');
           authStatus.style.display = 'block';
           authStatus.innerHTML = '❌ Çıkış hatası: ' + error.message;
