@@ -70,60 +70,8 @@ class GameistAuth {
     }
 
     createAuthUI() {
-        // Find or create auth container
-        let authContainer = document.getElementById('gameist-auth-container');
-        if (!authContainer) {
-            authContainer = document.createElement('div');
-            authContainer.id = 'gameist-auth-container';
-            authContainer.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                z-index: 9999;
-                background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
-                padding: 12px;
-                border-radius: 12px;
-                backdrop-filter: blur(15px);
-                border: 1px solid rgba(255,255,255,0.2);
-                box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-                min-width: 200px;
-            `;
-            document.body.appendChild(authContainer);
-        }
-
-        authContainer.innerHTML = `
-            <div id="game-login-btn" class="auth-btn" style="display: block;">
-                <button onclick="gameistAuth.signIn()" style="
-                    padding: 8px 16px;
-                    background: #4285f4;
-                    color: white;
-                    border: none;
-                    border-radius: 8px;
-                    cursor: pointer;
-                    font-size: 12px;
-                    font-weight: 600;
-                    width: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 6px;
-                ">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    </svg>
-                    <span data-i18n="login_button">Giriş Yap</span>
-                </button>
-            </div>
-            <div id="game-user-info" class="auth-info" style="display: none;">
-                <!-- User info hidden - no profile box -->
-            </div>
-            <div id="game-auth-status" style="font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 4px; display: none;"></div>
-        `;
-
-        // Apply translations if available
-        if (typeof applyAuthTranslations === 'function') {
-            applyAuthTranslations();
-        }
+        // Auth UI removed - using main index.html login button instead
+        console.log('🔥 Auth component initialized without UI');
     }
 
     async signIn() {
