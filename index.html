@@ -645,53 +645,282 @@
     <script src="main.js?v=3"></script>
     <script src="hub-i18n.js?v=3"></script>
     <script src="auth-i18n.js?v=3"></script>
-    <script src="auth-component.js?v=3"></script>
     
-    <!-- Firebase Configuration -->
+    <!-- Firebase Configuration - Initialize Firebase first -->
     <script>
-      const firebaseConfig = {
-        apiKey: "AIzaSyD7ckcqdZWfnUx5r8uKmvu9Ikax1x5Qidk",
-        authDomain: "gameist.firebaseapp.com",
-        projectId: "gameist",
-        storageBucket: "gameist.firebasestorage.app",
-        messagingSenderId: "525659299937",
-        appId: "1:525659299937:web:1c8343a25be2a994bcca20",
-        measurementId: "G-WE9R0GWKM6",
-        databaseURL: "https://gameist-default-rtdb.firebaseio.com/"
-      };
-      firebase.initializeApp(firebaseConfig);
-
-      // Firebase Authentication Logic
-      const provider = new firebase.auth.GoogleAuthProvider();
-      provider.addScope('email');
-      provider.addScope('profile');
-      
-      // Fix for auth/argument-error
-      provider.setCustomParameters({
-        'prompt': 'select_account'
-      });
-
-      // Initialize Firestore for leaderboard
-      let db;
-      try {
-        db = firebase.firestore();
-        console.log("✅ Firestore initialized - leaderboard ready");
-      } catch (error) {
-        console.error("❌ Firestore initialization failed:", error);
-      }
-
-      // Make db accessible globally for stats functions
-      window.gameistDB = db;
-
-      // Google login button event listener
-      document.getElementById('googleLogin').addEventListener('click', async () => {
-        try {
-          const result = await firebase.auth().signInWithPopup(provider);
-          handleAuthSuccess(result);
-        } catch (error) {
-          handleAuthError(error);
+      // Wait for Firebase to be ready
+      document.addEventListener('DOMContentLoaded', function() {
+        // Check if Firebase is loaded
+        if (typeof firebase === 'undefined') {
+          console.error('❌ Firebase not loaded');
+          return;
         }
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyD7ckcqdZWfnUx5r8uKmvu9Ikax1x5Qidk",
+          authDomain: "gameist.firebaseapp.com",
+          projectId: "gameist",
+          storageBucket: "gameist.firebasestorage.app",
+          messagingSenderId: "525659299937",
+          appId: "1:525659299937:web:1c8343a25be2a994bcca20",
+          measurementId: "G-WE9R0GWKM6",
+          databaseURL: "https://gameist-default-rtdb.firebaseio.com/"
+        };
+
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+          console.log("✅ Firebase initialized");
+        }
+
+        // Now setup auth and other Firebase services
+        setupFirebaseServices();
       });
+
+      function setupFirebaseServices() {
+        // Firebase Authentication Logic
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
+        
+        // Fix for auth/argument-error
+        provider.setCustomParameters({
+          'prompt': 'select_account'
+        });
+
+        // Initialize Firestore for leaderboard
+        let db;
+        try {
+          db = firebase.firestore();
+          console.log("✅ Firestore initialized - leaderboard ready");
+        } catch (error) {
+          console.error("❌ Firestore initialization failed:", error);
+        }
+
+        // Make db accessible globally for stats functions
+        window.gameistDB = db;
+
+        // Google login button event listener
+        document.getElementById('googleLogin').addEventListener('click', async () => {
+          try {
+            const result = await firebase.auth().signInWithPopup(provider);
+            handleAuthSuccess(result);
+          } catch (error) {
+            handleAuthError(error);
+          }
+        });
+
+        // Logout button event listener
+        document.getElementById('logout').addEventListener('click', async () => {
+          try {
+            await firebase.auth().signOut();
+            document.getElementById('googleLogin').style.display = 'inline-flex';
+            document.getElementById('userInfo').style.display = 'none';
+            console.log("✅ User signed out successfully");
+          } catch (error) {
+            console.error("❌ Sign out error:", error);
+            const authStatus = document.getElementById('authStatus');
+            authStatus.style.display = 'block';
+            authStatus.innerHTML = '❌ Çıkış hatası: ' + error.message;
+          }
+        });
+
+        // Handle successful authentication
+        function handleAuthSuccess(result) {
+          const user = result.user;
+          const credential = result.credential;
+          const token = credential ? credential.accessToken : 'N/A';
+          
+          // Update UI with user info
+          document.getElementById('userName').textContent = user.displayName;
+          document.getElementById('userEmailText').textContent = user.email;
+          document.getElementById('userPhoto').src = user.photoURL;
+          document.getElementById('googleLogin').style.display = 'none';
+          document.getElementById('userInfo').style.display = 'block';
+          
+          // Update status with translation
+          const authStatus = document.getElementById('authStatus');
+          authStatus.style.display = 'block';
+          authStatus.innerHTML = '✅ Giriş başarılı!';
+          
+          console.log("✅ Authentication successful:", {
+            displayName: user.displayName,
+            email: user.email,
+            uid: user.uid,
+            token: token.substring(0, 20) + '...'
+          });
+          
+          // Save user session for cross-page access
+          localStorage.setItem('gameist_user', JSON.stringify({
+            displayName: user.displayName,
+            email: user.email,
+            photoURL: user.photoURL,
+            uid: user.uid
+          }));
+          
+          // Load and update user stats immediately after login
+          loadUserStats(user.uid);
+          
+          // Sync any pending scores from localStorage
+          if (window.gameistAuth && window.gameistAuth.syncPendingScores) {
+            setTimeout(() => {
+              window.gameistAuth.syncPendingScores().then(() => {
+                // Reload stats after syncing
+                loadUserStats(user.uid);
+              });
+            }, 1000);
+          }
+          
+          // Hide status after 3 seconds
+          setTimeout(() => {
+            authStatus.style.display = 'none';
+          }, 3000);
+        }
+
+        // Handle authentication errors
+        function handleAuthError(error) {
+          console.error("❌ Authentication error:", error);
+          
+          const authStatus = document.getElementById('authStatus');
+          authStatus.style.display = 'block';
+          
+          let errorMessage;
+          
+          // Use translated error messages
+          switch (error.code) {
+            case 'auth/popup-closed-by-user':
+              errorMessage = 'Popup kapatıldı';
+              break;
+            case 'auth/popup-blocked':
+              errorMessage = 'Popup engellendi';
+              break;
+            case 'auth/cancelled-popup-request':
+              errorMessage = 'Giriş iptal edildi';
+              break;
+            case 'auth/unauthorized-domain':
+              errorMessage = 'Yetkisiz alan adı';
+              break;
+            default:
+              errorMessage = 'Giriş başarısız: ' + error.message;
+          }
+          
+          authStatus.innerHTML = '❌ ' + errorMessage;
+          
+          // Hide status after 5 seconds
+          setTimeout(() => {
+            authStatus.style.display = 'none';
+          }, 5000);
+        }
+
+        // Listen for authentication state changes
+        firebase.auth().onAuthStateChanged((user) => {
+          if (user) {
+            // User is signed in - update UI
+            document.getElementById('userName').textContent = user.displayName;
+            document.getElementById('userEmailText').textContent = user.email;
+            document.getElementById('userPhoto').src = user.photoURL;
+            document.getElementById('googleLogin').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'block';
+            
+            // Save session for cross-page access
+            localStorage.setItem('gameist_user', JSON.stringify({
+              displayName: user.displayName,
+              email: user.email,
+              photoURL: user.photoURL,
+              uid: user.uid
+            }));
+            
+            console.log("✅ User session active:", user.displayName);
+            
+            // Load and sync user stats immediately
+            loadUserStats(user.uid);
+            
+            // Auto-sync every 30 seconds for real-time updates
+            setInterval(() => {
+              console.log('🔄 Auto-syncing user stats...');
+              loadUserStats(user.uid);
+            }, 30000);
+            
+            // Sync pending scores from localStorage
+            if (window.gameistAuth && window.gameistAuth.syncPendingScores) {
+              setTimeout(() => {
+                window.gameistAuth.syncPendingScores().then(() => {
+                  // Reload stats after syncing
+                  loadUserStats(user.uid);
+                });
+              }, 1000);
+            }
+          } else {
+            // User is signed out - clear session
+            document.getElementById('googleLogin').style.display = 'inline-flex';
+            document.getElementById('userInfo').style.display = 'none';
+            localStorage.removeItem('gameist_user');
+            console.log("ℹ️ No active user session");
+          }
+        });
+
+        // Check for saved session on page load
+        function checkSavedSession() {
+          const savedUser = localStorage.getItem('gameist_user');
+          if (savedUser) {
+            try {
+              const user = JSON.parse(savedUser);
+              console.log("🔄 Restoring saved session:", user.displayName);
+              
+              // Update UI with saved data
+              document.getElementById('userName').textContent = user.displayName;
+              document.getElementById('userEmailText').textContent = user.email;
+              document.getElementById('userPhoto').src = user.photoURL;
+              document.getElementById('googleLogin').style.display = 'none';
+              document.getElementById('userInfo').style.display = 'block';
+              
+              // Load user stats immediately when session is restored
+              if (user.uid) {
+                loadUserStats(user.uid);
+                
+                // Auto-sync every 30 seconds
+                setInterval(() => {
+                  console.log('🔄 Auto-syncing user stats...');
+                  loadUserStats(user.uid);
+                }, 30000);
+                
+                // Sync pending scores
+                if (window.gameistAuth && window.gameistAuth.syncPendingScores) {
+                  setTimeout(() => {
+                    window.gameistAuth.syncPendingScores().then(() => {
+                      loadUserStats(user.uid);
+                    });
+                  }, 2000);
+                }
+              }
+            } catch (e) {
+              console.error("❌ Failed to restore session:", e);
+              localStorage.removeItem('gameist_user');
+            }
+          }
+        }
+
+        // Initialize session check and auto-sync
+        setTimeout(() => {
+          checkSavedSession();
+          
+          // Auto-sync every 30 seconds for all logged-in users
+          const savedUser = localStorage.getItem('gameist_user');
+          if (savedUser) {
+            const user = JSON.parse(savedUser);
+            if (user.uid) {
+              setInterval(() => {
+                console.log('🔄 Periodic auto-sync...');
+                loadUserStats(user.uid);
+              }, 30000);
+            }
+          }
+        }, 1000);
+      }
+    </script>
+    
+    <!-- Load auth-component after Firebase is initialized -->
+    <script src="auth-component.js?v=3"></script>
 
       // Logout button event listener
       document.getElementById('logout').addEventListener('click', async () => {
