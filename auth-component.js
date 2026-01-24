@@ -26,14 +26,6 @@ class GameistAuth {
                 this.initFirebase();
                 this.createAuthUI();
                 this.checkSavedSession();
-                
-                // Trigger sync for logged-in users
-                const user = this.getCurrentUser();
-                if (user) {
-                    setTimeout(() => {
-                        this.syncPendingScores();
-                    }, 2000);
-                }
             }
         }, 1000);
     }
@@ -44,8 +36,7 @@ class GameistAuth {
         const scripts = [
             'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js',
             'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js',
-            'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js',
-            'https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js'
+            'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js'
         ];
 
         scripts.forEach(src => {
@@ -63,7 +54,6 @@ class GameistAuth {
         
         this.auth = firebase.auth();
         this.db = firebase.firestore();
-        this.realtimeDb = firebase.database();
         this.provider = new firebase.auth.GoogleAuthProvider();
         
         console.log('🔥 Firebase initialized for game page');
@@ -210,7 +200,7 @@ class GameistAuth {
         return savedUser ? JSON.parse(savedUser) : null;
     }
 
-    // Save score to leaderboard with cross-device sync
+    // Save score to leaderboard
     async saveScore(gameName, score) {
         console.log('🎮 saveScore called with:', { gameName, score });
         
@@ -227,171 +217,55 @@ class GameistAuth {
         console.log('💾 Attempting to save to Firestore...');
         console.log('🔥 DB reference:', this.db);
         
-        const scoreData = {
-            userId: user.uid,
-            displayName: user.displayName,
-            email: user.email,
-            score: score,
-            game: gameName,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            deviceId: this.getDeviceId()
-        };
-        
-        console.log('📄 Document data to save:', scoreData);
-        
         try {
-            // Try to save to Firestore first
-            const firestoreResult = await this.saveToFirestore(scoreData);
-            
-            // Also save to Realtime Database for cross-device sync
-            await this.saveToRealtimeDatabase(user.uid, scoreData);
-            
-            // Save to localStorage as backup
-            this.saveToLocalStorage(scoreData);
-            
-            console.log('✅ Score saved successfully to all locations:', score);
-            return firestoreResult;
-            
-        } catch (error) {
-            console.error('❌ Failed to save score:', error);
-            
-            // Fallback: save to localStorage and mark for sync
-            scoreData.firestoreFailed = true;
-            scoreData.needsSync = true;
-            this.saveToLocalStorage(scoreData);
-            
-            return false;
-        }
-    }
-
-    // Get unique device ID for tracking
-    getDeviceId() {
-        let deviceId = localStorage.getItem('gameist_device_id');
-        if (!deviceId) {
-            deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('gameist_device_id', deviceId);
-        }
-        return deviceId;
-    }
-
-    // Save to Firestore with retry logic
-    async saveToFirestore(scoreData) {
-        for (let attempt = 1; attempt <= 3; attempt++) {
-            try {
-                console.log(`🔄 Firestore attempt ${attempt}/3`);
-                
-                const timeoutPromise = new Promise((_, reject) => {
-                    setTimeout(() => reject(new Error('Firestore write timeout')), 3000);
-                });
-                
-                const writePromise = this.db.collection('leaderboard').add(scoreData);
-                const result = await Promise.race([writePromise, timeoutPromise]);
-                
-                console.log('✅ Score saved to Firestore:', scoreData.score);
-                console.log('📄 Document ID:', result.id);
-                return result;
-                
-            } catch (attemptError) {
-                console.error(`❌ Attempt ${attempt} failed:`, attemptError.message);
-                if (attempt < 3) {
-                    console.log(`⏳ Waiting ${attempt * 2} seconds before retry...`);
-                    await new Promise(resolve => setTimeout(resolve, attempt * 2000));
-                } else {
-                    throw attemptError;
-                }
-            }
-        }
-    }
-
-    // Save to Realtime Database for cross-device sync
-    async saveToRealtimeDatabase(userId, scoreData) {
-        try {
-            const database = this.realtimeDb || firebase.database();
-            const userScoresRef = database.ref(`userScores/${userId}`);
-            
-            // Use timestamp as key for uniqueness
-            const scoreKey = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            const realtimeData = {
-                ...scoreData,
-                timestamp: scoreData.timestamp || Date.now()
+            const docData = {
+                userId: user.uid,
+                displayName: user.displayName,
+                email: user.email,
+                score: score,
+                game: gameName,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
             
-            await userScoresRef.child(scoreKey).set(realtimeData);
-            console.log('✅ Score saved to Realtime Database for cross-device sync');
+            console.log('📄 Document data to save:', docData);
             
-        } catch (error) {
-            console.error('❌ Failed to save to Realtime Database:', error.message);
-            // Don't throw error, continue with other storage methods
-        }
-    }
-
-    // Save to localStorage as backup
-    saveToLocalStorage(scoreData) {
-        try {
-            const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
-            localScores.push({
-                ...scoreData,
-                timestamp: Date.now()
-            });
-            
-            // Keep only last 100 scores to prevent storage issues
-            if (localScores.length > 100) {
-                localScores.splice(0, localScores.length - 100);
-            }
-            
-            localStorage.setItem('gameist_local_scores', JSON.stringify(localScores));
-            console.log('✅ Score saved to localStorage backup');
-            
-        } catch (error) {
-            console.error('❌ Failed to save to localStorage:', error.message);
-        }
-    }
-
-    // Sync pending scores from localStorage to cloud
-    async syncPendingScores() {
-        const user = this.getCurrentUser();
-        if (!user || !this.db) return;
-
-        try {
-            const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
-            const pendingScores = localScores.filter(score => 
-                score.userId === user.uid && (score.firestoreFailed || score.needsSync)
-            );
-
-            console.log(`🔄 Found ${pendingScores.length} pending scores to sync`);
-
-            for (const score of pendingScores) {
+            // Try multiple times with shorter timeout
+            for (let attempt = 1; attempt <= 3; attempt++) {
                 try {
-                    const scoreData = {
-                        userId: score.userId,
-                        displayName: score.displayName,
-                        email: score.email,
-                        score: score.score,
-                        game: score.game,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                        deviceId: score.deviceId || this.getDeviceId(),
-                        syncedFrom: 'localStorage'
-                    };
-
-                    await this.saveToFirestore(scoreData);
-                    await this.saveToRealtimeDatabase(user.uid, scoreData);
+                    console.log(`🔄 Firestore attempt ${attempt}/3`);
                     
-                    // Mark as synced
-                    score.firestoreFailed = false;
-                    score.needsSync = false;
-                    score.syncedAt = Date.now();
+                    const timeoutPromise = new Promise((_, reject) => {
+                        setTimeout(() => reject(new Error('Firestore write timeout')), 3000);
+                    });
                     
-                    console.log(`✅ Synced pending score: ${score.game} - ${score.score}`);
-                } catch (error) {
-                    console.error(`❌ Failed to sync pending score:`, error);
+                    const writePromise = this.db.collection('leaderboard').add(docData);
+                    const result = await Promise.race([writePromise, timeoutPromise]);
+                    
+                    console.log('✅ Score saved to leaderboard:', score);
+                    console.log('📄 Document ID:', result.id);
+                    return result;
+                    
+                } catch (attemptError) {
+                    console.error(`❌ Attempt ${attempt} failed:`, attemptError.message);
+                    if (attempt < 3) {
+                        console.log(`⏳ Waiting ${attempt * 2} seconds before retry...`);
+                        await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+                    } else {
+                        throw attemptError;
+                    }
                 }
             }
-
-            // Update localStorage with sync status
-            localStorage.setItem('gameist_local_scores', JSON.stringify(localScores));
             
         } catch (error) {
-            console.error('❌ Failed to sync pending scores:', error);
+            console.error('❌ Failed to save score after 3 attempts:', error);
+            console.error('❌ Error code:', error.code);
+            console.error('❌ Error message:', error.message);
+            
+            if (error.message === 'Firestore write timeout') {
+                console.error('❌ Firestore write operation timed out - possible network issue');
+            }
+            
+            return false;
         }
     }
 }
