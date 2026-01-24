@@ -716,6 +716,92 @@
           loadUserStats(user.uid);
         }
       });
+
+      // Load user statistics
+      async function loadUserStats(userId) {
+        console.log('📊 Loading user stats for:', userId);
+        
+        try {
+          const database = firebase.firestore();
+          if (!database) {
+            console.error('❌ Database not available');
+            return;
+          }
+          
+          let allScores = [];
+          
+          // 1. Load from Firestore (primary source)
+          try {
+            console.log('🔍 Loading from Firestore...');
+            const snapshot = await database.collection('leaderboard')
+              .where('userId', '==', userId)
+              .orderBy('timestamp', 'desc')
+              .get();
+            
+            const firestoreScores = snapshot.docs.map(doc => ({
+              ...doc.data(),
+              source: 'firestore'
+            }));
+            allScores.push(...firestoreScores);
+            console.log('📈 Found scores from Firestore:', firestoreScores.length);
+            
+          } catch (error) {
+            console.error('❌ Firestore query failed:', error);
+          }
+          
+          // 2. Load from localStorage (fallback)
+          try {
+            const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
+            const userLocalScores = localScores.filter(score => score.userId === userId);
+            
+            userLocalScores.forEach(localScore => {
+              const isDuplicate = allScores.some(existingScore => 
+                existingScore.score === localScore.score && 
+                existingScore.game === localScore.game &&
+                Math.abs((existingScore.timestamp || 0) - (localScore.timestamp || 0)) < 5000
+              );
+              
+              if (!isDuplicate) {
+                allScores.push({
+                  ...localScore,
+                  source: 'localStorage'
+                });
+              }
+            });
+            
+            console.log('📈 Found scores from localStorage:', userLocalScores.length);
+          } catch (error) {
+            console.error('❌ Failed to load localStorage scores:', error);
+          }
+          
+          console.log('📈 Total combined scores:', allScores.length);
+          
+          // Calculate statistics
+          const totalScore = allScores.reduce((sum, score) => sum + (score.score || 0), 0);
+          const gamesPlayed = new Set(allScores.map(s => s.game)).size;
+          
+          console.log('📊 Calculated stats:', { totalScore, gamesPlayed });
+          
+          // Update UI elements
+          const userTotalScoreEl = document.getElementById('userTotalScore');
+          const userGamesPlayedEl = document.getElementById('userGamesPlayed');
+          
+          if (userTotalScoreEl) {
+            userTotalScoreEl.textContent = totalScore.toLocaleString();
+            console.log('✅ Updated main UI total score:', totalScore);
+          }
+          
+          if (userGamesPlayedEl) {
+            userGamesPlayedEl.textContent = gamesPlayed;
+            console.log('✅ Updated main UI games played:', gamesPlayed);
+          }
+          
+          console.log('✅ User stats loaded successfully');
+          
+        } catch (error) {
+          console.error('❌ Failed to load user stats:', error);
+        }
+      }
     </script>
 
       // Logout button event listener
