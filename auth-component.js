@@ -34,11 +34,8 @@ class GameistAuth {
                         this.syncPendingScores();
                     }, 2000);
                 }
-            } else {
-                // Retry if firebase not loaded yet
-                setTimeout(() => this.init(), 1000);
             }
-        }, 500);
+        }, 1000);
     }
 
     loadFirebaseScripts() {
@@ -401,15 +398,7 @@ class GameistAuth {
 
 // Initialize auth component
 let gameistAuth;
-
-// Initialize immediately if DOM is ready, otherwise wait for DOMContentLoaded
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-        gameistAuth = new GameistAuth();
-        window.gameistAuth = gameistAuth; // Make it globally accessible
-    });
-} else {
-    // DOM is already ready
+document.addEventListener('DOMContentLoaded', function() {
     gameistAuth = new GameistAuth();
     window.gameistAuth = gameistAuth; // Make it globally accessible
-}
+});
