@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sync Debug Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+        }
+        .test-section {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #45a049; }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Cross-Device Sync Debug Test</h1>
+    
+    <div class="test-section">
+        <h2>📊 Realtime Database Test</h2>
+        <button onclick="testWrite()">Test Write Score</button>
+        <button onclick="testRead()">Test Read Scores</button>
+        <button onclick="clearLog()">Clear Log</button>
+        <div id="log" class="log"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔄 Auto-Sync Test</h2>
+        <button onclick="startAutoSync()">Start Auto-Sync (3s)</button>
+        <button onclick="stopAutoSync()">Stop Auto-Sync</button>
+        <div id="syncStatus">Auto-sync: Stopped</div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7ckcqdZWfnUx5r8uKmvu9Ikax1x5Qidk",
+            authDomain: "gameist.firebaseapp.com",
+            projectId: "gameist",
+            storageBucket: "gameist.firebasestorage.app",
+            messagingSenderId: "525659299937",
+            appId: "1:525659299937:web:1c8343a25be2a994bcca20",
+            databaseURL: "https://gameist-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        let autoSyncInterval = null;
+        let currentUser = null;
+
+        // Log function
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Clear log
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // Test write to Realtime Database
+        async function testWrite() {
+            try {
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    log('❌ No user logged in');
+                    return;
+                }
+
+                const score = Math.floor(Math.random() * 1000000);
+                log(`💾 Writing test score: ${score}`);
+
+                const database = firebase.database();
+                const userScoresRef = database.ref(`userScores/${user.uid}`);
+                const newScoreRef = userScoresRef.push();
+
+                await newScoreRef.set({
+                    userId: user.uid,
+                    displayName: user.displayName,
+                    email: user.email,
+                    score: score,
+                    game: 'debug-test',
+                    timestamp: Date.now(),
+                    testScore: true
+                });
+
+                log(`✅ Test score written successfully: ${score}`);
+            } catch (error) {
+                log(`❌ Write error: ${error.message}`);
+            }
+        }
+
+        // Test read from Realtime Database
+        async function testRead() {
+            try {
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    log('❌ No user logged in');
+                    return;
+                }
+
+                log(`📖 Reading scores for user: ${user.uid}`);
+
+                const database = firebase.database();
+                const userScoresRef = database.ref(`userScores/${user.uid}`);
+                
+                const snapshot = await userScoresRef.once('value');
+                const data = snapshot.val();
+
+                if (data) {
+                    const scores = Object.values(data);
+                    log(`📊 Found ${scores.length} scores:`);
+                    scores.forEach(score => {
+                        log(`   📄 ${score.game}: ${score.score} pts (${new Date(score.timestamp).toLocaleTimeString()})`);
+                    });
+                } else {
+                    log('📭 No scores found');
+                }
+            } catch (error) {
+                log(`❌ Read error: ${error.message}`);
+            }
+        }
+
+        // Start auto-sync
+        function startAutoSync() {
+            if (autoSyncInterval) {
+                clearInterval(autoSyncInterval);
+            }
+
+            log('🔄 Starting auto-sync every 3 seconds');
+            document.getElementById('syncStatus').textContent = 'Auto-sync: Running (3s)';
+
+            autoSyncInterval = setInterval(async () => {
+                try {
+                    const user = firebase.auth().currentUser;
+                    if (!user) {
+                        log('❌ No user for auto-sync');
+                        return;
+                    }
+
+                    const database = firebase.database();
+                    const userScoresRef = database.ref(`userScores/${user.uid}`);
+                    
+                    const snapshot = await userScoresRef.once('value');
+                    const data = snapshot.val();
+
+                    if (data) {
+                        const scores = Object.values(data);
+                        const totalScore = scores.reduce((sum, score) => sum + score.score, 0);
+                        log(`🔄 Auto-sync: ${scores.length} scores, total: ${totalScore}`);
+                    } else {
+                        log('🔄 Auto-sync: No scores found');
+                    }
+                } catch (error) {
+                    log(`❌ Auto-sync error: ${error.message}`);
+                }
+            }, 3000);
+        }
+
+        // Stop auto-sync
+        function stopAutoSync() {
+            if (autoSyncInterval) {
+                clearInterval(autoSyncInterval);
+                autoSyncInterval = null;
+                log('⏹️ Auto-sync stopped');
+                document.getElementById('syncStatus').textContent = 'Auto-sync: Stopped';
+            }
+        }
+
+        // Check authentication
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                log(`✅ User logged in: ${user.displayName} (${user.uid})`);
+            } else {
+                log('❌ No user logged in');
+                currentUser = null;
+            }
+        });
+
+        // Initialize
+        log('🔥 Sync Debug Test initialized');
+    </script>
+</body>
+</html>
