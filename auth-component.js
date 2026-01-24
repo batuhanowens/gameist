@@ -60,6 +60,9 @@ class GameistAuth {
     }
 
     createAuthUI() {
+        // DISABLED - Auth container removed
+        return;
+        
         // Find or create auth container
         let authContainer = document.getElementById('gameist-auth-container');
         if (!authContainer) {
