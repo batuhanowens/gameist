@@ -105,7 +105,26 @@ class GameistAuth {
                 </button>
             </div>
             <div id="game-user-info" class="auth-info" style="display: none;">
-                <!-- User info hidden - no profile box -->
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <img id="game-user-photo" src="" style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);">
+                    <div style="flex: 1; min-width: 0;">
+                        <div id="game-user-name" style="color: white; font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
+                        <div style="color: rgba(255,255,255,0.7); font-size: 11px;">Oyuncu</div>
+                    </div>
+                </div>
+                <button onclick="gameistAuth.signOut()" style="
+                    padding: 6px 12px;
+                    background: #ef4444;
+                    color: white;
+                    border: none;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 11px;
+                    font-weight: 600;
+                    width: 100%;
+                ">
+                    <span data-i18n="logout_button">Çıkış</span>
+                </button>
             </div>
             <div id="game-auth-status" style="font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 4px; display: none;"></div>
         `;
