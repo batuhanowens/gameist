@@ -1,0 +1,6 @@
+# Ezoic Ads.txt Configuration
+# This file authorizes Ezoic to sell ads on your site
+# For more information: https://support.ezoic.com/kb/article/what-is-ads-txt
+
+google.com, pub-9478711342689131, DIRECT, f08c47fec0942fa0
+ezoic.com, 19390, DIRECT, f08c47fec0942fa0
