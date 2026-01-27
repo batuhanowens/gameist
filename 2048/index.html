@@ -92,12 +92,33 @@
             <canvas id="menu-bg" class="menu-bg"></canvas>
             <div class="overlay-card">
                 <h2 class="menu-title">2048 PulseMerge</h2>
+                <!-- Banner Ad -->
+                <div style="display: flex; justify-content: center; margin: 10px 0;">
+                    <script>
+                        atOptions = {
+                            'key' : 'ce673f1e09efadddcb7e75ee9d586e4a',
+                            'format' : 'iframe',
+                            'height' : 50,
+                            'width' : 320,
+                            'params' : {}
+                        };
+                    </script>
+                    <script src="https://www.highperformanceformat.com/ce673f1e09efadddcb7e75ee9d586e4a/invoke.js"></script>
+                </div>
                 <div class="overlay-actions">
                     <button id="menu-play">Play</button>
                     <button id="menu-settings">Settings</button>
                     <button id="menu-exit">Exit</button>
                     <button id="menu-hub">Back to Main Menu</button>
                 </div>
+            </div>
+            <!-- Buy Me a Coffee Banner -->
+            <div style="position: fixed; bottom: 10px; right: 10px; z-index: 1000; opacity: 0.6; transition: opacity 0.3s ease;" 
+                 onmouseover="this.style.opacity='1'" 
+                 onmouseout="this.style.opacity='0.6'">
+              <a href="https://buymeacoffee.com/gameist" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+                <img src="../assets/buymeacoffee.png" alt="Buy Me a Coffee" style="width: 100px; height: auto; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+              </a>
             </div>
             <!-- Promo section removed for Store build to avoid any external asset dependency or broken-image icons -->
         </div>
