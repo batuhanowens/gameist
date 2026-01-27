@@ -8753,9 +8753,22 @@ class GlowlingsGame {
     initScoreMonitoring() {
         this._lastReportedScore = 0;
         this._lastScoreCheckTime = 0;
-        this._scoreUpdateInterval = 5000; // Check every 5 seconds
-        this._minScoreIncrease = 100; // Minimum score increase to report
+        this._scoreUpdateInterval = 3000; // Check every 3 seconds (faster for testing)
+        this._minScoreIncrease = 50; // Minimum score increase to report (lower for testing)
         console.log('🎮 Score monitoring initialized');
+    }
+
+    // Get current run's best score from run history
+    getCurrentRunBestScore() {
+        try {
+            if (this.runHistory && this.runHistory.best && this.runHistory.best.score) {
+                return this.runHistory.best.score;
+            }
+            return this.score || 0;
+        } catch (error) {
+            console.warn('⚠️ Error getting current run best score:', error);
+            return this.score || 0;
+        }
     }
 
     // Check for score updates and notify main menu
@@ -8781,14 +8794,14 @@ class GlowlingsGame {
             return;
         }
         
-        const currentScore = this.score || 0;
+        const currentScore = this.getCurrentRunBestScore(); // Use best score from run history
         const scoreIncrease = currentScore - this._lastReportedScore;
         
-        console.log(`🔍 Score check: ${this._lastReportedScore} → ${currentScore} (+${scoreIncrease}), Game state: ${this.gameState}`);
+        console.log(`🔍 Score check: ${this._lastReportedScore} → ${currentScore} (+${scoreIncrease}), Game state: ${this.gameState}, Run best: ${this.getCurrentRunBestScore()}`);
         
-        // Only report if score increased significantly
-        if (scoreIncrease >= this._minScoreIncrease && this.gameState === 'playing') {
-            console.log(`📈 Score increase detected: ${this._lastReportedScore} → ${currentScore} (+${scoreIncrease})`);
+        // Only report if score increased significantly (allow menu state too)
+        if (scoreIncrease >= this._minScoreIncrease && (this.gameState === 'playing' || this.gameState === 'menu')) {
+            console.log(`📈 Score increase detected: ${this._lastReportedScore} → ${currentScore} (+${scoreIncrease}) [Using run best score]`);
             
             // Send score update to main menu
             this.sendScoreUpdate(currentScore, scoreIncrease);
@@ -8888,12 +8901,16 @@ class GlowlingsGame {
     debugTestScoreUpdate() {
         console.log('🧪 Manual score test triggered');
         console.log('Current score:', this.score);
+        console.log('Run best score:', this.getCurrentRunBestScore());
         console.log('Game state:', this.gameState);
         console.log('Last reported score:', this._lastReportedScore);
         
-        // Force a score increase for testing
-        this.score = (this.score || 0) + 500;
-        console.log('New score:', this.score);
+        // Force a score increase for testing (update run history best score)
+        const testScore = (this.getCurrentRunBestScore() || 0) + 500;
+        if (this.runHistory && this.runHistory.best) {
+            this.runHistory.best.score = testScore;
+            console.log('Updated run history best score to:', testScore);
+        }
         
         // Trigger score check immediately
         this._lastScoreCheckTime = 0; // Reset timer to force check
