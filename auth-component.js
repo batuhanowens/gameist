@@ -193,13 +193,17 @@ class GameistAuth {
         const userInfo = document.getElementById('game-user-info');
 
         if (user) {
-            loginBtn.style.display = 'none';
-            userInfo.style.display = 'block';
-            document.getElementById('game-user-name').textContent = user.displayName;
-            document.getElementById('game-user-photo').src = user.photoURL;
+            if (loginBtn) loginBtn.style.display = 'none';
+            if (userInfo) userInfo.style.display = 'block';
+            
+            const userNameEl = document.getElementById('game-user-name');
+            const userPhotoEl = document.getElementById('game-user-photo');
+            
+            if (userNameEl) userNameEl.textContent = user.displayName;
+            if (userPhotoEl) userPhotoEl.src = user.photoURL;
         } else {
-            loginBtn.style.display = 'block';
-            userInfo.style.display = 'none';
+            if (loginBtn) loginBtn.style.display = 'block';
+            if (userInfo) userInfo.style.display = 'none';
         }
     }
 
@@ -233,6 +237,13 @@ class GameistAuth {
             console.error('❌ Cannot save score: user not logged in or DB not available');
             console.error('❌ User exists:', !!user);
             console.error('❌ DB exists:', !!this.db);
+            
+            // Fallback to localStorage if Firebase is not available
+            if (user) {
+                console.log('💾 Using localStorage fallback for score...');
+                this.saveScoreLocalStorage(gameName, score, user);
+                return true;
+            }
             return false;
         }
 
@@ -265,6 +276,10 @@ class GameistAuth {
                     
                     console.log('✅ Score saved to leaderboard:', score);
                     console.log('📄 Document ID:', result.id);
+                    
+                    // Notify main menu of score update
+                    this.notifyMainMenu(gameName, score, user, true);
+                    
                     return result;
                     
                 } catch (attemptError) {
@@ -283,11 +298,86 @@ class GameistAuth {
             console.error('❌ Error code:', error.code);
             console.error('❌ Error message:', error.message);
             
-            if (error.message === 'Firestore write timeout') {
-                console.error('❌ Firestore write operation timed out - possible network issue');
+            // Fallback to localStorage and notify main menu
+            if (user) {
+                console.log('💾 Using localStorage fallback after Firestore failure...');
+                this.saveScoreLocalStorage(gameName, score, user);
+                this.notifyMainMenu(gameName, score, user, false);
+                return true;
             }
             
             return false;
+        }
+    }
+    
+    // Local storage fallback for score saving
+    saveScoreLocalStorage(gameName, score, user) {
+        try {
+            const scores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
+            
+            // Check if this score already exists (avoid duplicates)
+            const exists = scores.some(s => 
+                s.userId === user.uid && 
+                s.game === gameName && 
+                s.score === score &&
+                Math.abs(Date.now() - (s.timestamp || 0)) < 5000
+            );
+            
+            if (!exists) {
+                scores.push({
+                    userId: user.uid,
+                    displayName: user.displayName,
+                    email: user.email,
+                    score: score,
+                    game: gameName,
+                    timestamp: Date.now()
+                });
+                
+                // Keep only last 50 scores per user
+                const userScores = scores.filter(s => s.userId === user.uid);
+                const otherScores = scores.filter(s => s.userId !== user.uid);
+                const recentUserScores = userScores.sort((a, b) => b.timestamp - a.timestamp).slice(0, 50);
+                
+                localStorage.setItem('gameist_local_scores', JSON.stringify([...otherScores, ...recentUserScores]));
+                console.log('✅ Score saved to localStorage fallback:', score);
+            }
+        } catch (error) {
+            console.error('❌ Failed to save to localStorage fallback:', error);
+        }
+    }
+    
+    // Notify main menu of score updates
+    notifyMainMenu(gameName, score, user, firestoreSuccess) {
+        try {
+            // Use BroadcastChannel for cross-tab communication
+            const channel = new BroadcastChannel('gameist_stats');
+            channel.postMessage({
+                type: 'statsUpdate',
+                game: gameName,
+                score: score,
+                userId: user.uid,
+                displayName: user.displayName,
+                timestamp: Date.now(),
+                firestoreSuccess: firestoreSuccess
+            });
+            
+            console.log('📡 Notified main menu via BroadcastChannel');
+            
+            // Fallback: localStorage for cross-page communication
+            localStorage.setItem('gameist_stats_update_needed', JSON.stringify({
+                type: 'statsUpdate',
+                game: gameName,
+                score: score,
+                userId: user.uid,
+                displayName: user.displayName,
+                timestamp: Date.now(),
+                firestoreSuccess: firestoreSuccess
+            }));
+            
+            console.log('💾 Set localStorage fallback for main menu notification');
+            
+        } catch (error) {
+            console.error('❌ Failed to notify main menu:', error);
         }
     }
 }
