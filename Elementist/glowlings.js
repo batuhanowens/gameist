@@ -8760,16 +8760,27 @@ class GlowlingsGame {
     // Get current run's best score from run history - ALWAYS get the exact best
     getCurrentRunBestScore() {
         try {
-            // Always prioritize runHistory.best.score - this is the definitive best score
+            // Method 1: Try to get from statsBestScore element (most reliable)
+            const statsBestScoreEl = document.getElementById('statsBestScore');
+            if (statsBestScoreEl && statsBestScoreEl.textContent && statsBestScoreEl.textContent !== '-') {
+                const scoreText = statsBestScoreEl.textContent.replace(/,/g, '').trim();
+                const scoreFromElement = parseInt(scoreText);
+                if (!isNaN(scoreFromElement) && scoreFromElement > 0) {
+                    console.log(`🏆 Getting exact best score from statsBestScore element: ${scoreFromElement}`);
+                    return scoreFromElement;
+                }
+            }
+            
+            // Method 2: Fallback to runHistory.best.score
             if (this.runHistory && this.runHistory.best && typeof this.runHistory.best.score === 'number') {
                 const bestScore = this.runHistory.best.score;
-                console.log(`🏆 Getting exact best score from run history: ${bestScore}`);
+                console.log(`🔄 Fallback to runHistory.best.score: ${bestScore}`);
                 return bestScore;
             }
             
-            // Fallback to current score if no run history
+            // Method 3: Final fallback to current score
             const currentScore = this.score || 0;
-            console.log(`⚠️ No run history best score, using current score: ${currentScore}`);
+            console.log(`⚠️ No best score found, using current score: ${currentScore}`);
             return currentScore;
         } catch (error) {
             console.warn('⚠️ Error getting current run best score:', error);
@@ -8904,6 +8915,16 @@ class GlowlingsGame {
     // Debug function to show current run history state
     debugRunHistory() {
         console.log('🔍 Run History Debug:');
+        
+        // Check statsBestScore element
+        const statsBestScoreEl = document.getElementById('statsBestScore');
+        console.log('statsBestScore element exists:', !!statsBestScoreEl);
+        if (statsBestScoreEl) {
+            console.log('statsBestScore content:', statsBestScoreEl.textContent);
+            const scoreFromElement = parseInt(statsBestScoreEl.textContent.replace(/,/g, '').trim());
+            console.log('Parsed score from element:', !isNaN(scoreFromElement) ? scoreFromElement : 'NaN');
+        }
+        
         console.log('runHistory exists:', !!this.runHistory);
         if (this.runHistory) {
             console.log('runHistory.best exists:', !!this.runHistory.best);
@@ -8930,6 +8951,7 @@ class GlowlingsGame {
         const currentBest = this.getCurrentRunBestScore();
         const testBestScore = currentBest + 500;
         
+        // Update runHistory
         if (this.runHistory && this.runHistory.best) {
             this.runHistory.best.score = testBestScore;
             console.log(`🎯 Updated run history best score to: ${testBestScore}`);
@@ -8942,6 +8964,15 @@ class GlowlingsGame {
                     timestamp: Date.now()
                 }
             };
+        }
+        
+        // Also update the statsBestScore element for testing
+        const statsBestScoreEl = document.getElementById('statsBestScore');
+        if (statsBestScoreEl) {
+            statsBestScoreEl.textContent = testBestScore.toLocaleString();
+            console.log(`📊 Updated statsBestScore element to: ${testBestScore.toLocaleString()}`);
+        } else {
+            console.log('⚠️ statsBestScore element not found');
         }
         
         // Trigger score check immediately
