@@ -2481,13 +2481,24 @@
                 <h3 class="brand-242" data-lang="followUs">242 Games</h3>
             </div>
             <!-- Buy Me a Coffee Banner -->
-            <div style="position: fixed; bottom: 10px; right: 10px; z-index: 1000; opacity: 0.6; transition: opacity 0.3s ease;" 
+            <div style="position: fixed; bottom: 10px; right: 10px; z-index: 1000; opacity: 0.6; transition: opacity 0.3s ease; text-align: center;" 
                  onmouseover="this.style.opacity='1'" 
                  onmouseout="this.style.opacity='0.6'">
+              <div style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff6b6b); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: gradientShift 3s ease-in-out infinite; font-size: 10px; font-weight: 600; margin-bottom: 3px; text-shadow: 0 0 8px rgba(255,255,255,0.3);">
+                Support the solo dev☕ (2$)
+              </div>
               <a href="https://buymeacoffee.com/gameist" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
                 <img src="../assets/buymeacoffee.png" alt="Buy Me a Coffee" style="width: 100px; height: auto; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
               </a>
             </div>
+            
+            <style>
+            @keyframes gradientShift {
+              0% { background-position: 0% 50%; }
+              50% { background-position: 100% 50%; }
+              100% { background-position: 0% 50%; }
+            }
+            </style>
         </div>
         <!-- Element + Character Select Overlay (shown after pressing start) -->
         <div id="elementSelectOverlay" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.9); pointer-events:all; z-index:999;">
