@@ -644,6 +644,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="main.js?v=3"></script>
+    <script src="score-sync.js?v=1"></script>
     <script src="hub-i18n.js?v=3"></script>
     <script src="auth-i18n.js?v=3"></script>
     
@@ -859,6 +860,154 @@
         } else {
           console.log('❌ No saved user found for refresh');
         }
+      });
+
+      // Global score synchronization system
+      window.gameistScoreSync = {
+        lastUpdate: 0,
+        isListening: false,
+        
+        // Initialize real-time listeners
+        init() {
+          if (this.isListening) return;
+          this.isListening = true;
+          
+          console.log('🔄 Initializing score synchronization...');
+          
+          // Listen for storage events (cross-tab sync)
+          window.addEventListener('storage', (e) => {
+            if (e.key === 'gameist_score_update') {
+              console.log('📡 Storage event detected - refreshing scores');
+              this.triggerRefresh();
+            }
+          });
+          
+          // Listen for visibility changes (tab switch)
+          document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+              console.log('👁️ Tab became visible - checking for score updates');
+              this.checkForUpdates();
+            }
+          });
+          
+          // Listen for window focus
+          window.addEventListener('focus', () => {
+            console.log('🎯 Window focused - checking for score updates');
+            this.checkForUpdates();
+          });
+          
+          // Set up periodic sync
+          setInterval(() => {
+            this.checkForUpdates();
+          }, 30000); // Check every 30 seconds
+        },
+        
+        // Trigger score refresh across all tabs
+        triggerRefresh() {
+          const savedUser = localStorage.getItem('gameist_user');
+          if (savedUser) {
+            const user = JSON.parse(savedUser);
+            console.log('🔄 Auto-refreshing scores for:', user.displayName);
+            loadUserStats(user.uid);
+            
+            // Notify other tabs
+            localStorage.setItem('gameist_score_update', Date.now().toString());
+            
+            // Update last update time
+            this.lastUpdate = Date.now();
+          }
+        },
+        
+        // Check if updates are needed
+        checkForUpdates() {
+          const savedUser = localStorage.getItem('gameist_user');
+          if (!savedUser) return;
+          
+          const user = JSON.parse(savedUser);
+          const timeSinceLastUpdate = Date.now() - this.lastUpdate;
+          
+          // Auto-refresh if it's been more than 10 seconds
+          if (timeSinceLastUpdate > 10000) {
+            this.triggerRefresh();
+          }
+        },
+        
+        // Manual refresh from game pages
+        notifyScoreUpdate(gameName, score) {
+          console.log(`🎮 Score update notification: ${gameName} - ${score}`);
+          this.triggerRefresh();
+        }
+      };
+
+      // Enhanced saveScore function with real-time sync
+      window.saveUserScore = async function(userId, displayName, score, gameName) {
+        console.log('💾 saveUserScore called:', { userId, displayName, score, gameName });
+        
+        try {
+          const database = window.gameistDB || db;
+          if (!database) {
+            console.error('❌ Database not available');
+            return false;
+          }
+          
+          // Save to Firestore
+          const docData = {
+            userId: userId,
+            displayName: displayName,
+            score: score,
+            game: gameName,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          };
+          
+          console.log('📄 Saving to Firestore:', docData);
+          
+          const result = await database.collection('leaderboard').add(docData);
+          console.log('✅ Score saved to Firestore:', result.id);
+          
+          // Save to Realtime Database for cross-device sync
+          try {
+            const realtimeDb = firebase.database();
+            const scoreRef = realtimeDb.ref(`userScores/${userId}/${result.id}`);
+            await scoreRef.set({
+              ...docData,
+              timestamp: Date.now(),
+              firestoreId: result.id
+            });
+            console.log('✅ Score synced to Realtime Database');
+          } catch (rtError) {
+            console.log('ℹ️ Realtime Database sync failed:', rtError.message);
+          }
+          
+          // Save to localStorage fallback
+          const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
+          localScores.push({
+            ...docData,
+            timestamp: Date.now(),
+            id: result.id
+          });
+          localStorage.setItem('gameist_local_scores', JSON.stringify(localScores));
+          console.log('✅ Score saved to localStorage fallback');
+          
+          // Trigger synchronization
+          if (window.gameistScoreSync) {
+            window.gameistScoreSync.notifyScoreUpdate(gameName, score);
+          }
+          
+          return result;
+          
+        } catch (error) {
+          console.error('❌ Failed to save score:', error);
+          return false;
+        }
+      };
+
+      // Initialize score sync system
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+          if (window.gameistScoreSync) {
+            window.gameistScoreSync.init();
+          }
+        }, 1000);
       });
 
       // Manual test button for debugging

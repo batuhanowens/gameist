@@ -265,6 +265,17 @@ class GameistAuth {
                     
                     console.log('✅ Score saved to leaderboard:', score);
                     console.log('📄 Document ID:', result.id);
+                    
+                    // Trigger global synchronization
+                    if (typeof window.saveUserScore === 'function') {
+                        window.saveUserScore(user.uid, user.displayName, score, gameName);
+                    } else if (window.parent && typeof window.parent.saveUserScore === 'function') {
+                        window.parent.saveUserScore(user.uid, user.displayName, score, gameName);
+                    } else {
+                        // Fallback: trigger storage event
+                        localStorage.setItem('gameist_score_update', Date.now().toString());
+                    }
+                    
                     return result;
                     
                 } catch (attemptError) {

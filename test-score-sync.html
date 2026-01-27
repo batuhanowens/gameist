@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Score Sync Test - Gameist</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .test-section {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #357ae8;
+        }
+        .status {
+            background: rgba(0,255,0,0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #00ff00;
+        }
+        .error {
+            background: rgba(255,0,0,0.1);
+            border-left-color: #ff0000;
+        }
+        #log {
+            background: #000;
+            padding: 10px;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔄 Gameist Score Synchronization Test</h1>
+    
+    <div class="test-section">
+        <h2>📊 User Status</h2>
+        <div id="userStatus">Checking user status...</div>
+        <button onclick="checkUser()">Check User</button>
+        <button onclick="simulateLogin()">Simulate Login</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>🎮 Score Tests</h2>
+        <button onclick="testScoreSave()">Test Score Save</button>
+        <button onclick="testMultipleScores()">Test Multiple Scores</button>
+        <button onclick="testCrossTabSync()">Test Cross-Tab Sync</button>
+        <div id="scoreStatus">Ready to test scores...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📡 Sync Status</h2>
+        <div id="syncStatus">Checking sync system...</div>
+        <button onclick="checkSyncSystem()">Check Sync System</button>
+        <button onclick="triggerManualSync()">Trigger Manual Sync</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>📝 Event Log</h2>
+        <div id="log"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="auth-component.js"></script>
+    <script src="score-sync.js"></script>
+    
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7ckcqdZWfnUx5r8uKmvu9Ikax1x5Qidk",
+            authDomain: "gameist.firebaseapp.com",
+            projectId: "gameist",
+            storageBucket: "gameist.firebasestorage.app",
+            messagingSenderId: "525659299937",
+            appId: "1:525659299937:web:1c8343a25be2a994bcca20",
+            measurementId: "G-WE9R0GWKM6",
+            databaseURL: "https://gameist-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        
+        // Test logging
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'color: red' : type === 'success' ? 'color: green' : 'color: white';
+            logEl.innerHTML += `<div style="${className}">[${timestamp}] ${message}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        function updateStatus(elementId, message, isError = false) {
+            const el = document.getElementById(elementId);
+            el.innerHTML = `<div class="status ${isError ? 'error' : ''}">${message}</div>`;
+        }
+        
+        // User functions
+        function checkUser() {
+            const savedUser = localStorage.getItem('gameist_user');
+            if (savedUser) {
+                const user = JSON.parse(savedUser);
+                updateStatus('userStatus', `✅ Logged in as: ${user.displayName} (${user.email})`);
+                log(`User found: ${user.displayName}`, 'success');
+            } else {
+                updateStatus('userStatus', '❌ No user logged in', true);
+                log('No user found in localStorage', 'error');
+            }
+        }
+        
+        function simulateLogin() {
+            const mockUser = {
+                displayName: 'Test User',
+                email: 'test@example.com',
+                photoURL: 'https://via.placeholder.com/80',
+                uid: 'test_user_123'
+            };
+            localStorage.setItem('gameist_user', JSON.stringify(mockUser));
+            updateStatus('userStatus', `✅ Simulated login: ${mockUser.displayName}`);
+            log(`Simulated login for: ${mockUser.displayName}`, 'success');
+        }
+        
+        // Score functions
+        async function testScoreSave() {
+            const savedUser = localStorage.getItem('gameist_user');
+            if (!savedUser) {
+                updateStatus('scoreStatus', '❌ Please login first', true);
+                return;
+            }
+            
+            const user = JSON.parse(savedUser);
+            const score = Math.floor(Math.random() * 1000) + 100;
+            
+            log(`Testing score save: ${score} for game: test-game`);
+            updateStatus('scoreStatus', '🔄 Saving score...');
+            
+            try {
+                if (window.gameistAuth && window.gameistAuth.saveScore) {
+                    const result = await window.gameistAuth.saveScore('test-game', score);
+                    if (result) {
+                        updateStatus('scoreStatus', `✅ Score saved: ${score}`);
+                        log(`Score saved successfully: ${score}`, 'success');
+                    } else {
+                        updateStatus('scoreStatus', '❌ Score save failed', true);
+                        log('Score save failed', 'error');
+                    }
+                } else {
+                    updateStatus('scoreStatus', '❌ Auth system not available', true);
+                    log('Auth system not available', 'error');
+                }
+            } catch (error) {
+                updateStatus('scoreStatus', `❌ Error: ${error.message}`, true);
+                log(`Error saving score: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testMultipleScores() {
+            log('Testing multiple score saves...');
+            updateStatus('scoreStatus', '🔄 Saving multiple scores...');
+            
+            const games = ['elementist', '2048', 'wordlist', 'bilardist'];
+            for (const game of games) {
+                const score = Math.floor(Math.random() * 5000) + 500;
+                log(`Saving score for ${game}: ${score}`);
+                
+                if (window.gameistAuth && window.gameistAuth.saveScore) {
+                    await window.gameistAuth.saveScore(game, score);
+                    await new Promise(resolve => setTimeout(resolve, 500)); // Small delay
+                }
+            }
+            
+            updateStatus('scoreStatus', '✅ Multiple scores saved');
+            log('Multiple scores test completed', 'success');
+        }
+        
+        function testCrossTabSync() {
+            log('Testing cross-tab synchronization...');
+            updateStatus('scoreStatus', '🔄 Triggering cross-tab sync...');
+            
+            // Trigger storage event
+            localStorage.setItem('gameist_score_update', Date.now().toString());
+            
+            setTimeout(() => {
+                updateStatus('scoreStatus', '✅ Cross-tab sync triggered');
+                log('Cross-tab sync event triggered', 'success');
+            }, 1000);
+        }
+        
+        // Sync functions
+        function checkSyncSystem() {
+            if (window.gameistScoreSync) {
+                updateStatus('syncStatus', '✅ Sync system available');
+                log('Score sync system is available', 'success');
+                log(`Last update: ${window.gameistScoreSync.lastUpdate}`);
+                log(`Is listening: ${window.gameistScoreSync.isListening}`);
+            } else {
+                updateStatus('syncStatus', '❌ Sync system not available', true);
+                log('Score sync system not available', 'error');
+            }
+        }
+        
+        function triggerManualSync() {
+            if (window.gameistScoreSync) {
+                log('Triggering manual synchronization...');
+                window.gameistScoreSync.triggerRefresh();
+                updateStatus('syncStatus', '✅ Manual sync triggered');
+                log('Manual sync triggered', 'success');
+            } else {
+                updateStatus('syncStatus', '❌ Sync system not available', true);
+                log('Cannot trigger sync - system not available', 'error');
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Score sync test page loaded');
+            checkUser();
+            
+            setTimeout(() => {
+                checkSyncSystem();
+            }, 2000);
+            
+            // Listen for score updates
+            window.addEventListener('gameistScoreUpdate', (event) => {
+                log(`🎮 Score update event received: ${JSON.stringify(event.detail)}`, 'success');
+            });
+        });
+    </script>
+</body>
+</html>
