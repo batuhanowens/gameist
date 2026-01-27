@@ -2484,14 +2484,30 @@
             <div style="position: fixed; bottom: 10px; right: 10px; z-index: 1000; opacity: 0.6; transition: opacity 0.3s ease; text-align: center;" 
                  onmouseover="this.style.opacity='1'" 
                  onmouseout="this.style.opacity='0.6'">
-              <div style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff6b6b); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: gradientShift 3s ease-in-out infinite; font-size: 9px; font-weight: 600; margin-bottom: 2px; text-shadow: 0 0 6px rgba(255,255,255,0.3); line-height: 1.1;">
-                <div>Support</div>
-                <div>solo dev ☕ (2$)</div>
+              <div class="support-message" style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff6b6b); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: gradientShift 3s ease-in-out infinite; font-size: 10px; font-weight: 600; margin-bottom: 3px; text-shadow: 0 0 8px rgba(255,255,255,0.3); line-height: 1.2;">
+                <div class="desktop-text">Support the solo dev☕ (2$)</div>
+                <div class="mobile-text" style="display: none;">Support<br>solo dev ☕ (2$)</div>
               </div>
               <a href="https://buymeacoffee.com/gameist" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
-                <img src="../assets/buymeacoffee.png" alt="Buy Me a Coffee" style="width: 80px; height: auto; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+                <img class="desktop-img" src="../assets/buymeacoffee.png" alt="Buy Me a Coffee" style="width: 100px; height: auto; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+                <img class="mobile-img" src="../assets/buymeacoffee.png" alt="Buy Me a Coffee" style="width: 80px; height: auto; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: none;">
               </a>
             </div>
+            
+            <style>
+            @keyframes gradientShift {
+              0% { background-position: 0% 50%; }
+              50% { background-position: 100% 50%; }
+              100% { background-position: 0% 50%; }
+            }
+            
+            @media (max-width: 768px) {
+              .desktop-text { display: none !important; }
+              .mobile-text { display: block !important; font-size: 9px !important; margin-bottom: 2px !important; line-height: 1.1 !important; }
+              .desktop-img { display: none !important; }
+              .mobile-img { display: inline !important; }
+            }
+            </style>
             
             <style>
             @keyframes gradientShift {
