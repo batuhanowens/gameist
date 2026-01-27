@@ -90,6 +90,7 @@ body {
   background: var(--primary-gradient);
   opacity: 0.1;
   animation: float 20s infinite linear;
+  -webkit-animation: float 20s infinite linear;
 }
 
 .shape-1 {
@@ -124,6 +125,7 @@ body {
   top: 30%;
   right: 30%;
   animation-delay: -15s;
+  background: var(--accent-gradient);
 }
 
 .shape-5 {
@@ -138,8 +140,21 @@ body {
 @keyframes float {
   0% {
     transform: translateY(100vh) rotate(0deg);
+    -webkit-transform: translateY(100vh) rotate(0deg);
   }
   100% {
+    transform: translateY(-100px) rotate(360deg);
+    -webkit-transform: translateY(-100px) rotate(360deg);
+  }
+}
+
+@-webkit-keyframes float {
+  0% {
+    -webkit-transform: translateY(100vh) rotate(0deg);
+    transform: translateY(100vh) rotate(0deg);
+  }
+  100% {
+    -webkit-transform: translateY(-100px) rotate(360deg);
     transform: translateY(-100px) rotate(360deg);
   }
 }
