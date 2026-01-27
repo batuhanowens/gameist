@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
   <head>
-    <script data-cfasync="false" src="https://cmp.gatekeeperconsent.com/min.js"></script>
-    <script data-cfasync="false" src="https://the.gatekeeperconsent.com/cmp.min.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gameist | Elementist, 2048, Wordlist, Bilardist - Ücretsiz Online Oyun Hub'ı</title>
@@ -12,11 +10,6 @@
     />
     <meta name="robots" content="index,follow" />
     <link rel="canonical" href="./index.html" />
-    <script async src="//www.ezojs.com/ezoic/sa.min.js"></script>
-    <script>
-        window.ezstandalone = window.ezstandalone || {};
-        ezstandalone.cmd = ezstandalone.cmd || [];
-    </script>
     <meta property="og:site_name" content="Gameist" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Gameist - Premium Oyun Deneyimi" />
@@ -27,7 +20,8 @@
       gtag('js', new Date());
       gtag('config', 'G-57L2NFVJYL');
     </script>
-    <!-- Ezoic AdSense integration will handle ads -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9478711342689131"
+         crossorigin="anonymous"></script>
     <meta
       property="og:description"
       content="Elementist, 2048, Wordlist ve Bilardist: hepsi Gameist ana menüsünde."
@@ -151,6 +145,7 @@
         ]
       }
     </script>
+    <script src="https://pl28580836.effectivegatecpm.com/02/74/05/0274056288dd0d4327742db82768e3ed.js"></script>
   </head>
   <body>
     <!-- Animated Background -->
@@ -287,9 +282,6 @@
           </div>
         </div>
       </header>
-
-      <!-- Ezoic Ad Placement - Top of Page -->
-      <div id="ezoic-pub-ad-placeholder-101"></div>
 
       <!-- Games Section -->
       <section class="games-section">
@@ -434,9 +426,6 @@
             </div>
           </a>
 
-          <!-- Ezoic Ad Placement - Under Page Title -->
-          <div id="ezoic-pub-ad-placeholder-102"></div>
-
           <!-- Wordle Game Card -->
           <a href="wordle/index.html" class="game-card">
             <div class="card-header">
@@ -574,9 +563,6 @@
         </div>
       </section>
 
-      <!-- Ezoic Ad Placement - Bottom of Page -->
-      <div id="ezoic-pub-ad-placeholder-103"></div>
-
       <!-- Call to Action -->
       <section class="cta-section">
         <div class="cta-content">
@@ -661,7 +647,8 @@
     <script src="hub-i18n.js?v=3"></script>
     <script src="auth-i18n.js?v=3"></script>
     
-    <!-- Firebase Configuration -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9478711342689131"
+         crossorigin="anonymous"></script>
     <script>
       const firebaseConfig = {
         apiKey: "AIzaSyD7ckcqdZWfnUx5r8uKmvu9Ikax1x5Qidk",
@@ -1553,40 +1540,6 @@
       }
 
       console.log("🔥 Firebase Authentication initialized successfully");
-      
-      // Initialize Ezoic Ads with dynamic content support
-      ezstandalone.cmd.push(function () {
-        // Show initial ads
-        ezstandalone.showAds(101, 102, 103);
-      });
-
-      // Dynamic content management functions
-      window.gameistAds = {
-        // Refresh ads when page content changes (SPA navigation)
-        refreshAds: function() {
-          ezstandalone.cmd.push(function () {
-            ezstandalone.showAds();
-          });
-        },
-        
-        // Show new ads for dynamically loaded content
-        showNewAds: function(...placeholderIds) {
-          if (placeholderIds.length > 0) {
-            ezstandalone.cmd.push(function () {
-              ezstandalone.showAds(...placeholderIds);
-            });
-          }
-        },
-        
-        // Clean up removed ad placeholders
-        cleanupAds: function(...placeholderIds) {
-          if (placeholderIds.length > 0) {
-            ezstandalone.cmd.push(function () {
-              ezstandalone.destroyPlaceholders(...placeholderIds);
-            });
-          }
-        }
-      };
     </script>
   </body>
 </html>
