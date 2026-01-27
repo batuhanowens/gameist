@@ -8753,18 +8753,24 @@ class GlowlingsGame {
     initScoreMonitoring() {
         this._lastReportedScore = 0;
         this._lastScoreCheckTime = 0;
-        this._scoreUpdateInterval = 3000; // Check every 3 seconds (faster for testing)
-        this._minScoreIncrease = 50; // Minimum score increase to report (lower for testing)
-        console.log('🎮 Score monitoring initialized');
+        this._scoreUpdateInterval = 2000; // Check every 2 seconds (very responsive)
+        console.log('🎮 Score monitoring initialized - detecting ANY best score improvement');
     }
 
-    // Get current run's best score from run history
+    // Get current run's best score from run history - ALWAYS get the exact best
     getCurrentRunBestScore() {
         try {
-            if (this.runHistory && this.runHistory.best && this.runHistory.best.score) {
-                return this.runHistory.best.score;
+            // Always prioritize runHistory.best.score - this is the definitive best score
+            if (this.runHistory && this.runHistory.best && typeof this.runHistory.best.score === 'number') {
+                const bestScore = this.runHistory.best.score;
+                console.log(`🏆 Getting exact best score from run history: ${bestScore}`);
+                return bestScore;
             }
-            return this.score || 0;
+            
+            // Fallback to current score if no run history
+            const currentScore = this.score || 0;
+            console.log(`⚠️ No run history best score, using current score: ${currentScore}`);
+            return currentScore;
         } catch (error) {
             console.warn('⚠️ Error getting current run best score:', error);
             return this.score || 0;
@@ -8775,17 +8781,13 @@ class GlowlingsGame {
     checkScoreUpdate() {
         const now = Date.now();
         
-        // Debug: Log that function is being called
-        if (Math.random() < 0.01) { // Only log 1% of the time to avoid spam
-            console.log('🔍 checkScoreUpdate called - Current score:', this.score, 'Game state:', this.gameState);
-        }
-        
         // Initialize if not done yet
         if (this._lastScoreCheckTime === undefined) {
             this.initScoreMonitoring();
             this._lastScoreCheckTime = now;
-            this._lastReportedScore = this.score || 0;
-            console.log('🎮 Score monitoring initialized - Initial score:', this._lastReportedScore);
+            const initialBest = this.getCurrentRunBestScore();
+            this._lastReportedScore = initialBest;
+            console.log('🎮 Score monitoring initialized - Initial best score:', initialBest);
             return;
         }
         
@@ -8794,34 +8796,26 @@ class GlowlingsGame {
             return;
         }
         
-        const currentScore = this.getCurrentRunBestScore(); // Use best score from run history
-        const scoreIncrease = currentScore - this._lastReportedScore;
+        // ALWAYS get the current best score from run history
+        const currentBestScore = this.getCurrentRunBestScore();
+        const scoreIncrease = currentBestScore - this._lastReportedScore;
         
-        console.log(`🔍 Score check: ${this._lastReportedScore} → ${currentScore} (+${scoreIncrease}), Game state: ${this.gameState}, Run best: ${this.getCurrentRunBestScore()}`);
+        console.log(`🔍 Score check: Last reported: ${this._lastReportedScore}, Current best: ${currentBestScore}, Increase: ${scoreIncrease}, Game state: ${this.gameState}`);
         
-        // Only report if score increased significantly AND it's a new best score
-        if (scoreIncrease >= this._minScoreIncrease && (this.gameState === 'playing' || this.gameState === 'menu')) {
-            // Check if this is a new best score for the run
-            const currentRunBest = this.getCurrentRunBestScore();
-            const lastReportedBest = this._lastReportedScore || 0;
+        // ALWAYS send update if best score changed (even by 1 point)
+        if (currentBestScore > this._lastReportedScore && (this.gameState === 'playing' || this.gameState === 'menu')) {
+            console.log(`🎉 BEST SCORE IMPROVED! ${this._lastReportedScore} → ${currentBestScore} (+${scoreIncrease})`);
             
-            if (currentRunBest > lastReportedBest) {
-                console.log(`🎉 NEW BEST SCORE! ${lastReportedBest} → ${currentRunBest} (+${scoreIncrease}) [Using run best score]`);
-                
-                // Send score update to main menu
-                this.sendScoreUpdate(currentRunBest, currentRunBest - lastReportedBest);
-                
-                // Update last reported values
-                this._lastReportedScore = currentRunBest;
-                this._lastScoreCheckTime = now;
-            } else {
-                console.log(`ℹ️ Not a new best score (${currentRunBest} ≤ ${lastReportedBest})`);
-                // Update time even if no new best to keep checking
-                this._lastScoreCheckTime = now;
-            }
-        } else {
-            // Update time even if no score increase to keep checking
+            // Send score update to main menu
+            this.sendScoreUpdate(currentBestScore, scoreIncrease);
+            
+            // Update last reported values
+            this._lastReportedScore = currentBestScore;
             this._lastScoreCheckTime = now;
+        } else {
+            // Update time even if no change to keep checking
+            this._lastScoreCheckTime = now;
+            console.log(`ℹ️ No best score improvement (${currentBestScore} ≤ ${this._lastReportedScore})`);
         }
     }
 
@@ -8907,19 +8901,47 @@ class GlowlingsGame {
         }
     }
 
+    // Debug function to show current run history state
+    debugRunHistory() {
+        console.log('🔍 Run History Debug:');
+        console.log('runHistory exists:', !!this.runHistory);
+        if (this.runHistory) {
+            console.log('runHistory.best exists:', !!this.runHistory.best);
+            if (this.runHistory.best) {
+                console.log('Best score:', this.runHistory.best.score);
+                console.log('Best wave:', this.runHistory.best.wave);
+                console.log('Best timestamp:', new Date(this.runHistory.best.timestamp).toLocaleString());
+            }
+        }
+        console.log('Current game score:', this.score);
+        console.log('getCurrentRunBestScore() result:', this.getCurrentRunBestScore());
+        console.log('Last reported score:', this._lastReportedScore);
+    }
+
     // Debug function to manually trigger score update (call from console)
     debugTestScoreUpdate() {
         console.log('🧪 Manual score test triggered');
         console.log('Current score:', this.score);
-        console.log('Run best score:', this.getCurrentRunBestScore());
+        console.log('Run history best score:', this.getCurrentRunBestScore());
         console.log('Game state:', this.gameState);
         console.log('Last reported score:', this._lastReportedScore);
         
-        // Force a score increase for testing (update run history best score)
-        const testScore = (this.getCurrentRunBestScore() || 0) + 500;
+        // Force a new best score in run history for testing
+        const currentBest = this.getCurrentRunBestScore();
+        const testBestScore = currentBest + 500;
+        
         if (this.runHistory && this.runHistory.best) {
-            this.runHistory.best.score = testScore;
-            console.log('Updated run history best score to:', testScore);
+            this.runHistory.best.score = testBestScore;
+            console.log(`🎯 Updated run history best score to: ${testBestScore}`);
+        } else {
+            console.log('⚠️ No run history found, creating one');
+            this.runHistory = {
+                best: {
+                    score: testBestScore,
+                    wave: 1,
+                    timestamp: Date.now()
+                }
+            };
         }
         
         // Trigger score check immediately
