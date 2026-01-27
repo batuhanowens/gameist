@@ -4973,33 +4973,10 @@
     <!-- Characters wiring handled in glowlings.js to match Builds behavior -->
     
     <!-- Firebase Authentication for Gameist -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="../auth-component.js?v=2"></script>
-    <script src="../score-sync.js?v=1"></script>
     
     <!-- Game-specific leaderboard integration -->
     <script>
-      // Firebase Configuration
-      const firebaseConfig = {
-        apiKey: "AIzaSyD7ckcqdZWfnUx5r8uKmvu9Ikax1x5Qidk",
-        authDomain: "gameist.firebaseapp.com",
-        projectId: "gameist",
-        storageBucket: "gameist.firebasestorage.app",
-        messagingSenderId: "525659299937",
-        appId: "1:525659299937:web:1c8343a25be2a994bcca20",
-        measurementId: "G-WE9R0GWKM6",
-        databaseURL: "https://gameist-default-rtdb.firebaseio.com/"
-      };
-      
-      // Initialize Firebase if not already initialized
-      if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-        console.log('🔥 Firebase initialized for Elementist');
-      }
-      
       // Elementist-specific leaderboard integration
       document.addEventListener('DOMContentLoaded', function() {
         // Wait for auth component to initialize

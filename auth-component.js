@@ -17,11 +17,17 @@ class GameistAuth {
     }
 
     init() {
-        // Firebase should already be initialized by the main page
-        // Don't load scripts again to prevent conflicts
-        this.initFirebase();
-        this.createAuthUI();
-        this.checkSavedSession();
+        // Load Firebase scripts if not already loaded
+        this.loadFirebaseScripts();
+        
+        // Wait for scripts to load, then initialize
+        setTimeout(() => {
+            if (typeof firebase !== 'undefined') {
+                this.initFirebase();
+                this.createAuthUI();
+                this.checkSavedSession();
+            }
+        }, 1000);
     }
 
     loadFirebaseScripts() {
@@ -42,14 +48,8 @@ class GameistAuth {
     }
 
     initFirebase() {
-        // Use existing Firebase instance if available
-        if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
-            console.log('🔥 Using existing Firebase instance');
-        } else if (!firebase.apps.length) {
-            console.log('🔥 Initializing Firebase for auth component');
+        if (!firebase.apps.length) {
             firebase.initializeApp(this.firebaseConfig);
-        } else {
-            console.log('🔥 Firebase already initialized');
         }
         
         this.auth = firebase.auth();
@@ -192,26 +192,14 @@ class GameistAuth {
         const loginBtn = document.getElementById('game-login-btn');
         const userInfo = document.getElementById('game-user-info');
 
-        // Only update UI if elements exist (game pages might not have auth UI)
-        if (loginBtn && userInfo) {
-            if (user) {
-                loginBtn.style.display = 'none';
-                userInfo.style.display = 'block';
-                const userNameEl = document.getElementById('game-user-name');
-                const userPhotoEl = document.getElementById('game-user-photo');
-                if (userNameEl) userNameEl.textContent = user.displayName;
-                if (userPhotoEl) userPhotoEl.src = user.photoURL;
-            } else {
-                loginBtn.style.display = 'block';
-                userInfo.style.display = 'none';
-            }
+        if (user) {
+            loginBtn.style.display = 'none';
+            userInfo.style.display = 'block';
+            document.getElementById('game-user-name').textContent = user.displayName;
+            document.getElementById('game-user-photo').src = user.photoURL;
         } else {
-            // Game page - just log the auth state
-            if (user) {
-                console.log('✅ User authenticated in game:', user.displayName);
-            } else {
-                console.log('ℹ️ No user authenticated in game');
-            }
+            loginBtn.style.display = 'block';
+            userInfo.style.display = 'none';
         }
     }
 
@@ -277,17 +265,6 @@ class GameistAuth {
                     
                     console.log('✅ Score saved to leaderboard:', score);
                     console.log('📄 Document ID:', result.id);
-                    
-                    // Trigger global synchronization
-                    if (typeof window.saveUserScore === 'function') {
-                        window.saveUserScore(user.uid, user.displayName, score, gameName);
-                    } else if (window.parent && typeof window.parent.saveUserScore === 'function') {
-                        window.parent.saveUserScore(user.uid, user.displayName, score, gameName);
-                    } else {
-                        // Fallback: trigger storage event
-                        localStorage.setItem('gameist_score_update', Date.now().toString());
-                    }
-                    
                     return result;
                     
                 } catch (attemptError) {
