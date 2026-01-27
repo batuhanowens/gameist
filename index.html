@@ -868,8 +868,10 @@
         
         const user = JSON.parse(savedUser);
         const testScore = Math.floor(Math.random() * 1000) + 500;
+        const gameNames = ['elementist', '2048', 'wordlist', 'bilardist', 'test_game'];
+        const randomGame = gameNames[Math.floor(Math.random() * gameNames.length)];
         
-        console.log('🧪 Saving test score:', testScore);
+        console.log('🧪 Saving test score:', { score: testScore, game: randomGame });
         
         // Save to localStorage
         const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
@@ -877,7 +879,7 @@
           userId: user.uid,
           displayName: user.displayName,
           score: testScore,
-          game: 'test_game',
+          game: randomGame,
           timestamp: Date.now(),
           id: 'test_' + Date.now()
         };
@@ -886,6 +888,12 @@
         localStorage.setItem('gameist_local_scores', JSON.stringify(localScores));
         
         console.log('✅ Test score saved to localStorage');
+        console.log('📊 Total scores in localStorage:', localScores.length);
+        
+        // Show all scores for debugging
+        localScores.forEach((score, index) => {
+          console.log(`📄 Score ${index + 1}: ${score.game} - ${score.score} pts`);
+        });
         
         // Trigger UI update
         if (typeof loadUserStats === 'function') {
@@ -895,7 +903,7 @@
           console.error('❌ loadUserStats function not found');
         }
         
-        alert(`Test score ${testScore} saved! Check the UI.`);
+        alert(`Test score ${testScore} saved for ${randomGame}! Total scores: ${localScores.length}`);
       }
 
       // Check for saved session on page load
