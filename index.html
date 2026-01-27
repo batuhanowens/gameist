@@ -226,17 +226,49 @@
                   </div>
                 </div>
                 
-                <!-- Stats Section -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; position: relative; z-index: 1;">
-                  <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.2);">
-                    <div style="color: #fbbf24; font-size: 18px; font-weight: 700; margin-bottom: 2px;">🏆</div>
-                    <div style="color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600;" data-i18n="elementist_best_score">Elementist Best Score</div>
-                    <div id="userTotalScore" style="color: white; font-size: 16px; font-weight: 700;">0</div>
+                <!-- Stats Section - Carousel -->
+                <div style="position: relative; margin-bottom: 16px; position: relative; z-index: 1;">
+                  <div id="scoreCarousel" style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); overflow: hidden;">
+                    <div id="carouselContainer" style="display: flex; transition: transform 0.3s ease;">
+                      <!-- Slide 1: Total Score -->
+                      <div class="carousel-slide" style="min-width: 100%; text-align: center;">
+                        <div style="color: #fbbf24; font-size: 18px; font-weight: 700; margin-bottom: 2px;">🏆</div>
+                        <div style="color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600;">Total Score</div>
+                        <div id="totalScoreDisplay" style="color: white; font-size: 16px; font-weight: 700;">0</div>
+                      </div>
+                      <!-- Slide 2: Elementist Best -->
+                      <div class="carousel-slide" style="min-width: 100%; text-align: center;">
+                        <div style="color: #fbbf24; font-size: 18px; font-weight: 700; margin-bottom: 2px;">🎮</div>
+                        <div style="color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600;">Elementist Best</div>
+                        <div id="elementistBestDisplay" style="color: white; font-size: 16px; font-weight: 700;">0</div>
+                      </div>
+                      <!-- Slide 3: 2048 Best -->
+                      <div class="carousel-slide" style="min-width: 100%; text-align: center;">
+                        <div style="color: #fbbf24; font-size: 18px; font-weight: 700; margin-bottom: 2px;">🔢</div>
+                        <div style="color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600;">2048 Best</div>
+                        <div id="2048BestDisplay" style="color: white; font-size: 16px; font-weight: 700;">0</div>
+                      </div>
+                      <!-- Slide 4: Wordle Best -->
+                      <div class="carousel-slide" style="min-width: 100%; text-align: center;">
+                        <div style="color: #fbbf24; font-size: 18px; font-weight: 700; margin-bottom: 2px;">📝</div>
+                        <div style="color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600;">Wordle Best</div>
+                        <div id="wordleBestDisplay" style="color: white; font-size: 16px; font-weight: 700;">0</div>
+                      </div>
+                      <!-- Slide 5: Bilardist Best -->
+                      <div class="carousel-slide" style="min-width: 100%; text-align: center;">
+                        <div style="color: #fbbf24; font-size: 18px; font-weight: 700; margin-bottom: 2px;">�</div>
+                        <div style="color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600;">Bilardist Best</div>
+                        <div id="bilardistBestDisplay" style="color: white; font-size: 16px; font-weight: 700;">0</div>
+                      </div>
+                    </div>
                   </div>
-                  <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.2);">
-                    <div style="color: #60a5fa; font-size: 18px; font-weight: 700; margin-bottom: 2px;">🎮</div>
-                    <div style="color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600;" data-i18n="games_played">Games Played</div>
-                    <div id="userGamesPlayed" style="color: white; font-size: 16px; font-weight: 700;">0</div>
+                  <!-- Carousel indicators -->
+                  <div id="carouselIndicators" style="display: flex; justify-content: center; gap: 4px; margin-top: 6px;">
+                    <span class="indicator" data-slide="0" style="width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.2s ease;"></span>
+                    <span class="indicator" data-slide="1" style="width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: all 0.2s ease;"></span>
+                    <span class="indicator" data-slide="2" style="width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: all 0.2s ease;"></span>
+                    <span class="indicator" data-slide="3" style="width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: all 0.2s ease;"></span>
+                    <span class="indicator" data-slide="4" style="width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: all 0.2s ease;"></span>
                   </div>
                 </div>
                 
@@ -1055,31 +1087,53 @@
             }
           });
           
-          // Calculate Elementist's BEST score only
-          const elementistScores = allScores.filter(score => score.game === 'elementist');
-          const elementistBestScore = elementistScores.length > 0 
-            ? Math.max(...elementistScores.map(s => s.score))
-            : 0;
+          // Get individual game scores
+          const elementistBestScore = gameHighScores['elementist']?.score || 0;
+          const game2048BestScore = gameHighScores['2048']?.score || 0;
+          const wordleBestScore = gameHighScores['wordle']?.score || 0;
+          const bilardoBestScore = gameHighScores['bilardo']?.score || 0;
           
+          // Calculate total score
+          const totalScore = Object.values(gameHighScores).reduce((sum, game) => sum + game.score, 0);
           const gamesPlayed = new Set(allScores.map(s => s.game)).size;
           
-          console.log('📊 Calculated stats:', { elementistBestScore, gamesPlayed, elementistScores: elementistScores.length });
+          console.log('📊 Calculated stats:', { 
+            totalScore, 
+            elementistBestScore, 
+            game2048BestScore, 
+            wordleBestScore, 
+            bilardoBestScore, 
+            gamesPlayed 
+          });
+          
+          // Update carousel displays
+          const totalScoreEl = document.getElementById('totalScoreDisplay');
+          const elementistBestEl = document.getElementById('elementistBestDisplay');
+          const game2048BestEl = document.getElementById('2048BestDisplay');
+          const wordleBestEl = document.getElementById('wordleBestDisplay');
+          const bilardoBestEl = document.getElementById('bilardistBestDisplay');
+          
+          if (totalScoreEl) totalScoreEl.textContent = totalScore.toLocaleString();
+          if (elementistBestEl) elementistBestEl.textContent = elementistBestScore.toLocaleString();
+          if (game2048BestEl) game2048BestEl.textContent = game2048BestScore.toLocaleString();
+          if (wordleBestEl) wordleBestEl.textContent = wordleBestScore.toLocaleString();
+          if (bilardoBestEl) bilardoBestEl.textContent = bilardoBestScore.toLocaleString();
           
           // Update modal stats
           const modalTotalScore = document.getElementById('modalTotalScore');
           const modalGamesPlayed = document.getElementById('modalGamesPlayed');
           const gameStats = document.getElementById('gameStats');
           
-          if (modalTotalScore) modalTotalScore.textContent = elementistBestScore.toLocaleString();
+          if (modalTotalScore) modalTotalScore.textContent = totalScore.toLocaleString();
           if (modalGamesPlayed) modalGamesPlayed.textContent = gamesPlayed;
           
-          // Update main UI stats
+          // Update main UI stats (legacy elements)
           const userTotalScoreEl = document.getElementById('userTotalScore');
           const userGamesPlayedEl = document.getElementById('userGamesPlayed');
           
           if (userTotalScoreEl) {
-            userTotalScoreEl.textContent = elementistBestScore.toLocaleString();
-            console.log('✅ Updated main UI Elementist best score:', elementistBestScore);
+            userTotalScoreEl.textContent = totalScore.toLocaleString();
+            console.log('✅ Updated main UI total score:', totalScore);
           } else {
             console.error('❌ userTotalScore element not found');
           }
@@ -1190,6 +1244,83 @@
         }
       }
 
+      // Carousel functionality
+      let currentSlide = 0;
+      const totalSlides = 5;
+      let autoRotateInterval;
+      
+      function startAutoRotate() {
+        autoRotateInterval = setInterval(nextSlide, 3000);
+      }
+      
+      function stopAutoRotate() {
+        if (autoRotateInterval) {
+          clearInterval(autoRotateInterval);
+        }
+      }
+      
+      function updateCarousel() {
+        const container = document.getElementById('carouselContainer');
+        const indicators = document.querySelectorAll('.indicator');
+        
+        if (container) {
+          container.style.transform = `translateX(-${currentSlide * 100}%)`;
+        }
+        
+        // Update indicators
+        indicators.forEach((indicator, index) => {
+          indicator.style.background = index === currentSlide 
+            ? 'rgba(255,255,255,0.6)' 
+            : 'rgba(255,255,255,0.3)';
+        });
+      }
+      
+      function nextSlide() {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        updateCarousel();
+      }
+      
+      function goToSlide(slideIndex) {
+        currentSlide = slideIndex;
+        updateCarousel();
+      }
+      
+      // Auto-rotate carousel every 3 seconds
+      startAutoRotate();
+      
+      // Add click handlers to indicators
+      document.addEventListener('DOMContentLoaded', () => {
+        const indicators = document.querySelectorAll('.indicator');
+        const carousel = document.getElementById('scoreCarousel');
+        
+        indicators.forEach((indicator, index) => {
+          indicator.addEventListener('click', () => {
+            goToSlide(index);
+            // Restart auto-rotate after manual change
+            stopAutoRotate();
+            startAutoRotate();
+          });
+          
+          // Add hover effects
+          indicator.addEventListener('mouseenter', () => {
+            indicator.style.background = 'rgba(255,255,255,0.8)';
+            indicator.style.transform = 'scale(1.2)';
+          });
+          
+          indicator.addEventListener('mouseleave', () => {
+            const isActive = parseInt(indicator.dataset.slide) === currentSlide;
+            indicator.style.background = isActive ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.3)';
+            indicator.style.transform = 'scale(1)';
+          });
+        });
+        
+        // Pause auto-rotate on carousel hover
+        if (carousel) {
+          carousel.addEventListener('mouseenter', stopAutoRotate);
+          carousel.addEventListener('mouseleave', startAutoRotate);
+        }
+      });
+      
       // Initialize session check
       checkSavedSession();
       
@@ -1221,15 +1352,22 @@
                 console.log(`✅ Live Elementist score: ${event.data.score} (+${event.data.scoreIncrease})`);
                 
                 // Only update if it's a new best score
-                const currentBestScore = parseInt(document.getElementById('userTotalScore').textContent.replace(/,/g, '')) || 0;
+                const currentBestScore = parseInt(document.getElementById('elementistBestDisplay').textContent.replace(/,/g, '')) || 0;
                 if (event.data.score > currentBestScore) {
                   console.log(`🎉 NEW BEST SCORE! ${currentBestScore} → ${event.data.score}`);
                   
-                  // Update UI immediately for live feedback
+                  // Update Elementist carousel slide immediately
+                  const elementistBestEl = document.getElementById('elementistBestDisplay');
+                  if (elementistBestEl) {
+                    elementistBestEl.textContent = event.data.score.toLocaleString();
+                    console.log('✅ Updated Elementist carousel slide with new best score');
+                  }
+                  
+                  // Update legacy element for compatibility
                   const userTotalScoreEl = document.getElementById('userTotalScore');
                   if (userTotalScoreEl) {
                     userTotalScoreEl.textContent = event.data.score.toLocaleString();
-                    console.log('✅ Updated UI with new Elementist best score');
+                    console.log('✅ Updated legacy UI with new Elementist best score');
                   }
                 } else {
                   console.log(`ℹ️ Not a new best score (${event.data.score} ≤ ${currentBestScore})`);
@@ -1290,15 +1428,22 @@
               console.log('🎮 Processing live Elementist score from localStorage:', data);
               
               // Only update if it's a new best score
-              const currentBestScore = parseInt(document.getElementById('userTotalScore').textContent.replace(/,/g, '')) || 0;
+              const currentBestScore = parseInt(document.getElementById('elementistBestDisplay').textContent.replace(/,/g, '')) || 0;
               if (data.score > currentBestScore) {
                 console.log(`🎉 NEW BEST SCORE from localStorage! ${currentBestScore} → ${data.score}`);
                 
-                // Update UI immediately
+                // Update Elementist carousel slide immediately
+                const elementistBestEl = document.getElementById('elementistBestDisplay');
+                if (elementistBestEl) {
+                  elementistBestEl.textContent = data.score.toLocaleString();
+                  console.log('✅ Updated Elementist carousel slide from localStorage');
+                }
+                
+                // Update legacy element for compatibility
                 const userTotalScoreEl = document.getElementById('userTotalScore');
                 if (userTotalScoreEl) {
                   userTotalScoreEl.textContent = data.score.toLocaleString();
-                  console.log('✅ Updated UI with new Elementist best score from localStorage');
+                  console.log('✅ Updated legacy UI from localStorage');
                 }
               } else {
                 console.log(`ℹ️ Not a new best score from localStorage (${data.score} ≤ ${currentBestScore})`);
