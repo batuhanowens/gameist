@@ -1202,21 +1202,29 @@
             
             if (event.data && event.data.type === 'statsUpdate') {
               console.log('📊 Processing stats update from game:', event.data.game);
-              console.log('👤 User ID:', event.data.userId);
-              console.log('📈 Score:', event.data.score);
-              
-              // Check if this is for the current user
               const currentUser = firebase.auth().currentUser;
               if (currentUser && currentUser.uid === event.data.userId) {
-                console.log('✅ Stats update matches current user, reloading stats...');
                 loadUserStats(currentUser.uid);
+              }
+            }
+            
+            // Handle live score updates from Elementist
+            if (event.data && event.data.type === 'score_update' && event.data.game === 'elementist') {
+              console.log('🎮 Processing live score update from Elementist:', event.data);
+              const currentUser = firebase.auth().currentUser;
+              
+              if (currentUser && currentUser.uid === event.data.userId) {
+                console.log(`✅ Live Elementist score: ${event.data.score} (+${event.data.scoreIncrease})`);
                 
-                // If Firestore failed, sync to localStorage for cross-device sync
-                if (!event.data.firestoreSuccess) {
-                  syncToCloudStorage(event.data);
+                // Update UI immediately for live feedback
+                const userTotalScoreEl = document.getElementById('userTotalScore');
+                if (userTotalScoreEl) {
+                  userTotalScoreEl.textContent = event.data.score.toLocaleString();
+                  console.log('✅ Updated UI with live Elementist score');
                 }
-              } else {
-                console.log('ℹ️ Stats update for different user, ignoring');
+                
+                // Load full stats to ensure consistency
+                loadUserStats(currentUser.uid);
               }
             }
           };
@@ -1257,6 +1265,36 @@
           }, 1000);
         }
       }
+      
+      // Also poll for live score updates from Elementist (localStorage fallback)
+      setInterval(() => {
+        try {
+          const liveUpdate = localStorage.getItem('gameist_live_score_update');
+          if (liveUpdate) {
+            const data = JSON.parse(liveUpdate);
+            const currentUser = firebase.auth().currentUser;
+            
+            if (currentUser && currentUser.uid === data.userId && data.game === 'elementist') {
+              console.log('🎮 Processing live Elementist score from localStorage:', data);
+              
+              // Update UI immediately
+              const userTotalScoreEl = document.getElementById('userTotalScore');
+              if (userTotalScoreEl) {
+                userTotalScoreEl.textContent = data.score.toLocaleString();
+                console.log('✅ Updated UI with live Elementist score from localStorage');
+              }
+              
+              // Load full stats
+              loadUserStats(currentUser.uid);
+              
+              // Clear the live update
+              localStorage.removeItem('gameist_live_score_update');
+            }
+          }
+        } catch (error) {
+          console.error('❌ Error processing live score update:', error);
+        }
+      }, 2000); // Check every 2 seconds
       
       // Sync scores to cloud storage for cross-device sync when Firestore is down
       function syncToCloudStorage(scoreData) {

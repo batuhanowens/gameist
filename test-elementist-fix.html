@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elementist Score Fix Test</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: #3367d6;
+            transform: translateY(-2px);
+        }
+        .status {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+        .info { color: #60a5fa; }
+        .warning { color: #fbbf24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Elementist Score Fix Test</h1>
+        <p>Bu test, Elementist oyunundan ana menüye skor gönderimini doğrular.</p>
+        
+        <div>
+            <button onclick="testScoreSaving()">🧪 Test Skor Kaydetme</button>
+            <button onclick="testLocalStorageFormat()">💾 localStorage Format Test</button>
+            <button onclick="testFirestoreConnection()">🔥 Firestore Bağlantı Test</button>
+            <button onclick="clearTestData()">🗑️ Test Verilerini Temizle</button>
+        </div>
+        
+        <div id="status" class="status">Test sonuçları burada görünecek...</div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7ckcqdZWfnUx5r8uKmvu9Ikax1x5Qidk",
+            authDomain: "gameist.firebaseapp.com",
+            projectId: "gameist",
+            storageBucket: "gameist.firebasestorage.app",
+            messagingSenderId: "525659299937",
+            appId: "1:525659299937:web:1c8343a25be2a994bcca20",
+            measurementId: "G-WE9R0GWKM6",
+            databaseURL: "https://gameist-default-rtdb.firebaseio.com/"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info';
+            statusEl.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            statusEl.scrollTop = statusEl.scrollHeight;
+        }
+        
+        // Simulate the saveScoreToGameist function from Elementist
+        function saveScoreToGameist(score, wave) {
+            return new Promise((resolve, reject) => {
+                try {
+                    updateStatus(`🎮 Elementist skor kaydetme simülasyonu: { score: ${score}, wave: ${wave} }`, 'info');
+                    
+                    // Get current user from Firebase Auth
+                    firebase.auth().onAuthStateChanged(user => {
+                        if (user) {
+                            updateStatus(`👤 Kullanıcı bulundu: ${user.displayName}`, 'success');
+                            
+                            // Save to Firebase Firestore leaderboard collection
+                            const db = firebase.firestore();
+                            const leaderboardEntry = {
+                                userId: user.uid,
+                                displayName: user.displayName || 'Anonymous',
+                                photoURL: user.photoURL || '',
+                                email: user.email,
+                                game: 'elementist',
+                                score: Math.floor(score),
+                                wave: wave,
+                                timestamp: Date.now(),
+                                character: 'berserker', // Simulated
+                                element: 'fire' // Simulated
+                            };
+                            
+                            db.collection('leaderboard').add(leaderboardEntry)
+                                .then((docRef) => {
+                                    updateStatus(`✅ Skor Firestore'a kaydedildi! Document ID: ${docRef.id}`, 'success');
+                                    
+                                    // Also save to localStorage fallback
+                                    try {
+                                        const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
+                                        localScores.push({
+                                            ...leaderboardEntry,
+                                            timestamp: Date.now()
+                                        });
+                                        localStorage.setItem('gameist_local_scores', JSON.stringify(localScores.slice(-50)));
+                                        updateStatus('✅ localStorage fallback başarıyla güncellendi', 'success');
+                                    } catch (localError) {
+                                        updateStatus(`⚠️ localStorage hatası: ${localError.message}`, 'warning');
+                                    }
+                                    
+                                    resolve(docRef);
+                                })
+                                .catch(error => {
+                                    updateStatus(`❌ Firestore hatası: ${error.message}`, 'error');
+                                    reject(error);
+                                });
+                                
+                        } else {
+                            updateStatus('❌ Kullanıcı girişi gerekli', 'error');
+                            reject(new Error('No authenticated user'));
+                        }
+                    });
+                    
+                } catch (error) {
+                    updateStatus(`❌ Genel hata: ${error.message}`, 'error');
+                    reject(error);
+                }
+            });
+        }
+        
+        function testScoreSaving() {
+            updateStatus('🧪 Elementist skor kaydetme testi başlatılıyor...', 'info');
+            
+            const testScore = 15000;
+            const testWave = 7;
+            
+            saveScoreToGameist(testScore, testWave)
+                .then(() => {
+                    updateStatus('🎉 Test başarıyla tamamlandı!', 'success');
+                })
+                .catch((error) => {
+                    updateStatus(`❌ Test başarısız: ${error.message}`, 'error');
+                });
+        }
+        
+        function testLocalStorageFormat() {
+            updateStatus('💾 localStorage format testi başlatılıyor...', 'info');
+            
+            try {
+                // Check current localStorage
+                const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
+                updateStatus(`📊 Mevcut localStorage skor sayısı: ${localScores.length}`, 'info');
+                
+                // Show last few scores
+                const recentScores = localScores.slice(-3);
+                recentScores.forEach((score, index) => {
+                    updateStatus(`📄 Skor ${index + 1}: ${score.game} - ${score.score} (${new Date(score.timestamp).toLocaleString()})`, 'info');
+                });
+                
+                // Check if format matches what main menu expects
+                const hasRequiredFields = localScores.every(score => 
+                    score.userId && score.game && score.score && score.timestamp
+                );
+                
+                if (hasRequiredFields) {
+                    updateStatus('✅ localStorage formatı ana menü ile uyumlu', 'success');
+                } else {
+                    updateStatus('❌ localStorage formatı uyumsuz', 'error');
+                }
+                
+            } catch (error) {
+                updateStatus(`❌ localStorage test hatası: ${error.message}`, 'error');
+            }
+        }
+        
+        function testFirestoreConnection() {
+            updateStatus('🔥 Firestore bağlantı testi başlatılıyor...', 'info');
+            
+            try {
+                const db = firebase.firestore();
+                
+                // Test read access
+                db.collection('leaderboard')
+                    .where('game', '==', 'elementist')
+                    .orderBy('score', 'desc')
+                    .limit(5)
+                    .get()
+                    .then((snapshot) => {
+                        updateStatus(`✅ Firestore bağlantısı başarılı! ${snapshot.docs.length} skor bulundu`, 'success');
+                        
+                        snapshot.docs.forEach((doc, index) => {
+                            const data = doc.data();
+                            updateStatus(`📄 ${index + 1}. ${data.displayName}: ${data.score} (${data.game})`, 'info');
+                        });
+                    })
+                    .catch((error) => {
+                        updateStatus(`❌ Firestore okuma hatası: ${error.message}`, 'error');
+                    });
+                    
+            } catch (error) {
+                updateStatus(`❌ Firestore bağlantı hatası: ${error.message}`, 'error');
+            }
+        }
+        
+        function clearTestData() {
+            updateStatus('🗑️ Test verileri temizleniyor...', 'info');
+            
+            try {
+                localStorage.removeItem('gameist_local_scores');
+                updateStatus('✅ localStorage temizlendi', 'success');
+            } catch (error) {
+                updateStatus(`❌ Temizleme hatası: ${error.message}`, 'error');
+            }
+        }
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            updateStatus('🚀 Elementist Score Fix Test başlatılıyor...', 'info');
+            
+            // Check Firebase connection
+            setTimeout(() => {
+                try {
+                    const db = firebase.firestore();
+                    updateStatus('✅ Firebase Firestore başlatıldı', 'success');
+                } catch (error) {
+                    updateStatus(`❌ Firebase başlatma hatası: ${error.message}`, 'error');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

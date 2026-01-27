@@ -6975,6 +6975,10 @@ class GlowlingsGame {
 
             // Debug overlay
             try { this.updateDebugOverlay && this.updateDebugOverlay(); } catch {}
+            
+            // Continuous score monitoring for main menu sync
+            try { this.checkScoreUpdate(); } catch {}
+            
             // Always schedule next frame with rAF for smooth vsync pacing
             requestAnimationFrame(tick);
         };
@@ -8642,6 +8646,231 @@ class GlowlingsGame {
         if (restartBtn) restartBtn.onclick = () => this.restartRun();
         const backBtn = document.getElementById('backToMenuBtn');
         if (backBtn) backBtn.onclick = () => location.reload();
+    }
+
+    saveScoreToGameist(score, wave) {
+        try {
+            console.log('🎮 Saving Elementist score to Gameist system:', { score, wave });
+            
+            // Get current user from Firebase Auth
+            const user = firebase.auth().currentUser;
+            
+            if (user) {
+                // Save to Firebase Firestore leaderboard collection
+                const db = firebase.firestore();
+                const leaderboardEntry = {
+                    userId: user.uid,
+                    displayName: user.displayName || 'Anonymous',
+                    photoURL: user.photoURL || '',
+                    email: user.email,
+                    game: 'elementist',
+                    score: Math.floor(score),
+                    wave: wave,
+                    timestamp: Date.now(),
+                    character: this.currentRun ? this.currentRun.character : (this.selectedCharacter || 'berserker'),
+                    element: (this.player && this.player.element) ? this.player.element : (this.currentRun ? this.currentRun.element : '-')
+                };
+                
+                db.collection('leaderboard').add(leaderboardEntry)
+                    .then(() => {
+                        console.log('✅ Score saved to Firebase Firestore leaderboard');
+                    })
+                    .catch(error => {
+                        console.error('❌ Error saving to Firestore:', error);
+                    });
+                
+                // Also save to Realtime Database for cross-device sync
+                try {
+                    const database = firebase.database();
+                    const userScoresRef = database.ref(`userScores/${user.uid}`);
+                    const newScoreRef = userScoresRef.push();
+                    newScoreRef.set({
+                        ...leaderboardEntry,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    });
+                    console.log('✅ Score saved to Realtime Database');
+                } catch (rtError) {
+                    console.warn('⚠️ Could not save to Realtime Database:', rtError);
+                }
+                
+                // Save to localStorage as fallback (gameist_local_scores format)
+                try {
+                    const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
+                    localScores.push({
+                        ...leaderboardEntry,
+                        timestamp: Date.now()
+                    });
+                    // Keep only last 50 scores per user
+                    const userScores = localScores.filter(s => s.userId === user.uid).slice(-50);
+                    const otherScores = localScores.filter(s => s.userId !== user.uid);
+                    localStorage.setItem('gameist_local_scores', JSON.stringify([...otherScores, ...userScores]));
+                    console.log('✅ Score saved to localStorage fallback');
+                } catch (localError) {
+                    console.warn('⚠️ Could not save to localStorage:', localError);
+                }
+                
+                // Notify main menu of score update (if on same domain)
+                try {
+                    const gameistChannel = new BroadcastChannel('gameist_stats');
+                    gameistChannel.postMessage({
+                        type: 'score_update',
+                        game: 'elementist',
+                        score: Math.floor(score),
+                        userId: user.uid
+                    });
+                    console.log('✅ Notified main menu of score update');
+                } catch (bcError) {
+                    console.log('ℹ️ BroadcastChannel not available:', bcError.message);
+                }
+                
+            } else {
+                console.log('ℹ️ No authenticated user - score not saved to leaderboard');
+                // Still save to localStorage for anonymous users
+                try {
+                    const anonScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
+                    anonScores.push({
+                        userId: 'anonymous',
+                        displayName: 'Anonymous Player',
+                        game: 'elementist',
+                        score: Math.floor(score),
+                        wave: wave,
+                        timestamp: Date.now(),
+                        character: this.currentRun ? this.currentRun.character : (this.selectedCharacter || 'berserker'),
+                        element: (this.player && this.player.element) ? this.player.element : (this.currentRun ? this.currentRun.element : '-')
+                    });
+                    localStorage.setItem('gameist_local_scores', JSON.stringify(anonScores.slice(-50)));
+                    console.log('✅ Anonymous score saved to localStorage');
+                } catch (anonError) {
+                    console.warn('⚠️ Could not save anonymous score:', anonError);
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error in saveScoreToGameist:', error);
+        }
+    }
+
+    // Initialize score monitoring variables
+    initScoreMonitoring() {
+        this._lastReportedScore = 0;
+        this._lastScoreCheckTime = 0;
+        this._scoreUpdateInterval = 5000; // Check every 5 seconds
+        this._minScoreIncrease = 100; // Minimum score increase to report
+        console.log('🎮 Score monitoring initialized');
+    }
+
+    // Check for score updates and notify main menu
+    checkScoreUpdate() {
+        const now = Date.now();
+        
+        // Initialize if not done yet
+        if (this._lastScoreCheckTime === undefined) {
+            this.initScoreMonitoring();
+            this._lastScoreCheckTime = now;
+            this._lastReportedScore = this.score || 0;
+            return;
+        }
+        
+        // Check if enough time has passed
+        if (now - this._lastScoreCheckTime < this._scoreUpdateInterval) {
+            return;
+        }
+        
+        const currentScore = this.score || 0;
+        const scoreIncrease = currentScore - this._lastReportedScore;
+        
+        // Only report if score increased significantly
+        if (scoreIncrease >= this._minScoreIncrease && this.gameState === 'playing') {
+            console.log(`📈 Score increase detected: ${this._lastReportedScore} → ${currentScore} (+${scoreIncrease})`);
+            
+            // Send score update to main menu
+            this.sendScoreUpdate(currentScore, scoreIncrease);
+            
+            // Update last reported values
+            this._lastReportedScore = currentScore;
+            this._lastScoreCheckTime = now;
+        }
+    }
+
+    // Send score update to main menu via multiple channels
+    sendScoreUpdate(currentScore, scoreIncrease) {
+        try {
+            // Get current user
+            const user = firebase.auth().currentUser;
+            
+            if (user) {
+                console.log(`📤 Sending score update to main menu: ${currentScore} (+${scoreIncrease})`);
+                
+                // Method 1: BroadcastChannel for real-time updates
+                try {
+                    const gameistChannel = new BroadcastChannel('gameist_stats');
+                    gameistChannel.postMessage({
+                        type: 'score_update',
+                        game: 'elementist',
+                        score: Math.floor(currentScore),
+                        scoreIncrease: Math.floor(scoreIncrease),
+                        userId: user.uid,
+                        displayName: user.displayName,
+                        wave: this.waveNumber || 0,
+                        timestamp: Date.now(),
+                        isLiveUpdate: true
+                    });
+                    console.log('✅ Score update sent via BroadcastChannel');
+                } catch (bcError) {
+                    console.log('ℹ️ BroadcastChannel not available:', bcError.message);
+                }
+                
+                // Method 2: localStorage for polling
+                try {
+                    const updateData = {
+                        type: 'live_score_update',
+                        game: 'elementist',
+                        score: Math.floor(currentScore),
+                        scoreIncrease: Math.floor(scoreIncrease),
+                        userId: user.uid,
+                        displayName: user.displayName,
+                        wave: this.waveNumber || 0,
+                        timestamp: Date.now(),
+                        isLiveUpdate: true
+                    };
+                    localStorage.setItem('gameist_live_score_update', JSON.stringify(updateData));
+                    console.log('✅ Score update saved to localStorage');
+                } catch (localError) {
+                    console.warn('⚠️ Could not save score update to localStorage:', localError);
+                }
+                
+                // Method 3: Save to gameist_local_scores for persistent storage
+                try {
+                    const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
+                    const newScoreEntry = {
+                        userId: user.uid,
+                        displayName: user.displayName || 'Anonymous',
+                        photoURL: user.photoURL || '',
+                        email: user.email,
+                        game: 'elementist',
+                        score: Math.floor(currentScore),
+                        wave: this.waveNumber || 0,
+                        timestamp: Date.now(),
+                        character: this.currentRun ? this.currentRun.character : (this.selectedCharacter || 'berserker'),
+                        element: (this.player && this.player.element) ? this.player.element : (this.currentRun ? this.currentRun.element : '-'),
+                        isLiveUpdate: true
+                    };
+                    
+                    // Add to local scores (keep only last 50 per user)
+                    const userScores = localScores.filter(s => s.userId === user.uid).slice(-49);
+                    const otherScores = localScores.filter(s => s.userId !== user.uid);
+                    localStorage.setItem('gameist_local_scores', JSON.stringify([...otherScores, ...userScores, newScoreEntry]));
+                    console.log('✅ Live score saved to gameist_local_scores');
+                } catch (persistError) {
+                    console.warn('⚠️ Could not persist live score:', persistError);
+                }
+                
+            } else {
+                console.log('ℹ️ No authenticated user - score update not sent');
+            }
+            
+        } catch (error) {
+            console.error('❌ Error sending score update:', error);
+        }
     }
 
     // Return to Character & Element Select overlay (like pressing Start, then seeing selection)
@@ -10679,6 +10908,9 @@ class GlowlingsGame {
         this.renderStatsPanel && this.renderStatsPanel();
         // Clear current run marker
         this.currentRun = null;
+
+        // Save score to Gameist main menu leaderboard system
+        this.saveScoreToGameist(score, wave);
 
         // Coin economy: grant coins based on score and wave (anti-exploit guards)
         try {
