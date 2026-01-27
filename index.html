@@ -1075,11 +1075,21 @@
           
           // Debug: Log all game names found
           console.log('🎮 All game names found in database:', [...new Set(allScores.map(s => s.game))]);
-          console.log('📊 All scores:', allScores.slice(0, 5).map(s => ({ game: s.game, score: s.score, timestamp: new Date(s.timestamp).toLocaleString() })));
+          console.log('📊 All scores:', allScores.slice(0, 10).map(s => ({ game: s.game, score: s.score, timestamp: new Date(s.timestamp).toLocaleString() })));
+          
+          // Debug: Check specifically for 2048 scores
+          const game2048Scores = allScores.filter(s => s.game === '2048');
+          console.log('🔢 2048 scores found:', game2048Scores.length);
+          if (game2048Scores.length > 0) {
+            console.log('🔢 2048 score details:', game2048Scores.map(s => ({ score: s.score, timestamp: new Date(s.timestamp).toLocaleString() })));
+          }
           
           // Get individual game scores - check for multiple possible game names
           const elementistBestScore = gameHighScores['elementist']?.score || 0;
           const game2048BestScore = gameHighScores['2048']?.score || gameHighScores['game2048']?.score || 0;
+          
+          console.log('💯 Raw gameHighScores for 2048:', gameHighScores['2048']);
+          console.log('💯 Final 2048 best score from database:', game2048BestScore);
           
           // Try to get 2048 best score from DOM if available
           let dom2048BestScore = 0;
@@ -1452,6 +1462,88 @@
         console.log('nextSlide() - go to slide', (currentSlide + 1) % totalSlides);
         console.log('prevSlide() - go to slide', (currentSlide - 1 + totalSlides) % totalSlides);
         console.log('goToSlide(2) - go to slide 2');
+      }
+      
+      // Manual function to check 2048 scores directly
+      async function check2048Scores() {
+        try {
+          console.log('🔍 Manual 2048 score check...');
+          const user = firebase.auth().currentUser;
+          if (!user) {
+            console.log('❌ No user logged in');
+            return;
+          }
+          
+          // Check Realtime Database directly
+          const database = firebase.database();
+          const userScoresRef = database.ref(`userScores/${user.uid}`);
+          
+          const snapshot = await userScoresRef.once('value');
+          const data = snapshot.val();
+          
+          if (data) {
+            const scores = Object.values(data);
+            const game2048Scores = scores.filter(s => s.game === '2048');
+            
+            console.log(`🔢 Found ${game2048Scores.length} 2048 scores in Realtime Database:`);
+            game2048Scores.forEach(score => {
+              console.log(`  - Score: ${score.score}, Time: ${new Date(score.timestamp).toLocaleString()}`);
+            });
+            
+            if (game2048Scores.length > 0) {
+              const best2048Score = Math.max(...game2048Scores.map(s => s.score));
+              console.log(`🏆 Best 2048 score: ${best2048Score}`);
+              
+              // Update the carousel display
+              const game2048BestEl = document.getElementById('2048BestDisplay');
+              if (game2048BestEl) {
+                game2048BestEl.textContent = best2048Score.toLocaleString();
+                console.log('✅ Updated 2048 carousel display');
+              }
+            } else {
+              console.log('❌ No 2048 scores found');
+            }
+          } else {
+            console.log('❌ No scores found in Realtime Database');
+          }
+        } catch (error) {
+          console.error('❌ Error checking 2048 scores:', error);
+        }
+      }
+      
+      // Manual function to test 2048 score saving
+      async function test2048Score(score = 2048) {
+        try {
+          console.log('🧪 Testing 2048 score saving...');
+          const user = firebase.auth().currentUser;
+          if (!user) {
+            console.log('❌ No user logged in');
+            return;
+          }
+          
+          const database = firebase.database();
+          const userScoresRef = database.ref(`userScores/${user.uid}`);
+          const newScoreRef = userScoresRef.push();
+          
+          await newScoreRef.set({
+            userId: user.uid,
+            displayName: user.displayName,
+            email: user.email,
+            score: score,
+            game: '2048',
+            timestamp: Date.now(),
+            from2048: true,
+            test: true
+          });
+          
+          console.log(`✅ Test 2048 score ${score} saved to Realtime Database`);
+          
+          // Check immediately
+          await check2048Scores();
+          
+        } catch (error) {
+          console.error('❌ Error testing 2048 score:', error);
+        }
       }
       
       // Initialize session check
