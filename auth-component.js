@@ -17,17 +17,11 @@ class GameistAuth {
     }
 
     init() {
-        // Load Firebase scripts if not already loaded
-        this.loadFirebaseScripts();
-        
-        // Wait for scripts to load, then initialize
-        setTimeout(() => {
-            if (typeof firebase !== 'undefined') {
-                this.initFirebase();
-                this.createAuthUI();
-                this.checkSavedSession();
-            }
-        }, 1000);
+        // Firebase should already be initialized by the main page
+        // Don't load scripts again to prevent conflicts
+        this.initFirebase();
+        this.createAuthUI();
+        this.checkSavedSession();
     }
 
     loadFirebaseScripts() {
@@ -48,8 +42,14 @@ class GameistAuth {
     }
 
     initFirebase() {
-        if (!firebase.apps.length) {
+        // Use existing Firebase instance if available
+        if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+            console.log('🔥 Using existing Firebase instance');
+        } else if (!firebase.apps.length) {
+            console.log('🔥 Initializing Firebase for auth component');
             firebase.initializeApp(this.firebaseConfig);
+        } else {
+            console.log('🔥 Firebase already initialized');
         }
         
         this.auth = firebase.auth();

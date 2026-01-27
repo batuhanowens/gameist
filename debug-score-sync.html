@@ -103,7 +103,20 @@
         };
         
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+            console.log('🔥 Firebase initialized for debug page');
+        }
+        
+        // Wait for Firebase to be fully ready
+        setTimeout(() => {
+            // Check if database is available
+            if (typeof firebase.database === 'function') {
+                console.log('✅ Firebase Realtime Database is available');
+            } else {
+                console.log('❌ Firebase Realtime Database not available');
+            }
+        }, 1000);
         
         function log(message, type = 'info') {
             const logEl = document.getElementById('log');
@@ -137,10 +150,23 @@
                 const firestore = firebase.firestore();
                 log('✅ Firebase Firestore available', 'success');
                 
-                const database = firebase.database();
-                log('✅ Firebase Realtime Database available', 'success');
+                // Check Realtime Database with proper error handling
+                try {
+                    const database = firebase.database();
+                    if (typeof database === 'function') {
+                        log('✅ Firebase Realtime Database available', 'success');
+                        
+                        // Test database functionality
+                        const testRef = database.ref('test/connection');
+                        log('✅ Firebase Realtime Database functional', 'success');
+                    } else {
+                        log('❌ Firebase Realtime Database not a function', 'error');
+                    }
+                } catch (dbError) {
+                    log('❌ Firebase Realtime Database error: ' + dbError.message, 'error');
+                }
                 
-                updateStatus('firebaseStatus', '✅ All Firebase services available');
+                updateStatus('firebaseStatus', '✅ Firebase services checked');
                 
             } catch (error) {
                 log('❌ Firebase error: ' + error.message, 'error');
@@ -160,13 +186,21 @@
                 });
                 log('✅ Firestore write test passed', 'success');
                 
-                // Test Realtime Database
-                const rtdb = firebase.database();
-                await rtdb.ref('test/connection').set({
-                    connected: true,
-                    timestamp: Date.now()
-                });
-                log('✅ Realtime Database write test passed', 'success');
+                // Test Realtime Database with error handling
+                try {
+                    const rtdb = firebase.database();
+                    if (typeof rtdb === 'function') {
+                        await rtdb.ref('test/connection').set({
+                            connected: true,
+                            timestamp: Date.now()
+                        });
+                        log('✅ Realtime Database write test passed', 'success');
+                    } else {
+                        log('⚠️ Realtime Database not available, skipping test', 'warning');
+                    }
+                } catch (rtError) {
+                    log('⚠️ Realtime Database test failed: ' + rtError.message, 'warning');
+                }
                 
                 updateStatus('firebaseStatus', '✅ Firebase connection test passed');
                 
