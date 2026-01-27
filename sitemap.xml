@@ -26,9 +26,13 @@
   </url>
   <url>
     <loc>https://gameist.fun/Elementist/</loc>
+    <priority>1.0</priority>
+    <lastmod>2025-01-27</lastmod>
   </url>
   <url>
     <loc>https://gameist.fun/Elementist/glowlings.html</loc>
+    <priority>1.0</priority>
+    <lastmod>2025-01-27</lastmod>
   </url>
   <url>
     <loc>https://gameist.fun/guides/2048-nasil-oynanir.html</loc>
