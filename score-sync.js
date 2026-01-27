@@ -18,6 +18,7 @@
             lastUpdate: 0,
             isListening: false,
             realtimeListener: null,
+            saveDebounce: new Map(), // Debounce map for save calls
             
             // Initialize real-time listeners
             init() {
@@ -236,15 +237,29 @@
         window.saveUserScore = async function(userId, displayName, score, gameName) {
             console.log('💾 saveUserScore called:', { userId, displayName, score, gameName });
             
+            // Debounce to prevent multiple rapid calls
+            const debounceKey = `${userId}_${gameName}`;
+            const now = Date.now();
+            const lastCall = window.gameistScoreSync.saveDebounce.get(debounceKey) || 0;
+            
+            if (now - lastCall < 1000) { // 1 second debounce
+                console.log('⏳ Debouncing saveUserScore call');
+                return false;
+            }
+            
+            window.gameistScoreSync.saveDebounce.set(debounceKey, now);
+            
             try {
                 // Try to use parent's save function if in iframe
-                if (window.parent && typeof window.parent.saveUserScore === 'function') {
+                if (window.parent && window.parent !== window && typeof window.parent.saveUserScore === 'function') {
+                    console.log('📡 Using parent saveUserScore');
                     return await window.parent.saveUserScore(userId, displayName, score, gameName);
                 }
                 
-                // Try to use main page's save function
-                if (typeof saveUserScore === 'function' && window.saveUserScore !== arguments.callee) {
-                    return await window.saveUserScore(userId, displayName, score, gameName);
+                // Try to use main page's enhanced save function (but avoid recursion)
+                if (typeof saveUserScoreMain === 'function' && window.saveUserScoreMain !== arguments.callee) {
+                    console.log('📡 Using main saveUserScore');
+                    return await window.saveUserScoreMain(userId, displayName, score, gameName);
                 }
                 
                 // Fallback: save to localStorage and trigger sync
@@ -264,7 +279,7 @@
                 
                 // Save to Firebase Realtime Database for cross-device sync
                 try {
-                    if (typeof firebase !== 'undefined') {
+                    if (typeof firebase !== 'undefined' && firebase.database) {
                         const database = firebase.database();
                         const scoreRef = database.ref(`userScores/${userId}/${scoreData.id}`);
                         await scoreRef.set(scoreData);

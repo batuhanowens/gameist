@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Sync Fix Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: white; }
+        button { background: #4285f4; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin: 5px; cursor: pointer; }
+        .status { background: rgba(0,255,0,0.1); padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #00ff00; }
+        .error { background: rgba(255,0,0,0.1); border-left-color: #ff0000; }
+        #log { background: #000; padding: 10px; border-radius: 5px; height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Quick Sync Fix Test</h1>
+    
+    <div class="status" id="status">Ready to test...</div>
+    
+    <button onclick="testSingleSave()">Test Single Save</button>
+    <button onclick="testMultipleSaves()">Test Multiple Saves (should debounce)</button>
+    <button onclick="clearLog()">Clear Log</button>
+    
+    <div id="log"></div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="score-sync.js"></script>
+    
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7ckcqdZWfnUx5r8uKmvu9Ikax1x5Qidk",
+            authDomain: "gameist.firebaseapp.com",
+            projectId: "gameist",
+            storageBucket: "gameist.firebasestorage.app",
+            messagingSenderId: "525659299937",
+            appId: "1:525659299937:web:1c8343a25be2a994bcca20",
+            measurementId: "G-WE9R0GWKM6",
+            databaseURL: "https://gameist-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'white';
+            logEl.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        function updateStatus(message, isError = false) {
+            const el = document.getElementById('status');
+            el.innerHTML = `<div class="${isError ? 'error' : 'status'}">${message}</div>`;
+        }
+        
+        // Mock user
+        const mockUser = {
+            displayName: 'Test User',
+            email: 'test@gameist.com',
+            uid: 'test_user_fix_' + Date.now()
+        };
+        
+        async function testSingleSave() {
+            log('🧪 Testing single save...');
+            updateStatus('Testing single save...');
+            
+            try {
+                const result = await window.saveUserScore(mockUser.uid, mockUser.displayName, 1000, 'test_game');
+                if (result) {
+                    log('✅ Single save successful', 'success');
+                    updateStatus('✅ Single save works!');
+                } else {
+                    log('❌ Single save failed', 'error');
+                    updateStatus('❌ Single save failed', true);
+                }
+            } catch (error) {
+                log('❌ Single save error: ' + error.message, 'error');
+                updateStatus('❌ Error: ' + error.message, true);
+            }
+        }
+        
+        async function testMultipleSaves() {
+            log('🧪 Testing multiple saves (should debounce)...');
+            updateStatus('Testing debounce...');
+            
+            let successCount = 0;
+            let debounceCount = 0;
+            
+            // Try to save multiple times rapidly
+            for (let i = 0; i < 5; i++) {
+                try {
+                    const result = await window.saveUserScore(mockUser.uid, mockUser.displayName, 2000 + i, 'debounce_test');
+                    if (result) {
+                        successCount++;
+                        log(`✅ Save ${i + 1} successful`);
+                    } else {
+                        debounceCount++;
+                        log(`⏳ Save ${i + 1} debounced`);
+                    }
+                } catch (error) {
+                    log(`❌ Save ${i + 1} error: ${error.message}`, 'error');
+                }
+                
+                // Small delay between calls
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            log(`📊 Results: ${successCount} successful, ${debounceCount} debounced`);
+            
+            if (successCount === 1 && debounceCount === 4) {
+                updateStatus('✅ Debounce working correctly!');
+                log('✅ Debounce mechanism is working perfectly!', 'success');
+            } else {
+                updateStatus('⚠️ Debounce may not be working as expected', true);
+                log('⚠️ Debounce behavior unexpected', 'error');
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🔧 Quick fix test page loaded');
+            setTimeout(() => {
+                if (window.gameistScoreSync) {
+                    log('✅ Score sync system available');
+                } else {
+                    log('❌ Score sync system not available', 'error');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
