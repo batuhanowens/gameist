@@ -1084,14 +1084,18 @@
           // Try to get 2048 best score from DOM if available
           let dom2048BestScore = 0;
           try {
-            // Try to get from 2048 game page if it's loaded
-            const game2048BestEl = document.getElementById('best-score');
-            if (game2048BestEl && game2048BestEl.textContent) {
-              const scoreFrom2048DOM = parseInt(game2048BestEl.textContent.replace(/,/g, '').trim());
-              if (!isNaN(scoreFrom2048DOM) && scoreFrom2048DOM > 0) {
-                dom2048BestScore = scoreFrom2048DOM;
-                console.log(`🔢 Got 2048 best score from DOM: ${dom2048BestScore}`);
+            // Check if we're on the 2048 game page
+            if (window.location.pathname.includes('/2048/') || window.location.href.includes('/2048/')) {
+              const game2048BestEl = document.getElementById('best-score');
+              if (game2048BestEl && game2048BestEl.textContent) {
+                const scoreFrom2048DOM = parseInt(game2048BestEl.textContent.replace(/,/g, '').trim());
+                if (!isNaN(scoreFrom2048DOM) && scoreFrom2048DOM > 0) {
+                  dom2048BestScore = scoreFrom2048DOM;
+                  console.log(`🔢 Got 2048 best score from 2048 page DOM: ${dom2048BestScore}`);
+                }
               }
+            } else {
+              console.log('ℹ️ Not on 2048 page, cannot get DOM score directly');
             }
           } catch (error) {
             console.log('ℹ️ Could not get 2048 score from DOM (game not loaded)');
@@ -1388,24 +1392,27 @@
       // Check for 2048 DOM score updates periodically
       function check2048DOMScore() {
         try {
-          const game2048BestEl = document.getElementById('best-score');
-          if (game2048BestEl && game2048BestEl.textContent) {
-            const scoreFrom2048DOM = parseInt(game2048BestEl.textContent.replace(/,/g, '').trim());
-            if (!isNaN(scoreFrom2048DOM) && scoreFrom2048DOM > 0) {
-              const current2048Display = document.getElementById('2048BestDisplay');
-              const currentDisplayedScore = parseInt(current2048Display.textContent.replace(/,/g, '')) || 0;
-              
-              if (scoreFrom2048DOM > currentDisplayedScore) {
-                console.log(`🔢 2048 DOM score updated: ${currentDisplayedScore} → ${scoreFrom2048DOM}`);
-                if (current2048Display) {
-                  current2048Display.textContent = scoreFrom2048DOM.toLocaleString();
-                }
-                // Update total score
-                const elementistScore = parseInt(document.getElementById('elementistBestDisplay').textContent.replace(/,/g, '')) || 0;
-                const newTotal = elementistScore + scoreFrom2048DOM;
-                const totalDisplay = document.getElementById('totalScoreDisplay');
-                if (totalDisplay) {
-                  totalDisplay.textContent = newTotal.toLocaleString();
+          // Only check if we're on the 2048 page
+          if (window.location.pathname.includes('/2048/') || window.location.href.includes('/2048/')) {
+            const game2048BestEl = document.getElementById('best-score');
+            if (game2048BestEl && game2048BestEl.textContent) {
+              const scoreFrom2048DOM = parseInt(game2048BestEl.textContent.replace(/,/g, '').trim());
+              if (!isNaN(scoreFrom2048DOM) && scoreFrom2048DOM > 0) {
+                const current2048Display = document.getElementById('2048BestDisplay');
+                const currentDisplayedScore = parseInt(current2048Display.textContent.replace(/,/g, '')) || 0;
+                
+                if (scoreFrom2048DOM > currentDisplayedScore) {
+                  console.log(`🔢 2048 DOM score updated: ${currentDisplayedScore} → ${scoreFrom2048DOM}`);
+                  if (current2048Display) {
+                    current2048Display.textContent = scoreFrom2048DOM.toLocaleString();
+                  }
+                  // Update total score
+                  const elementistScore = parseInt(document.getElementById('elementistBestDisplay').textContent.replace(/,/g, '')) || 0;
+                  const newTotal = elementistScore + scoreFrom2048DOM;
+                  const totalDisplay = document.getElementById('totalScoreDisplay');
+                  if (totalDisplay) {
+                    totalDisplay.textContent = newTotal.toLocaleString();
+                  }
                 }
               }
             }
@@ -1426,6 +1433,19 @@
         console.log('Carousel element:', document.getElementById('scoreCarousel'));
         console.log('Container element:', document.getElementById('carouselContainer'));
         console.log('Indicators:', document.querySelectorAll('.indicator').length);
+        
+        // Test page detection
+        console.log('🌐 Page Detection:');
+        console.log('Current URL:', window.location.href);
+        console.log('Current pathname:', window.location.pathname);
+        console.log('Is 2048 page:', window.location.pathname.includes('/2048/') || window.location.href.includes('/2048/'));
+        
+        // Test 2048 DOM element
+        const bestScoreEl = document.getElementById('best-score');
+        console.log('2048 best-score element:', bestScoreEl);
+        if (bestScoreEl) {
+          console.log('2048 best-score content:', bestScoreEl.textContent);
+        }
         
         // Test swipe simulation
         console.log('🧪 Testing swipe functions:');
@@ -1490,17 +1510,47 @@
                 loadUserStats(currentUser.uid);
               }
             }
+            
+            // Handle live score updates from 2048
+            if (event.data && event.data.type === 'score_update' && event.data.game === '2048') {
+              console.log('🎮 Processing live score update from 2048:', event.data);
+              const currentUser = firebase.auth().currentUser;
+              
+              if (currentUser && currentUser.uid === event.data.userId) {
+                console.log(`✅ Live 2048 score: ${event.data.score} (+${event.data.scoreIncrease})`);
+                
+                // Only update if it's a new best score
+                const currentBestScore = parseInt(document.getElementById('2048BestDisplay').textContent.replace(/,/g, '')) || 0;
+                if (event.data.score > currentBestScore) {
+                  console.log(`🎉 NEW 2048 BEST SCORE! ${currentBestScore} → ${event.data.score}`);
+                  
+                  // Update 2048 carousel slide immediately
+                  const game2048BestEl = document.getElementById('2048BestDisplay');
+                  if (game2048BestEl) {
+                    game2048BestEl.textContent = event.data.score.toLocaleString();
+                    console.log('✅ Updated 2048 carousel slide with new best score');
+                  }
+                  
+                  // Update total score
+                  const currentElementistScore = parseInt(document.getElementById('elementistBestDisplay').textContent.replace(/,/g, '')) || 0;
+                  const newTotal = currentElementistScore + event.data.score;
+                  const totalDisplay = document.getElementById('totalScoreDisplay');
+                  if (totalDisplay) {
+                    totalDisplay.textContent = newTotal.toLocaleString();
+                  }
+                } else {
+                  console.log(`ℹ️ Not a new 2048 best score (${event.data.score} ≤ ${currentBestScore})`);
+                }
+                
+                // Load full stats to ensure consistency
+                loadUserStats(currentUser.uid);
+              }
+            }
           };
           
-          gameistChannel.addEventListener('error', (error) => {
-            console.error('❌ BroadcastChannel error:', error);
-          });
-          
-          console.log('📡 BroadcastChannel stats listener initialized');
+          console.log('� BroadcastChannel listener initialized for stats updates');
         } catch (error) {
-          console.error('❌ Failed to initialize BroadcastChannel listener:', error);
-          // Fallback to localStorage polling
-          console.log('🔄 Falling back to localStorage polling...');
+          console.error('❌ Error setting up BroadcastChannel listener:', error);
           
           setInterval(() => {
             const updateNeeded = localStorage.getItem('gameist_stats_update_needed');
