@@ -248,18 +248,6 @@
                         <div style="color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600;">2048 Best</div>
                         <div id="2048BestDisplay" style="color: white; font-size: 16px; font-weight: 700;">0</div>
                       </div>
-                      <!-- Slide 4: Wordle Best -->
-                      <div class="carousel-slide" style="min-width: 100%; text-align: center;">
-                        <div style="color: #fbbf24; font-size: 18px; font-weight: 700; margin-bottom: 2px;">📝</div>
-                        <div style="color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600;">Wordle Best</div>
-                        <div id="wordleBestDisplay" style="color: white; font-size: 16px; font-weight: 700;">0</div>
-                      </div>
-                      <!-- Slide 5: Bilardist Best -->
-                      <div class="carousel-slide" style="min-width: 100%; text-align: center;">
-                        <div style="color: #fbbf24; font-size: 18px; font-weight: 700; margin-bottom: 2px;">�</div>
-                        <div style="color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600;">Bilardist Best</div>
-                        <div id="bilardistBestDisplay" style="color: white; font-size: 16px; font-weight: 700;">0</div>
-                      </div>
                     </div>
                   </div>
                   <!-- Carousel indicators -->
@@ -267,8 +255,6 @@
                     <span class="indicator" data-slide="0" style="width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.2s ease;"></span>
                     <span class="indicator" data-slide="1" style="width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: all 0.2s ease;"></span>
                     <span class="indicator" data-slide="2" style="width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: all 0.2s ease;"></span>
-                    <span class="indicator" data-slide="3" style="width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: all 0.2s ease;"></span>
-                    <span class="indicator" data-slide="4" style="width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: all 0.2s ease;"></span>
                   </div>
                 </div>
                 
@@ -1094,19 +1080,35 @@
           // Get individual game scores - check for multiple possible game names
           const elementistBestScore = gameHighScores['elementist']?.score || 0;
           const game2048BestScore = gameHighScores['2048']?.score || gameHighScores['game2048']?.score || 0;
-          const wordleBestScore = gameHighScores['wordle']?.score || gameHighScores['wordle-game']?.score || 0;
-          const bilardoBestScore = gameHighScores['bilardo']?.score || gameHighScores['bilardist']?.score || 0;
+          
+          // Try to get 2048 best score from DOM if available
+          let dom2048BestScore = 0;
+          try {
+            // Try to get from 2048 game page if it's loaded
+            const game2048BestEl = document.getElementById('best-score');
+            if (game2048BestEl && game2048BestEl.textContent) {
+              const scoreFrom2048DOM = parseInt(game2048BestEl.textContent.replace(/,/g, '').trim());
+              if (!isNaN(scoreFrom2048DOM) && scoreFrom2048DOM > 0) {
+                dom2048BestScore = scoreFrom2048DOM;
+                console.log(`🔢 Got 2048 best score from DOM: ${dom2048BestScore}`);
+              }
+            }
+          } catch (error) {
+            console.log('ℹ️ Could not get 2048 score from DOM (game not loaded)');
+          }
+          
+          // Use the higher of database or DOM score for 2048
+          const final2048BestScore = Math.max(game2048BestScore, dom2048BestScore);
           
           // Calculate total score from individual game best scores only
-          const totalScore = elementistBestScore + game2048BestScore + wordleBestScore + bilardoBestScore;
+          const totalScore = elementistBestScore + final2048BestScore;
           const gamesPlayed = new Set(allScores.map(s => s.game)).size;
           
           console.log('📊 Calculated stats:', { 
             totalScore, 
             elementistBestScore, 
-            game2048BestScore, 
-            wordleBestScore, 
-            bilardoBestScore, 
+            game2048BestScore: final2048BestScore,
+            dom2048BestScore,
             gamesPlayed 
           });
           
@@ -1114,14 +1116,10 @@
           const totalScoreEl = document.getElementById('totalScoreDisplay');
           const elementistBestEl = document.getElementById('elementistBestDisplay');
           const game2048BestEl = document.getElementById('2048BestDisplay');
-          const wordleBestEl = document.getElementById('wordleBestDisplay');
-          const bilardoBestEl = document.getElementById('bilardistBestDisplay');
           
           if (totalScoreEl) totalScoreEl.textContent = totalScore.toLocaleString();
           if (elementistBestEl) elementistBestEl.textContent = elementistBestScore.toLocaleString();
-          if (game2048BestEl) game2048BestEl.textContent = game2048BestScore.toLocaleString();
-          if (wordleBestEl) wordleBestEl.textContent = wordleBestScore.toLocaleString();
-          if (bilardoBestEl) bilardoBestEl.textContent = bilardoBestScore.toLocaleString();
+          if (game2048BestEl) game2048BestEl.textContent = final2048BestScore.toLocaleString();
           
           // Update modal stats
           const modalTotalScore = document.getElementById('modalTotalScore');
@@ -1250,7 +1248,7 @@
 
       // Carousel functionality
       let currentSlide = 0;
-      const totalSlides = 5;
+      const totalSlides = 3;
       let autoRotateInterval;
       let touchStartX = 0;
       let touchEndX = 0;
@@ -1386,6 +1384,39 @@
           carousel.addEventListener('mouseleave', startAutoRotate);
         }
       });
+      
+      // Check for 2048 DOM score updates periodically
+      function check2048DOMScore() {
+        try {
+          const game2048BestEl = document.getElementById('best-score');
+          if (game2048BestEl && game2048BestEl.textContent) {
+            const scoreFrom2048DOM = parseInt(game2048BestEl.textContent.replace(/,/g, '').trim());
+            if (!isNaN(scoreFrom2048DOM) && scoreFrom2048DOM > 0) {
+              const current2048Display = document.getElementById('2048BestDisplay');
+              const currentDisplayedScore = parseInt(current2048Display.textContent.replace(/,/g, '')) || 0;
+              
+              if (scoreFrom2048DOM > currentDisplayedScore) {
+                console.log(`🔢 2048 DOM score updated: ${currentDisplayedScore} → ${scoreFrom2048DOM}`);
+                if (current2048Display) {
+                  current2048Display.textContent = scoreFrom2048DOM.toLocaleString();
+                }
+                // Update total score
+                const elementistScore = parseInt(document.getElementById('elementistBestDisplay').textContent.replace(/,/g, '')) || 0;
+                const newTotal = elementistScore + scoreFrom2048DOM;
+                const totalDisplay = document.getElementById('totalScoreDisplay');
+                if (totalDisplay) {
+                  totalDisplay.textContent = newTotal.toLocaleString();
+                }
+              }
+            }
+          }
+        } catch (error) {
+          // Silent fail - 2048 game not loaded
+        }
+      }
+      
+      // Check 2048 DOM score every 5 seconds
+      setInterval(check2048DOMScore, 5000);
       
       // Debug function for carousel testing (call from console)
       function debugCarousel() {
