@@ -1049,7 +1049,24 @@
               console.log('📭 No scores found in Realtime Database');
             }
           } catch (error) {
-            console.log('ℹ️ Realtime Database not available:', error.message);
+            console.error('❌ Error accessing Realtime Database:', error);
+            console.log('⚠️ Falling back to localStorage for 2048 scores...');
+            
+            // Fallback: Check localStorage for 2048 scores
+            const local2048Score = localStorage.getItem('2048_best_score');
+            if (local2048Score) {
+              const score = parseInt(local2048Score);
+              if (!isNaN(score) && score > 0) {
+                realtimeScores.push({
+                  userId: userId,
+                  game: '2048',
+                  score: score,
+                  timestamp: Date.now(),
+                  fromLocal: true
+                });
+                console.log(`📱 Found 2048 score from localStorage: ${score}`);
+              }
+            }
           }
           
           // Combine all scores and sort by timestamp (newest first)
@@ -1521,28 +1538,58 @@
             return;
           }
           
-          const database = firebase.database();
-          const userScoresRef = database.ref(`userScores/${user.uid}`);
-          const newScoreRef = userScoresRef.push();
+          // Save to localStorage as backup
+          localStorage.setItem('2048_best_score', score.toString());
+          console.log(`💾 Saved 2048 score ${score} to localStorage backup`);
           
-          await newScoreRef.set({
-            userId: user.uid,
-            displayName: user.displayName,
-            email: user.email,
-            score: score,
-            game: '2048',
-            timestamp: Date.now(),
-            from2048: true,
-            test: true
-          });
-          
-          console.log(`✅ Test 2048 score ${score} saved to Realtime Database`);
+          // Try to save to Realtime Database
+          try {
+            const database = firebase.database();
+            const userScoresRef = database.ref(`userScores/${user.uid}`);
+            const newScoreRef = userScoresRef.push();
+            
+            await newScoreRef.set({
+              userId: user.uid,
+              displayName: user.displayName,
+              email: user.email,
+              score: score,
+              game: '2048',
+              timestamp: Date.now(),
+              from2048: true,
+              test: true
+            });
+            
+            console.log(`✅ Test 2048 score ${score} saved to Realtime Database`);
+          } catch (firebaseError) {
+            console.log('⚠️ Firebase save failed, using localStorage only:', firebaseError);
+          }
           
           // Check immediately
           await check2048Scores();
           
         } catch (error) {
           console.error('❌ Error testing 2048 score:', error);
+        }
+      }
+      
+      // Function to manually set 2048 score from localStorage (for testing)
+      function set2048Score(score) {
+        localStorage.setItem('2048_best_score', score.toString());
+        console.log(`💾 Manually set 2048 score to ${score} in localStorage`);
+        
+        // Update display immediately
+        const game2048BestEl = document.getElementById('2048BestDisplay');
+        if (game2048BestEl) {
+          game2048BestEl.textContent = score.toLocaleString();
+          console.log('✅ Updated 2048 carousel display from localStorage');
+        }
+        
+        // Update total score
+        const elementistScore = parseInt(document.getElementById('elementistBestDisplay').textContent.replace(/,/g, '')) || 0;
+        const newTotal = elementistScore + score;
+        const totalDisplay = document.getElementById('totalScoreDisplay');
+        if (totalDisplay) {
+          totalDisplay.textContent = newTotal.toLocaleString();
         }
       }
       
