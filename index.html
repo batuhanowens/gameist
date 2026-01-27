@@ -228,7 +228,7 @@
                 
                 <!-- Stats Section - Carousel -->
                 <div style="position: relative; margin-bottom: 16px; position: relative; z-index: 1;">
-                  <div id="scoreCarousel" style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); overflow: hidden;">
+                  <div id="scoreCarousel" style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); overflow: hidden; cursor: grab; user-select: none;">
                     <div id="carouselContainer" style="display: flex; transition: transform 0.3s ease;">
                       <!-- Slide 1: Total Score -->
                       <div class="carousel-slide" style="min-width: 100%; text-align: center;">
@@ -1087,14 +1087,18 @@
             }
           });
           
-          // Get individual game scores
-          const elementistBestScore = gameHighScores['elementist']?.score || 0;
-          const game2048BestScore = gameHighScores['2048']?.score || 0;
-          const wordleBestScore = gameHighScores['wordle']?.score || 0;
-          const bilardoBestScore = gameHighScores['bilardo']?.score || 0;
+          // Debug: Log all game names found
+          console.log('🎮 All game names found in database:', [...new Set(allScores.map(s => s.game))]);
+          console.log('📊 All scores:', allScores.slice(0, 5).map(s => ({ game: s.game, score: s.score, timestamp: new Date(s.timestamp).toLocaleString() })));
           
-          // Calculate total score
-          const totalScore = Object.values(gameHighScores).reduce((sum, game) => sum + game.score, 0);
+          // Get individual game scores - check for multiple possible game names
+          const elementistBestScore = gameHighScores['elementist']?.score || 0;
+          const game2048BestScore = gameHighScores['2048']?.score || gameHighScores['game2048']?.score || 0;
+          const wordleBestScore = gameHighScores['wordle']?.score || gameHighScores['wordle-game']?.score || 0;
+          const bilardoBestScore = gameHighScores['bilardo']?.score || gameHighScores['bilardist']?.score || 0;
+          
+          // Calculate total score from individual game best scores only
+          const totalScore = elementistBestScore + game2048BestScore + wordleBestScore + bilardoBestScore;
           const gamesPlayed = new Set(allScores.map(s => s.game)).size;
           
           console.log('📊 Calculated stats:', { 
@@ -1248,6 +1252,8 @@
       let currentSlide = 0;
       const totalSlides = 5;
       let autoRotateInterval;
+      let touchStartX = 0;
+      let touchEndX = 0;
       
       function startAutoRotate() {
         autoRotateInterval = setInterval(nextSlide, 3000);
@@ -1257,6 +1263,30 @@
         if (autoRotateInterval) {
           clearInterval(autoRotateInterval);
         }
+      }
+      
+      // Swipe functionality
+      function handleSwipe() {
+        const swipeThreshold = 50;
+        const diff = touchStartX - touchEndX;
+        
+        if (Math.abs(diff) > swipeThreshold) {
+          if (diff > 0) {
+            // Swipe left - next slide
+            nextSlide();
+          } else {
+            // Swipe right - previous slide
+            prevSlide();
+          }
+          // Restart auto-rotate after swipe
+          stopAutoRotate();
+          startAutoRotate();
+        }
+      }
+      
+      function prevSlide() {
+        currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+        updateCarousel();
       }
       
       function updateCarousel() {
@@ -1314,12 +1344,64 @@
           });
         });
         
-        // Pause auto-rotate on carousel hover
+        // Add touch events for swipe
         if (carousel) {
+          // Touch events for mobile swipe
+          carousel.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+          }, { passive: true });
+          
+          carousel.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+          }, { passive: true });
+          
+          // Mouse events for desktop swipe
+          let mouseDown = false;
+          carousel.addEventListener('mousedown', (e) => {
+            mouseDown = true;
+            touchStartX = e.screenX;
+            carousel.style.cursor = 'grabbing';
+          });
+          
+          carousel.addEventListener('mouseup', (e) => {
+            if (mouseDown) {
+              mouseDown = false;
+              touchEndX = e.screenX;
+              handleSwipe();
+              carousel.style.cursor = 'grab';
+            }
+          });
+          
+          carousel.addEventListener('mouseleave', () => {
+            mouseDown = false;
+            carousel.style.cursor = 'grab';
+          });
+          
+          // Set initial cursor
+          carousel.style.cursor = 'grab';
+          
+          // Pause auto-rotate on carousel hover
           carousel.addEventListener('mouseenter', stopAutoRotate);
           carousel.addEventListener('mouseleave', startAutoRotate);
         }
       });
+      
+      // Debug function for carousel testing (call from console)
+      function debugCarousel() {
+        console.log('🎠 Carousel Debug:');
+        console.log('Current slide:', currentSlide);
+        console.log('Total slides:', totalSlides);
+        console.log('Carousel element:', document.getElementById('scoreCarousel'));
+        console.log('Container element:', document.getElementById('carouselContainer'));
+        console.log('Indicators:', document.querySelectorAll('.indicator').length);
+        
+        // Test swipe simulation
+        console.log('🧪 Testing swipe functions:');
+        console.log('nextSlide() - go to slide', (currentSlide + 1) % totalSlides);
+        console.log('prevSlide() - go to slide', (currentSlide - 1 + totalSlides) % totalSlides);
+        console.log('goToSlide(2) - go to slide 2');
+      }
       
       // Initialize session check
       checkSavedSession();
