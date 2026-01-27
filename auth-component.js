@@ -192,14 +192,26 @@ class GameistAuth {
         const loginBtn = document.getElementById('game-login-btn');
         const userInfo = document.getElementById('game-user-info');
 
-        if (user) {
-            loginBtn.style.display = 'none';
-            userInfo.style.display = 'block';
-            document.getElementById('game-user-name').textContent = user.displayName;
-            document.getElementById('game-user-photo').src = user.photoURL;
+        // Only update UI if elements exist (game pages might not have auth UI)
+        if (loginBtn && userInfo) {
+            if (user) {
+                loginBtn.style.display = 'none';
+                userInfo.style.display = 'block';
+                const userNameEl = document.getElementById('game-user-name');
+                const userPhotoEl = document.getElementById('game-user-photo');
+                if (userNameEl) userNameEl.textContent = user.displayName;
+                if (userPhotoEl) userPhotoEl.src = user.photoURL;
+            } else {
+                loginBtn.style.display = 'block';
+                userInfo.style.display = 'none';
+            }
         } else {
-            loginBtn.style.display = 'block';
-            userInfo.style.display = 'none';
+            // Game page - just log the auth state
+            if (user) {
+                console.log('✅ User authenticated in game:', user.displayName);
+            } else {
+                console.log('ℹ️ No user authenticated in game');
+            }
         }
     }
 

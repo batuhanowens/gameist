@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Score Sync Debug - Gameist</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .section {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .status {
+            background: rgba(0,255,0,0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #00ff00;
+        }
+        .error {
+            background: rgba(255,0,0,0.1);
+            border-left-color: #ff0000;
+        }
+        #log {
+            background: #000;
+            padding: 10px;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Score Sync Debug</h1>
+    
+    <div class="section">
+        <h2>🔥 Firebase Status</h2>
+        <div id="firebaseStatus">Checking Firebase...</div>
+        <button onclick="checkFirebase()">Check Firebase</button>
+        <button onclick="testFirebaseConnection()">Test Connection</button>
+    </div>
+    
+    <div class="section">
+        <h2>👤 Auth Status</h2>
+        <div id="authStatus">Checking auth...</div>
+        <button onclick="checkAuth()">Check Auth</button>
+        <button onclick="simulateLogin()">Simulate Login</button>
+    </div>
+    
+    <div class="section">
+        <h2>📊 Score Functions</h2>
+        <div id="scoreStatus">Ready...</div>
+        <button onclick="testSaveScore()">Test Save Score</button>
+        <button onclick="testLoadStats()">Test Load Stats</button>
+        <button onclick="testSync()">Test Sync</button>
+    </div>
+    
+    <div class="section">
+        <h2>📝 Log</h2>
+        <div id="log"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="auth-component.js"></script>
+    <script src="score-sync.js"></script>
+    
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7ckcqdZWfnUx5r8uKmvu9Ikax1x5Qidk",
+            authDomain: "gameist.firebaseapp.com",
+            projectId: "gameist",
+            storageBucket: "gameist.firebasestorage.app",
+            messagingSenderId: "525659299937",
+            appId: "1:525659299937:web:1c8343a25be2a994bcca20",
+            measurementId: "G-WE9R0GWKM6",
+            databaseURL: "https://gameist-default-rtdb.firebaseio.com/"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'white';
+            logEl.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        function updateStatus(elementId, message, isError = false) {
+            const el = document.getElementById(elementId);
+            el.innerHTML = `<div class="status ${isError ? 'error' : ''}">${message}</div>`;
+        }
+        
+        function checkFirebase() {
+            log('Checking Firebase...');
+            
+            try {
+                const app = firebase.app();
+                log('✅ Firebase app initialized: ' + app.name, 'success');
+                
+                // Check services
+                const auth = firebase.auth();
+                log('✅ Firebase Auth available', 'success');
+                
+                const firestore = firebase.firestore();
+                log('✅ Firebase Firestore available', 'success');
+                
+                const database = firebase.database();
+                log('✅ Firebase Realtime Database available', 'success');
+                
+                updateStatus('firebaseStatus', '✅ All Firebase services available');
+                
+            } catch (error) {
+                log('❌ Firebase error: ' + error.message, 'error');
+                updateStatus('firebaseStatus', '❌ Firebase error: ' + error.message, true);
+            }
+        }
+        
+        async function testFirebaseConnection() {
+            log('Testing Firebase connection...');
+            
+            try {
+                // Test Firestore
+                const db = firebase.firestore();
+                const testDoc = await db.collection('test').add({
+                    test: true,
+                    timestamp: Date.now()
+                });
+                log('✅ Firestore write test passed', 'success');
+                
+                // Test Realtime Database
+                const rtdb = firebase.database();
+                await rtdb.ref('test/connection').set({
+                    connected: true,
+                    timestamp: Date.now()
+                });
+                log('✅ Realtime Database write test passed', 'success');
+                
+                updateStatus('firebaseStatus', '✅ Firebase connection test passed');
+                
+            } catch (error) {
+                log('❌ Firebase connection test failed: ' + error.message, 'error');
+                updateStatus('firebaseStatus', '❌ Connection test failed: ' + error.message, true);
+            }
+        }
+        
+        function checkAuth() {
+            log('Checking authentication...');
+            
+            const savedUser = localStorage.getItem('gameist_user');
+            if (savedUser) {
+                const user = JSON.parse(savedUser);
+                log('✅ Found saved user: ' + user.displayName, 'success');
+                updateStatus('authStatus', '✅ User logged in: ' + user.displayName);
+            } else {
+                log('❌ No saved user found', 'error');
+                updateStatus('authStatus', '❌ No user logged in', true);
+            }
+        }
+        
+        function simulateLogin() {
+            const mockUser = {
+                displayName: 'Debug User',
+                email: 'debug@gameist.com',
+                photoURL: 'https://via.placeholder.com/80',
+                uid: 'debug_user_' + Date.now()
+            };
+            localStorage.setItem('gameist_user', JSON.stringify(mockUser));
+            log('✅ Simulated login for: ' + mockUser.displayName, 'success');
+            updateStatus('authStatus', '✅ Debug user logged in');
+        }
+        
+        async function testSaveScore() {
+            log('Testing save score function...');
+            
+            const savedUser = localStorage.getItem('gameist_user');
+            if (!savedUser) {
+                log('❌ No user found, please login first', 'error');
+                updateStatus('scoreStatus', '❌ Please login first', true);
+                return;
+            }
+            
+            const user = JSON.parse(savedUser);
+            const score = Math.floor(Math.random() * 1000) + 100;
+            
+            try {
+                if (window.saveUserScore) {
+                    const result = await window.saveUserScore(user.uid, user.displayName, score, 'debug_game');
+                    if (result) {
+                        log('✅ Score saved successfully: ' + score, 'success');
+                        updateStatus('scoreStatus', '✅ Score saved: ' + score);
+                    } else {
+                        log('❌ Score save failed', 'error');
+                        updateStatus('scoreStatus', '❌ Score save failed', true);
+                    }
+                } else {
+                    log('❌ saveUserScore function not found', 'error');
+                    updateStatus('scoreStatus', '❌ saveUserScore not found', true);
+                }
+            } catch (error) {
+                log('❌ Score save error: ' + error.message, 'error');
+                updateStatus('scoreStatus', '❌ Error: ' + error.message, true);
+            }
+        }
+        
+        async function testLoadStats() {
+            log('Testing load stats function...');
+            
+            const savedUser = localStorage.getItem('gameist_user');
+            if (!savedUser) {
+                log('❌ No user found, please login first', 'error');
+                updateStatus('scoreStatus', '❌ Please login first', true);
+                return;
+            }
+            
+            const user = JSON.parse(savedUser);
+            
+            try {
+                if (typeof loadUserStats === 'function') {
+                    await loadUserStats(user.uid);
+                    log('✅ Stats loaded successfully', 'success');
+                    updateStatus('scoreStatus', '✅ Stats loaded');
+                } else {
+                    log('❌ loadUserStats function not found', 'error');
+                    updateStatus('scoreStatus', '❌ loadUserStats not found', true);
+                }
+            } catch (error) {
+                log('❌ Stats load error: ' + error.message, 'error');
+                updateStatus('scoreStatus', '❌ Error: ' + error.message, true);
+            }
+        }
+        
+        function testSync() {
+            log('Testing sync system...');
+            
+            if (window.gameistScoreSync) {
+                log('✅ Score sync system available', 'success');
+                log('Last update: ' + window.gameistScoreSync.lastUpdate);
+                log('Is listening: ' + window.gameistScoreSync.isListening);
+                
+                window.gameistScoreSync.triggerRefresh();
+                log('✅ Manual sync triggered', 'success');
+                updateStatus('scoreStatus', '✅ Sync system working');
+            } else {
+                log('❌ Score sync system not found', 'error');
+                updateStatus('scoreStatus', '❌ Sync system not found', true);
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🔧 Debug page loaded');
+            
+            setTimeout(() => {
+                checkFirebase();
+                checkAuth();
+            }, 1000);
+            
+            // Listen for events
+            window.addEventListener('gameistScoreUpdate', (event) => {
+                log('📡 Score update event: ' + JSON.stringify(event.detail));
+            });
+            
+            window.addEventListener('gameistRealtimeUpdate', (event) => {
+                log('📡 Realtime update event: ' + JSON.stringify(event.detail));
+            });
+        });
+    </script>
+</body>
+</html>
