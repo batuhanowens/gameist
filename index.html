@@ -1528,41 +1528,18 @@
         }
       }
       
-      // Manual function to test 2048 score saving
+      // Manual function to test 2048 score saving with cross-device sync
       async function test2048Score(score = 2048) {
         try {
-          console.log('🧪 Testing 2048 score saving...');
+          console.log('🧪 Testing 2048 score saving with cross-device sync...');
           const user = firebase.auth().currentUser;
           if (!user) {
             console.log('❌ No user logged in');
             return;
           }
           
-          // Save to localStorage as backup
-          localStorage.setItem('2048_best_score', score.toString());
-          console.log(`💾 Saved 2048 score ${score} to localStorage backup`);
-          
-          // Try to save to Realtime Database
-          try {
-            const database = firebase.database();
-            const userScoresRef = database.ref(`userScores/${user.uid}`);
-            const newScoreRef = userScoresRef.push();
-            
-            await newScoreRef.set({
-              userId: user.uid,
-              displayName: user.displayName,
-              email: user.email,
-              score: score,
-              game: '2048',
-              timestamp: Date.now(),
-              from2048: true,
-              test: true
-            });
-            
-            console.log(`✅ Test 2048 score ${score} saved to Realtime Database`);
-          } catch (firebaseError) {
-            console.log('⚠️ Firebase save failed, using localStorage only:', firebaseError);
-          }
+          // Sync to all devices
+          await syncScoreToAllDevices('2048', score);
           
           // Check immediately
           await check2048Scores();
@@ -1572,16 +1549,15 @@
         }
       }
       
-      // Function to manually set 2048 score from localStorage (for testing)
-      function set2048Score(score) {
-        localStorage.setItem('2048_best_score', score.toString());
-        console.log(`💾 Manually set 2048 score to ${score} in localStorage`);
+      // Function to manually set 2048 score with cross-device sync
+      async function set2048Score(score) {
+        console.log(`� Setting 2048 score to ${score} with cross-device sync...`);
         
         // Update display immediately
         const game2048BestEl = document.getElementById('2048BestDisplay');
         if (game2048BestEl) {
           game2048BestEl.textContent = score.toLocaleString();
-          console.log('✅ Updated 2048 carousel display from localStorage');
+          console.log('✅ Updated 2048 carousel display');
         }
         
         // Update total score
@@ -1591,10 +1567,140 @@
         if (totalDisplay) {
           totalDisplay.textContent = newTotal.toLocaleString();
         }
+        
+        // Sync to all devices
+        await syncScoreToAllDevices('2048', score);
+      }
+      
+      // Real-time cross-device synchronization
+      function setupRealtimeSync() {
+        const user = firebase.auth().currentUser;
+        if (!user) return;
+        
+        console.log('🔄 Setting up real-time cross-device sync for user:', user.displayName);
+        
+        try {
+          const database = firebase.database();
+          const userScoresRef = database.ref(`userScores/${user.uid}`);
+          
+          // Listen for real-time updates from any device
+          userScoresRef.on('value', (snapshot) => {
+            console.log('📡 Real-time score update detected from another device!');
+            const data = snapshot.val();
+            
+            if (data) {
+              const scores = Object.values(data);
+              
+              // Update localStorage with latest data
+              const game2048Scores = scores.filter(s => s.game === '2048');
+              if (game2048Scores.length > 0) {
+                const best2048Score = Math.max(...game2048Scores.map(s => s.score));
+                localStorage.setItem('2048_best_score', best2048Score.toString());
+                console.log(`💾 Synced 2048 score to localStorage: ${best2048Score}`);
+              }
+              
+              // Reload stats to update UI
+              loadUserStats(user.uid);
+            }
+          });
+          
+          console.log('✅ Real-time sync listener active');
+        } catch (error) {
+          console.error('❌ Error setting up real-time sync:', error);
+        }
+      }
+      
+      // Enhanced score saving with cross-device sync
+      async function syncScoreToAllDevices(game, score) {
+        const user = firebase.auth().currentUser;
+        if (!user) return;
+        
+        try {
+          console.log(`🔄 Syncing ${game} score ${score} to all devices...`);
+          
+          // Save to Firebase Realtime Database (primary sync source)
+          const database = firebase.database();
+          const userScoresRef = database.ref(`userScores/${user.uid}`);
+          const newScoreRef = userScoresRef.push();
+          
+          await newScoreRef.set({
+            userId: user.uid,
+            displayName: user.displayName,
+            email: user.email,
+            score: score,
+            game: game,
+            timestamp: Date.now(),
+            syncSource: 'main_menu'
+          });
+          
+          // Save to localStorage as backup
+          if (game === '2048') {
+            localStorage.setItem('2048_best_score', score.toString());
+          }
+          
+          console.log(`✅ ${game} score synced to all devices`);
+          
+          // Notify other tabs via BroadcastChannel
+          try {
+            const channel = new BroadcastChannel('gameist_stats');
+            channel.postMessage({
+              type: 'score_update',
+              game: game,
+              score: score,
+              userId: user.uid,
+              timestamp: Date.now()
+            });
+          } catch (error) {
+            console.log('BroadcastChannel not available');
+          }
+          
+        } catch (error) {
+          console.error(`❌ Error syncing ${game} score:`, error);
+          
+          // Fallback to localStorage only
+          if (game === '2048') {
+            localStorage.setItem('2048_best_score', score.toString());
+            console.log(`⚠️ ${game} score saved to localStorage only (Firebase failed)`);
+          }
+        }
+      }
+      
+      // Test cross-device synchronization
+      async function testCrossDeviceSync() {
+        console.log('🌐 Testing cross-device synchronization...');
+        const user = firebase.auth().currentUser;
+        if (!user) {
+          console.log('❌ No user logged in');
+          return;
+        }
+        
+        try {
+          // Test 2048 score sync
+          const testScore = 9999;
+          console.log(`🧪 Testing 2048 score sync: ${testScore}`);
+          await syncScoreToAllDevices('2048', testScore);
+          
+          // Wait a moment for sync
+          setTimeout(async () => {
+            await check2048Scores();
+            console.log('✅ Cross-device sync test completed');
+          }, 1000);
+          
+        } catch (error) {
+          console.error('❌ Cross-device sync test failed:', error);
+        }
       }
       
       // Initialize session check
       checkSavedSession();
+      
+      // Setup real-time sync when user is available
+      firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+          console.log('👤 User authenticated, setting up real-time sync...');
+          setupRealtimeSync();
+        }
+      });
       
       // Create BroadcastChannel for cross-page communication
       const gameistChannel = new BroadcastChannel('gameist_stats');
