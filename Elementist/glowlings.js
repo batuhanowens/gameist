@@ -8799,16 +8799,26 @@ class GlowlingsGame {
         
         console.log(`🔍 Score check: ${this._lastReportedScore} → ${currentScore} (+${scoreIncrease}), Game state: ${this.gameState}, Run best: ${this.getCurrentRunBestScore()}`);
         
-        // Only report if score increased significantly (allow menu state too)
+        // Only report if score increased significantly AND it's a new best score
         if (scoreIncrease >= this._minScoreIncrease && (this.gameState === 'playing' || this.gameState === 'menu')) {
-            console.log(`📈 Score increase detected: ${this._lastReportedScore} → ${currentScore} (+${scoreIncrease}) [Using run best score]`);
+            // Check if this is a new best score for the run
+            const currentRunBest = this.getCurrentRunBestScore();
+            const lastReportedBest = this._lastReportedScore || 0;
             
-            // Send score update to main menu
-            this.sendScoreUpdate(currentScore, scoreIncrease);
-            
-            // Update last reported values
-            this._lastReportedScore = currentScore;
-            this._lastScoreCheckTime = now;
+            if (currentRunBest > lastReportedBest) {
+                console.log(`🎉 NEW BEST SCORE! ${lastReportedBest} → ${currentRunBest} (+${scoreIncrease}) [Using run best score]`);
+                
+                // Send score update to main menu
+                this.sendScoreUpdate(currentRunBest, currentRunBest - lastReportedBest);
+                
+                // Update last reported values
+                this._lastReportedScore = currentRunBest;
+                this._lastScoreCheckTime = now;
+            } else {
+                console.log(`ℹ️ Not a new best score (${currentRunBest} ≤ ${lastReportedBest})`);
+                // Update time even if no new best to keep checking
+                this._lastScoreCheckTime = now;
+            }
         } else {
             // Update time even if no score increase to keep checking
             this._lastScoreCheckTime = now;

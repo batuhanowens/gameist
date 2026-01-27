@@ -230,7 +230,7 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; position: relative; z-index: 1;">
                   <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.2);">
                     <div style="color: #fbbf24; font-size: 18px; font-weight: 700; margin-bottom: 2px;">🏆</div>
-                    <div style="color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600;" data-i18n="total_score">Total Score</div>
+                    <div style="color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600;" data-i18n="elementist_best_score">Elementist Best Score</div>
                     <div id="userTotalScore" style="color: white; font-size: 16px; font-weight: 700;">0</div>
                   </div>
                   <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.2);">
@@ -901,7 +901,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
               <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; text-align: center;">
                 <div style="color: #fbbf24; font-size: 24px; font-weight: 700;">🏆</div>
-                <div style="color: rgba(255,255,255,0.8); font-size: 12px; margin-bottom: 5px;">${getAuthTranslation('total_score')}</div>
+                <div style="color: rgba(255,255,255,0.8); font-size: 12px; margin-bottom: 5px;">Elementist Best Score</div>
                 <div id="modalTotalScore" style="color: white; font-size: 20px; font-weight: 700;">0</div>
               </div>
               <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; text-align: center;">
@@ -1055,17 +1055,22 @@
             }
           });
           
-          const highestScore = Object.values(gameHighScores).reduce((sum, game) => sum + game.score, 0);
+          // Calculate Elementist's BEST score only
+          const elementistScores = allScores.filter(score => score.game === 'elementist');
+          const elementistBestScore = elementistScores.length > 0 
+            ? Math.max(...elementistScores.map(s => s.score))
+            : 0;
+          
           const gamesPlayed = new Set(allScores.map(s => s.game)).size;
           
-          console.log('📊 Calculated stats:', { highestScore, gamesPlayed, gameHighScores: Object.values(gameHighScores) });
+          console.log('📊 Calculated stats:', { elementistBestScore, gamesPlayed, elementistScores: elementistScores.length });
           
           // Update modal stats
           const modalTotalScore = document.getElementById('modalTotalScore');
           const modalGamesPlayed = document.getElementById('modalGamesPlayed');
           const gameStats = document.getElementById('gameStats');
           
-          if (modalTotalScore) modalTotalScore.textContent = highestScore.toLocaleString();
+          if (modalTotalScore) modalTotalScore.textContent = elementistBestScore.toLocaleString();
           if (modalGamesPlayed) modalGamesPlayed.textContent = gamesPlayed;
           
           // Update main UI stats
@@ -1073,8 +1078,8 @@
           const userGamesPlayedEl = document.getElementById('userGamesPlayed');
           
           if (userTotalScoreEl) {
-            userTotalScoreEl.textContent = highestScore.toLocaleString();
-            console.log('✅ Updated main UI highest score:', highestScore);
+            userTotalScoreEl.textContent = elementistBestScore.toLocaleString();
+            console.log('✅ Updated main UI Elementist best score:', elementistBestScore);
           } else {
             console.error('❌ userTotalScore element not found');
           }
@@ -1215,11 +1220,19 @@
               if (currentUser && currentUser.uid === event.data.userId) {
                 console.log(`✅ Live Elementist score: ${event.data.score} (+${event.data.scoreIncrease})`);
                 
-                // Update UI immediately for live feedback
-                const userTotalScoreEl = document.getElementById('userTotalScore');
-                if (userTotalScoreEl) {
-                  userTotalScoreEl.textContent = event.data.score.toLocaleString();
-                  console.log('✅ Updated UI with live Elementist score');
+                // Only update if it's a new best score
+                const currentBestScore = parseInt(document.getElementById('userTotalScore').textContent.replace(/,/g, '')) || 0;
+                if (event.data.score > currentBestScore) {
+                  console.log(`🎉 NEW BEST SCORE! ${currentBestScore} → ${event.data.score}`);
+                  
+                  // Update UI immediately for live feedback
+                  const userTotalScoreEl = document.getElementById('userTotalScore');
+                  if (userTotalScoreEl) {
+                    userTotalScoreEl.textContent = event.data.score.toLocaleString();
+                    console.log('✅ Updated UI with new Elementist best score');
+                  }
+                } else {
+                  console.log(`ℹ️ Not a new best score (${event.data.score} ≤ ${currentBestScore})`);
                 }
                 
                 // Load full stats to ensure consistency
@@ -1276,11 +1289,19 @@
             if (currentUser && currentUser.uid === data.userId && data.game === 'elementist') {
               console.log('🎮 Processing live Elementist score from localStorage:', data);
               
-              // Update UI immediately
-              const userTotalScoreEl = document.getElementById('userTotalScore');
-              if (userTotalScoreEl) {
-                userTotalScoreEl.textContent = data.score.toLocaleString();
-                console.log('✅ Updated UI with live Elementist score from localStorage');
+              // Only update if it's a new best score
+              const currentBestScore = parseInt(document.getElementById('userTotalScore').textContent.replace(/,/g, '')) || 0;
+              if (data.score > currentBestScore) {
+                console.log(`🎉 NEW BEST SCORE from localStorage! ${currentBestScore} → ${data.score}`);
+                
+                // Update UI immediately
+                const userTotalScoreEl = document.getElementById('userTotalScore');
+                if (userTotalScoreEl) {
+                  userTotalScoreEl.textContent = data.score.toLocaleString();
+                  console.log('✅ Updated UI with new Elementist best score from localStorage');
+                }
+              } else {
+                console.log(`ℹ️ Not a new best score from localStorage (${data.score} ≤ ${currentBestScore})`);
               }
               
               // Load full stats
