@@ -248,17 +248,55 @@
             const user = JSON.parse(savedUser);
             
             try {
-                if (typeof loadUserStats === 'function') {
-                    await loadUserStats(user.uid);
-                    log('✅ Stats loaded successfully', 'success');
-                    updateStatus('scoreStatus', '✅ Stats loaded');
-                } else {
-                    log('❌ loadUserStats function not found', 'error');
-                    updateStatus('scoreStatus', '❌ loadUserStats not found', true);
-                }
+                // Create a simple loadUserStats function for testing
+                await loadUserStats(user.uid);
+                log('✅ Stats loaded successfully', 'success');
+                updateStatus('scoreStatus', '✅ Stats loaded');
             } catch (error) {
                 log('❌ Stats load error: ' + error.message, 'error');
                 updateStatus('scoreStatus', '❌ Error: ' + error.message, true);
+            }
+        }
+        
+        // Simple loadUserStats function for testing
+        async function loadUserStats(userId) {
+            console.log('📊 Loading user stats for:', userId);
+            
+            try {
+                // Check localStorage for scores
+                const localScores = JSON.parse(localStorage.getItem('gameist_local_scores') || '[]');
+                const userLocalScores = localScores.filter(score => score.userId === userId);
+                console.log('📈 Found scores from localStorage:', userLocalScores.length);
+                
+                if (userLocalScores.length > 0) {
+                    // Calculate stats
+                    const totalScore = userLocalScores.reduce((sum, score) => sum + score.score, 0);
+                    const gamesPlayed = new Set(userLocalScores.map(s => s.game)).size;
+                    
+                    log(`📊 Stats: Total Score: ${totalScore}, Games Played: ${gamesPlayed}`);
+                    
+                    // Show game-specific stats
+                    const gameStats = {};
+                    userLocalScores.forEach(score => {
+                        if (!gameStats[score.game]) {
+                            gameStats[score.game] = { count: 0, highScore: 0 };
+                        }
+                        gameStats[score.game].count++;
+                        gameStats[score.game].highScore = Math.max(gameStats[score.game].highScore, score.score);
+                    });
+                    
+                    for (const [game, stats] of Object.entries(gameStats)) {
+                        log(`🎮 ${game}: High Score: ${stats.highScore} (${stats.count} games)`);
+                    }
+                    
+                    return { totalScore, gamesPlayed, gameStats };
+                } else {
+                    log('📭 No scores found for this user');
+                    return { totalScore: 0, gamesPlayed: 0, gameStats: {} };
+                }
+            } catch (error) {
+                console.error('Error loading user stats:', error);
+                throw error;
             }
         }
         

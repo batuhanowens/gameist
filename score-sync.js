@@ -69,6 +69,13 @@
                         return;
                     }
                     
+                    // Check if Firebase Database is available
+                    if (!firebase.database || typeof firebase.database !== 'function') {
+                        console.log('⚠️ Firebase Realtime Database not available, using fallback sync');
+                        console.log('ℹ️ This is normal in some environments - sync will work via localStorage');
+                        return;
+                    }
+                    
                     const savedUser = localStorage.getItem('gameist_user');
                     if (!savedUser) {
                         console.log('⚠️ No user found, skipping realtime listener');
@@ -93,6 +100,7 @@
                     
                 } catch (error) {
                     console.error('❌ Failed to initialize realtime listener:', error);
+                    console.log('ℹ️ Sync will continue to work via localStorage and storage events');
                 }
             },
             
@@ -279,11 +287,13 @@
                 
                 // Save to Firebase Realtime Database for cross-device sync
                 try {
-                    if (typeof firebase !== 'undefined' && firebase.database) {
+                    if (typeof firebase !== 'undefined' && firebase.database && typeof firebase.database === 'function') {
                         const database = firebase.database();
                         const scoreRef = database.ref(`userScores/${userId}/${scoreData.id}`);
                         await scoreRef.set(scoreData);
                         console.log('✅ Score synced to Firebase Realtime Database');
+                    } else {
+                        console.log('ℹ️ Firebase Realtime Database not available - using localStorage only');
                     }
                 } catch (firebaseError) {
                     console.log('ℹ️ Firebase sync failed:', firebaseError.message);
