@@ -8762,11 +8762,17 @@ class GlowlingsGame {
     checkScoreUpdate() {
         const now = Date.now();
         
+        // Debug: Log that function is being called
+        if (Math.random() < 0.01) { // Only log 1% of the time to avoid spam
+            console.log('🔍 checkScoreUpdate called - Current score:', this.score, 'Game state:', this.gameState);
+        }
+        
         // Initialize if not done yet
         if (this._lastScoreCheckTime === undefined) {
             this.initScoreMonitoring();
             this._lastScoreCheckTime = now;
             this._lastReportedScore = this.score || 0;
+            console.log('🎮 Score monitoring initialized - Initial score:', this._lastReportedScore);
             return;
         }
         
@@ -8778,6 +8784,8 @@ class GlowlingsGame {
         const currentScore = this.score || 0;
         const scoreIncrease = currentScore - this._lastReportedScore;
         
+        console.log(`🔍 Score check: ${this._lastReportedScore} → ${currentScore} (+${scoreIncrease}), Game state: ${this.gameState}`);
+        
         // Only report if score increased significantly
         if (scoreIncrease >= this._minScoreIncrease && this.gameState === 'playing') {
             console.log(`📈 Score increase detected: ${this._lastReportedScore} → ${currentScore} (+${scoreIncrease})`);
@@ -8787,6 +8795,9 @@ class GlowlingsGame {
             
             // Update last reported values
             this._lastReportedScore = currentScore;
+            this._lastScoreCheckTime = now;
+        } else {
+            // Update time even if no score increase to keep checking
             this._lastScoreCheckTime = now;
         }
     }
@@ -8871,6 +8882,22 @@ class GlowlingsGame {
         } catch (error) {
             console.error('❌ Error sending score update:', error);
         }
+    }
+
+    // Debug function to manually trigger score update (call from console)
+    debugTestScoreUpdate() {
+        console.log('🧪 Manual score test triggered');
+        console.log('Current score:', this.score);
+        console.log('Game state:', this.gameState);
+        console.log('Last reported score:', this._lastReportedScore);
+        
+        // Force a score increase for testing
+        this.score = (this.score || 0) + 500;
+        console.log('New score:', this.score);
+        
+        // Trigger score check immediately
+        this._lastScoreCheckTime = 0; // Reset timer to force check
+        this.checkScoreUpdate();
     }
 
     // Return to Character & Element Select overlay (like pressing Start, then seeing selection)

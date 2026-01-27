@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elementist Score Debug</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: #3367d6;
+            transform: translateY(-2px);
+        }
+        .status {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+        .info { color: #60a5fa; }
+        .warning { color: #fbbf24; }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Elementist Score Debug</h1>
+        <p>Bu sayfa Elementist oyunundaki skor izleme sistemini test eder.</p>
+        
+        <div>
+            <button onclick="testGameAccess()">🎮 Game Objesi Testi</button>
+            <button onclick="testScoreFunction()">📊 Skor Fonksiyonu Testi</button>
+            <button onclick="manualScoreTest()">🧪 Manuel Skor Testi</button>
+            <button onclick="openElementist()">🚀 Elementist'i Aç</button>
+            <button onclick="clearConsole()">🗑️ Console'u Temizle</button>
+        </div>
+        
+        <div class="status" id="status">Test sonuçları burada görünecek...</div>
+        
+        <iframe id="elementistFrame" style="display: none;"></iframe>
+    </div>
+
+    <script>
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info';
+            statusEl.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            statusEl.scrollTop = statusEl.scrollHeight;
+        }
+        
+        function testGameAccess() {
+            updateStatus('🔍 Testing game object access...', 'info');
+            
+            // Try to access the game object from the same window
+            if (typeof window.game !== 'undefined') {
+                updateStatus('✅ window.game found!', 'success');
+                updateStatus(`📊 Current score: ${window.game.score || 0}`, 'info');
+                updateStatus(`🎮 Game state: ${window.game.gameState || 'unknown'}`, 'info');
+                
+                // Check if score monitoring functions exist
+                if (typeof window.game.checkScoreUpdate === 'function') {
+                    updateStatus('✅ checkScoreUpdate function exists', 'success');
+                } else {
+                    updateStatus('❌ checkScoreUpdate function NOT found', 'error');
+                }
+                
+                if (typeof window.game.sendScoreUpdate === 'function') {
+                    updateStatus('✅ sendScoreUpdate function exists', 'success');
+                } else {
+                    updateStatus('❌ sendScoreUpdate function NOT found', 'error');
+                }
+                
+                if (typeof window.game.debugTestScoreUpdate === 'function') {
+                    updateStatus('✅ debugTestScoreUpdate function exists', 'success');
+                } else {
+                    updateStatus('❌ debugTestScoreUpdate function NOT found', 'error');
+                }
+                
+            } else {
+                updateStatus('❌ window.game NOT found - Elementist not loaded', 'error');
+                updateStatus('💡 Open Elementist first, then try again', 'info');
+            }
+        }
+        
+        function testScoreFunction() {
+            updateStatus('🧪 Testing score monitoring function...', 'info');
+            
+            if (typeof window.game !== 'undefined' && typeof window.game.checkScoreUpdate === 'function') {
+                try {
+                    updateStatus('📞 Calling checkScoreUpdate()...', 'info');
+                    window.game.checkScoreUpdate();
+                    updateStatus('✅ checkScoreUpdate() called successfully', 'success');
+                } catch (error) {
+                    updateStatus(`❌ Error calling checkScoreUpdate(): ${error.message}`, 'error');
+                }
+            } else {
+                updateStatus('❌ Game object or function not available', 'error');
+            }
+        }
+        
+        function manualScoreTest() {
+            updateStatus('🧪 Manual score test starting...', 'info');
+            
+            if (typeof window.game !== 'undefined' && typeof window.game.debugTestScoreUpdate === 'function') {
+                try {
+                    updateStatus('📞 Calling debugTestScoreUpdate()...', 'info');
+                    window.game.debugTestScoreUpdate();
+                    updateStatus('✅ debugTestScoreUpdate() called successfully', 'success');
+                } catch (error) {
+                    updateStatus(`❌ Error calling debugTestScoreUpdate(): ${error.message}`, 'error');
+                }
+            } else {
+                updateStatus('❌ Game object or debug function not available', 'error');
+            }
+        }
+        
+        function openElementist() {
+            updateStatus('🚀 Opening Elementist in iframe...', 'info');
+            
+            const iframe = document.getElementById('elementistFrame');
+            iframe.style.display = 'block';
+            iframe.src = './Elementist/glowlings.html';
+            
+            // Wait for iframe to load and then test
+            iframe.onload = () => {
+                updateStatus('✅ Elementist iframe loaded', 'success');
+                
+                // Try to access game object from iframe
+                setTimeout(() => {
+                    try {
+                        const iframeGame = iframe.contentWindow.game;
+                        if (iframeGame) {
+                            updateStatus('✅ Game object found in iframe!', 'success');
+                            
+                            // Make it globally accessible for testing
+                            window.iframeGame = iframeGame;
+                            updateStatus('📊 iframeGame.score: ' + (iframeGame.score || 0), 'info');
+                            
+                        } else {
+                            updateStatus('❌ Game object NOT found in iframe', 'error');
+                        }
+                    } catch (error) {
+                        updateStatus(`❌ Error accessing iframe: ${error.message}`, 'error');
+                    }
+                }, 2000);
+            };
+        }
+        
+        function clearConsole() {
+            document.getElementById('status').innerHTML = 'Console cleared...\n';
+        }
+        
+        // Listen for console messages from iframe
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'console') {
+                updateStatus(`📨 [Elementist] ${event.data.message}`, 'info');
+            }
+        });
+        
+        // Initialize
+        updateStatus('🚀 Elementist Score Debug Tool ready', 'info');
+        updateStatus('💡 Open Elementist first, then test the score monitoring', 'info');
+    </script>
+</body>
+</html>
