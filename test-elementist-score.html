@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://www.gstatic.com https://apis.google.com https://pagead2.googlesyndication.com https://*.firebaseio.com https://firebase.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://www.gstatic.com https://apis.google.com https://pagead2.googlesyndication.com https://*.firebaseio.com https://firebase.googleapis.com https://pl28580836.effectivegatecpm.com https://cdn.jsdelivr.net; connect-src 'self' https://ipapi.co https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com https://gameist.firebaseio.com https://*.firebaseio.com https://*.firebase.database.com https://*.googleapis.com https://identitytoolkit.googleapis.com https://gameist.firebaseapp.com https://www.gstatic.com https://firebase.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' data: https:; frame-src 'self' https://gameist.firebaseapp.com https://apis.google.com;">
+    <title>Elementist Score Test - Gameist</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: #3367d6;
+            transform: translateY(-2px);
+        }
+        .status {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+        .info { color: #60a5fa; }
+        .warning { color: #fbbf24; }
+        .score-display {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .score-value {
+            font-size: 48px;
+            font-weight: bold;
+            color: #fbbf24;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Elementist Score Sending Test</h1>
+        <p>Bu test Elementist oyunundan ana menüye skor gönderimini simüle eder.</p>
+        
+        <div class="score-display">
+            <h3>🎯 Mevcut Skor</h3>
+            <div class="score-value" id="currentScore">0</div>
+            <p>Skoru artırmak için butona bas</p>
+        </div>
+        
+        <div>
+            <button onclick="increaseScore()">📈 Skoru Artır (+1000)</button>
+            <button onclick="sendScoreToMain()">📤 Ana Menüye Gönder</button>
+            <button onclick="testBroadcastChannel()">📡 BroadcastChannel Test</button>
+            <button onclick="testLocalStorage()">💾 localStorage Test</button>
+            <button onclick="clearData()">🗑️ Verileri Temizle</button>
+        </div>
+        
+        <div id="status" class="status">Test sonuçları burada görünecek...</div>
+        
+        <div id="userInfo" style="display: none; background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+            <h3>👤 Kullanıcı Bilgisi</h3>
+            <div id="userDetails"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="../auth-component.js?v=2"></script>
+    
+    <script>
+        let currentScore = 0;
+        let currentUser = null;
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7ckcqdZWfnUx5r8uKmvu9Ikax1x5Qidk",
+            authDomain: "gameist.firebaseapp.com",
+            projectId: "gameist",
+            storageBucket: "gameist.firebasestorage.app",
+            messagingSenderId: "525659299937",
+            appId: "1:525659299937:web:1c8343a25be2a994bcca20",
+            measurementId: "G-WE9R0GWKM6",
+            databaseURL: "https://gameist-default-rtdb.firebaseio.com/"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info';
+            statusEl.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            statusEl.scrollTop = statusEl.scrollHeight;
+        }
+        
+        function increaseScore() {
+            currentScore += 1000;
+            document.getElementById('currentScore').textContent = currentScore;
+            updateStatus(`📈 Skor artırıldı: ${currentScore}`, 'success');
+        }
+        
+        function sendScoreToMain() {
+            updateStatus('📤 Ana menüye skor gönderimi başlatılıyor...', 'info');
+            
+            // Simulate Elementist score sending
+            const user = getCurrentUser();
+            
+            if (!user) {
+                updateStatus('❌ Kullanıcı girişi gerekli! Önce Google ile giriş yapın.', 'error');
+                return;
+            }
+            
+            updateStatus(`👤 Kullanıcı: ${user.displayName}`, 'info');
+            updateStatus(`🎯 Gönderilecek skor: ${currentScore}`, 'info');
+            
+            // Method 1: Use auth-component saveScore
+            if (window.gameistAuth) {
+                updateStatus('🔥 gameistAuth.saveScore kullanılıyor...', 'info');
+                
+                window.gameistAuth.saveScore('elementist', currentScore)
+                    .then((result) => {
+                        if (result) {
+                            updateStatus('✅ Skor Firestore\'a başarıyla kaydedildi!', 'success');
+                            updateStatus(`📄 Document ID: ${result.id}`, 'info');
+                        } else {
+                            updateStatus('⚠️ Firestore başarısız oldu ama localStorage kullanıldı', 'warning');
+                        }
+                    })
+                    .catch((error) => {
+                        updateStatus(`❌ Kayıt hatası: ${error.message}`, 'error');
+                    });
+            } else {
+                updateStatus('❌ gameistAuth mevcut değil', 'error');
+            }
+            
+            // Method 2: Direct BroadcastChannel (simulating Elementist behavior)
+            try {
+                const channel = new BroadcastChannel('gameist_stats');
+                const message = {
+                    type: 'statsUpdate',
+                    game: 'elementist',
+                    score: currentScore,
+                    userId: user.uid,
+                    displayName: user.displayName,
+                    timestamp: Date.now(),
+                    firestoreSuccess: true
+                };
+                
+                channel.postMessage(message);
+                updateStatus('📡 BroadcastChannel mesajı gönderildi', 'success');
+                updateStatus(`📨 Mesaj: ${JSON.stringify(message)}`, 'info');
+                
+            } catch (error) {
+                updateStatus(`❌ BroadcastChannel hatası: ${error.message}`, 'error');
+            }
+            
+            // Method 3: localStorage fallback
+            try {
+                localStorage.setItem('gameist_stats_update_needed', JSON.stringify({
+                    type: 'statsUpdate',
+                    game: 'elementist',
+                    score: currentScore,
+                    userId: user.uid,
+                    displayName: user.displayName,
+                    timestamp: Date.now(),
+                    firestoreSuccess: true
+                }));
+                updateStatus('💾 localStorage fallback ayarlandı', 'success');
+            } catch (error) {
+                updateStatus(`❌ localStorage hatası: ${error.message}`, 'error');
+            }
+        }
+        
+        function testBroadcastChannel() {
+            updateStatus('📡 BroadcastChannel test başlatılıyor...', 'info');
+            
+            try {
+                const channel = new BroadcastChannel('gameist_stats');
+                
+                // Listen for messages
+                channel.onmessage = (event) => {
+                    updateStatus(`📨 Mesaj alındı: ${JSON.stringify(event.data)}`, 'success');
+                };
+                
+                // Send test message
+                channel.postMessage({
+                    type: 'test',
+                    message: 'Elementist test mesajı',
+                    timestamp: Date.now()
+                });
+                
+                updateStatus('✅ BroadcastChannel test mesajı gönderildi', 'success');
+                
+            } catch (error) {
+                updateStatus(`❌ BroadcastChannel test hatası: ${error.message}`, 'error');
+            }
+        }
+        
+        function testLocalStorage() {
+            updateStatus('💾 localStorage test başlatılıyor...', 'info');
+            
+            try {
+                const testData = {
+                    type: 'statsUpdate',
+                    game: 'elementist',
+                    score: currentScore,
+                    userId: currentUser ? currentUser.uid : 'test-user',
+                    displayName: currentUser ? currentUser.displayName : 'Test User',
+                    timestamp: Date.now(),
+                    firestoreSuccess: true
+                };
+                
+                localStorage.setItem('gameist_stats_update_needed', JSON.stringify(testData));
+                updateStatus('✅ Veri localStorage\'a yazıldı', 'success');
+                
+                // Read it back
+                const stored = localStorage.getItem('gameist_stats_update_needed');
+                const parsed = JSON.parse(stored);
+                updateStatus(`📖 Okunan veri: ${JSON.stringify(parsed)}`, 'info');
+                
+            } catch (error) {
+                updateStatus(`❌ localStorage test hatası: ${error.message}`, 'error');
+            }
+        }
+        
+        function getCurrentUser() {
+            // Try Firebase auth first
+            const firebaseUser = firebase.auth().currentUser;
+            if (firebaseUser) {
+                currentUser = firebaseUser;
+                return firebaseUser;
+            }
+            
+            // Fallback to localStorage
+            const savedUser = localStorage.getItem('gameist_user');
+            if (savedUser) {
+                try {
+                    const user = JSON.parse(savedUser);
+                    currentUser = user;
+                    return user;
+                } catch (error) {
+                    updateStatus(`❌ localStorage kullanıcı okuma hatası: ${error.message}`, 'error');
+                }
+            }
+            
+            return null;
+        }
+        
+        function showUserInfo(user) {
+            const userInfoEl = document.getElementById('userInfo');
+            const userDetailsEl = document.getElementById('userDetails');
+            
+            userInfoEl.style.display = 'block';
+            userDetailsEl.innerHTML = `
+                <p><strong>Ad:</strong> ${user.displayName}</p>
+                <p><strong>Email:</strong> ${user.email}</p>
+                <p><strong>UID:</strong> ${user.uid}</p>
+                ${user.photoURL ? `<img src="${user.photoURL}" style="width: 50px; height: 50px; border-radius: 50%;">` : ''}
+            `;
+        }
+        
+        function clearData() {
+            updateStatus('🗑️ Veriler temizleniyor...', 'info');
+            
+            try {
+                localStorage.removeItem('gameist_stats_update_needed');
+                localStorage.removeItem('gameist_local_scores');
+                currentScore = 0;
+                document.getElementById('currentScore').textContent = '0';
+                updateStatus('✅ Veriler temizlendi', 'success');
+            } catch (error) {
+                updateStatus(`❌ Temizleme hatası: ${error.message}`, 'error');
+            }
+        }
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            updateStatus('🚀 Elementist skor testi başlatılıyor...', 'info');
+            
+            // Check for existing user
+            const user = getCurrentUser();
+            if (user) {
+                updateStatus(`✅ Kullanıcı bulundu: ${user.displayName}`, 'success');
+                showUserInfo(user);
+            } else {
+                updateStatus('⚠️ Kullanıcı girişi yapılmamış', 'warning');
+                updateStatus('💡 Google ile giriş yapmak için ana menüyü kullanın', 'info');
+            }
+            
+            // Check for gameistAuth
+            setTimeout(() => {
+                if (window.gameistAuth) {
+                    updateStatus('✅ gameistAuth component yüklendi', 'success');
+                } else {
+                    updateStatus('❌ gameistAuth component yüklenemedi', 'error');
+                }
+            }, 2000);
+            
+            // Listen for BroadcastChannel messages
+            try {
+                const channel = new BroadcastChannel('gameist_stats');
+                channel.onmessage = (event) => {
+                    updateStatus(`📨 BroadcastChannel mesajı: ${JSON.stringify(event.data)}`, 'success');
+                };
+                updateStatus('📡 BroadcastChannel dinleyicisi aktif', 'success');
+            } catch (error) {
+                updateStatus(`❌ BroadcastChannel dinleyici hatası: ${error.message}`, 'error');
+            }
+        });
+    </script>
+</body>
+</html>
