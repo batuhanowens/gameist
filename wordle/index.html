@@ -748,7 +748,43 @@
       // Auto-focus when game starts
       setTimeout(() => {
         focusWordleInput();
+        setupRowAnimationMonitor();
       }, 500);
+    }
+    
+    function setupRowAnimationMonitor() {
+      // Monitor row changes and add animation
+      let lastCurrentRow = -1;
+      
+      setInterval(() => {
+        if (window.currentRow !== undefined && window.currentRow !== lastCurrentRow) {
+          // Row has changed
+          console.log('Row changed from', lastCurrentRow, 'to', window.currentRow);
+          
+          // Animate the new row
+          if (window.rows && window.rows[window.currentRow]) {
+            const newRow = window.rows[window.currentRow];
+            const tiles = newRow.querySelectorAll('.tile');
+            
+            // Add fade animation to borders
+            tiles.forEach((tile, index) => {
+              setTimeout(() => {
+                tile.style.transition = 'border-color 0.3s ease';
+                tile.style.borderColor = '#667eea';
+                tile.style.boxShadow = '0 0 10px rgba(102, 126, 234, 0.5)';
+                
+                // Fade back to normal after 1 second
+                setTimeout(() => {
+                  tile.style.borderColor = '';
+                  tile.style.boxShadow = '';
+                }, 1000);
+              }, index * 50); // Stagger the animation
+            });
+          }
+          
+          lastCurrentRow = window.currentRow;
+        }
+      }, 100);
     }
     
     function getCurrentRow() {
@@ -788,6 +824,21 @@
       
       if (word.length === 5) {
         console.log('Submitting word:', word);
+        
+        // Check if game is over
+        if (window.gameOver) {
+          console.log('Game is over, resetting...');
+          if (window.resetGame) {
+            window.resetGame();
+          }
+          // Clear input after reset
+          const input = document.getElementById('wordleInput');
+          if (input) {
+            input.value = '';
+          }
+          return;
+        }
+        
         // Trigger the original game's checkRow function
         if (window.checkRow) {
           window.checkRow();
