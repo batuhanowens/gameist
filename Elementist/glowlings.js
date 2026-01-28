@@ -8661,26 +8661,6 @@ class GlowlingsGame {
                     <span style="color:#94a3b8;">Element:</span> 
                     <span style="color:#e5e7eb; font-weight:600;">${this.player ? this.getElementDisplayName(this.player.element) : '-'}</span>
                 </div>
-                <div style="margin-bottom:4px;">
-                    <span style="color:#94a3b8;">Süre:</span> 
-                    <span style="color:#e5e7eb; font-weight:600;">${this.formatRunTime(this.gameTime - this.remainingTime)}</span>
-                </div>
-                <div style="margin-bottom:4px;">
-                    <span style="color:#94a3b8;">Son Koşu:</span> 
-                    <span style="color:#e5e7eb; font-weight:600;" id="lastRunTimeDisplay">${this.formatRunTime(this.gameTime - this.remainingTime)}</span>
-                </div>
-                <div style="margin-bottom:4px;">
-                    <span style="color:#94a3b8;">En İyi:</span> 
-                    <span style="color:#22c55e; font-weight:600;" id="bestRunTimeDisplay">${this.getBestRunTime() || this.formatRunTime(this.gameTime - this.remainingTime)}</span>
-                </div>
-                <div style="margin-bottom:4px;">
-                    <span style="color:#94a3b8;">Wave:</span> 
-                    <span style="color:#e5e7eb; font-weight:600;">${this.waveNumber || 0}</span>
-                </div>
-                <div>
-                    <span style="color:#94a3b8;">Kill:</span> 
-                    <span style="color:#e5e7eb; font-weight:600;">${this.totalKills || 0}</span>
-                </div>
             `;
         }
 
@@ -8717,38 +8697,39 @@ class GlowlingsGame {
             const currentRunTime = this.gameTime - this.remainingTime;
             const formattedTime = this.formatRunTime(currentRunTime);
             
+            console.log('updateRunTimeStats called:', {
+                gameTime: this.gameTime,
+                remainingTime: this.remainingTime,
+                currentRunTime: currentRunTime,
+                formattedTime: formattedTime,
+                waveNumber: this.waveNumber,
+                totalKills: this.totalKills
+            });
+            
             // Update last run time
             const lastRunEl = document.getElementById('lastRunTime');
+            console.log('lastRunEl found:', !!lastRunEl);
             if (lastRunEl) {
                 lastRunEl.textContent = formattedTime;
-            }
-            
-            // Update last run time display in death screen
-            const lastRunDisplayEl = document.getElementById('lastRunTimeDisplay');
-            if (lastRunDisplayEl) {
-                lastRunDisplayEl.textContent = formattedTime;
             }
             
             // Get and update best run time
             const bestRunTime = this.getBestRunTime();
             const bestRunEl = document.getElementById('bestRunTime');
+            console.log('bestRunEl found:', !!bestRunEl, 'bestRunTime:', bestRunTime);
             if (bestRunEl) {
                 bestRunEl.textContent = bestRunTime || formattedTime;
             }
             
-            // Update best run time display in death screen
-            const bestRunDisplayEl = document.getElementById('bestRunTimeDisplay');
-            if (bestRunDisplayEl) {
-                bestRunDisplayEl.textContent = bestRunTime || formattedTime;
-            }
-            
             // Update wave and kills
             const finalWaveEl = document.getElementById('finalWave');
+            console.log('finalWaveEl found:', !!finalWaveEl);
             if (finalWaveEl) {
                 finalWaveEl.textContent = this.waveNumber || 0;
             }
             
             const finalKillsEl = document.getElementById('finalKills');
+            console.log('finalKillsEl found:', !!finalKillsEl);
             if (finalKillsEl) {
                 finalKillsEl.textContent = this.totalKills || 0;
             }
