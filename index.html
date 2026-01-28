@@ -51,8 +51,24 @@
     <!-- Disable CSP for Adsterra -->
     <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src *; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';">
     
-    <!-- Adsterra Pop-under -->
-    <script src="https://pl28580836.effectivegatecpm.com/02/74/05/0274056288dd0d4327742db82768e3ed.js"></script>
+    <!-- Adsterra Scripts via Proxy -->
+    <script>
+      // Load Adsterra scripts dynamically to bypass CSP
+      function loadAdsterraScript(src) {
+        var script = document.createElement('script');
+        script.src = src;
+        script.async = true;
+        document.head.appendChild(script);
+      }
+      
+      // Load pop-under
+      loadAdsterraScript('https://pl28580836.effectivegatecpm.com/02/74/05/0274056288dd0d4327742db82768e3ed.js');
+      
+      // Load 160x300 ad script
+      setTimeout(function() {
+        loadAdsterraScript('https://www.highperformanceformat.com/7e8a3c4b7150f91d87e4bec32282d94e/invoke.js');
+      }, 1000);
+    </script>
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -727,17 +743,16 @@
               backdrop-filter: blur(10px);
             ">
               <div style="margin: 0 8px;">
-                <!-- Adsterra 160x300 -->
+                <!-- Adsterra 160x300 - Delayed Loading -->
+                <div id="adsterra-160x300" style="width: 160px; height: 300px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #666; font-size: 12px; text-align: center;">
+                  Loading Ad...
+                </div>
                 <script>
-                  atOptions = {
-                    'key' : '7e8a3c4b7150f91d87e4bec32282d94e',
-                    'format' : 'iframe',
-                    'height' : 300,
-                    'width' : 160,
-                    'params' : {}
-                  };
+                  setTimeout(function() {
+                    var adDiv = document.getElementById('adsterra-160x300');
+                    adDiv.innerHTML = '<script>atOptions = {\'key\': \'7e8a3c4b7150f91d87e4bec32282d94e\',\'format\': \'iframe\',\'height\': 300,\'width\': 160,\'params\': {}};<\/script><script src="https://www.highperformanceformat.com/7e8a3c4b7150f91d87e4bec32282d94e/invoke.js"><\/script>';
+                  }, 2000);
                 </script>
-                <script src="https://www.highperformanceformat.com/7e8a3c4b7150f91d87e4bec32282d94e/invoke.js"></script>
               </div>
             </div>
             <div style="display:inline-block; padding:6px 10px; background:rgba(0,0,0,0.22); border:1px solid rgba(255,255,255,0.10); border-radius:12px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); font-size:12px; font-weight:500; opacity:0.92;">
