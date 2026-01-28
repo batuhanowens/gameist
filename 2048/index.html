@@ -90,8 +90,6 @@
       gtag('js', new Date());
       gtag('config', 'G-57L2NFVJYL');
     </script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9478711342689131"
-         crossorigin="anonymous"></script>
     <base href="./">
     <link id="app-styles" rel="stylesheet" href="./styles.css">
     <!-- Removed web manifest for packaged Store build to avoid icon scanning conflicts -->
@@ -145,19 +143,6 @@
             <canvas id="menu-bg" class="menu-bg"></canvas>
             <div class="overlay-card">
                 <h2 class="menu-title">2048 PulseMerge</h2>
-                <!-- Banner Ad -->
-                <div style="display: flex; justify-content: center; margin: 10px 0;">
-                    <script>
-                        atOptions = {
-                            'key' : 'ce673f1e09efadddcb7e75ee9d586e4a',
-                            'format' : 'iframe',
-                            'height' : 50,
-                            'width' : 320,
-                            'params' : {}
-                        };
-                    </script>
-                    <script src="https://www.highperformanceformat.com/ce673f1e09efadddcb7e75ee9d586e4a/invoke.js"></script>
-                </div>
                 <div class="overlay-actions">
                     <button id="menu-play">Play</button>
                     <button id="menu-settings">Settings</button>
@@ -582,7 +567,7 @@
       })();
     </script>
 
-    <!-- Smart Interstitial Ad System for 2048 -->
+    <!-- GA4 2048 Event Tracking -->
     <script>
         // Game session tracking
         let gameSessionCount = parseInt(localStorage.getItem('game2048_game_count') || '0');
@@ -721,7 +706,6 @@
     
     <!-- GA4 2048 Event Tracking -->
     <script>
-      // 2048 specific event tracking
       function track2048Event(eventName, parameters = {}) {
         console.log(`🎮 2048 Event: ${eventName}`, parameters);
         
