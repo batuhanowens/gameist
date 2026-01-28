@@ -6018,6 +6018,10 @@
                 
                 // Hide desktop ads on mobile
                 desktopAds.forEach(ad => ad.style.display = 'none');
+                
+                // Hide auth container on mobile
+                const authContainer = document.getElementById('gameist-auth-container');
+                if (authContainer) authContainer.style.display = 'none';
             } else {
                 // Hide side ads on desktop
                 if (leftAd) leftAd.style.display = 'none';
@@ -6025,6 +6029,10 @@
                 
                 // Show desktop ads on desktop
                 desktopAds.forEach(ad => ad.style.display = 'flex');
+                
+                // Show auth container on desktop
+                const authContainer = document.getElementById('gameist-auth-container');
+                if (authContainer) authContainer.style.display = 'block';
             }
         }
         
@@ -6032,5 +6040,14 @@
         window.addEventListener('load', manageAds);
         window.addEventListener('resize', manageAds);
     </script>
+    
+    <!-- Hide auth container on mobile with CSS -->
+    <style>
+        @media (max-width: 768px) {
+            #gameist-auth-container {
+                display: none !important;
+            }
+        }
+    </style>
   </body>
 </html>
