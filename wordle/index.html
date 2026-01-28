@@ -134,7 +134,17 @@
       <h1 class="oyunicih1"><span data-lang="gameTitle">Wordlist Kelime Tahmin Oyunu</span></h1>
       <p id="message"></p>
 
-      <div id="game-board" onclick="openKeyboard()">
+      <!-- Hidden input for mobile keyboard -->
+      <input type="text" id="wordleInput" style="
+        position: fixed;
+        top: -9999px;
+        left: -9999px;
+        opacity: 0;
+        pointer-events: none;
+        z-index: -1;
+      " autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+      <div id="game-board" onclick="focusWordleInput()">
         <div class="row">
           <div class="tile"></div>
           <div class="tile"></div>
@@ -179,54 +189,25 @@
         </div>
       </div>
 
-      <div id="keyboard">
-        <div class="keyboard-row">
-          <button>Q</button>
-          <button>W</button>
-          <button>E</button>
-          <button>R</button>
-          <button>T</button>
-          <button>Y</button>
-          <button>U</button>
-          <button class="tr-only">Ü</button>
-          <button>I</button>
-          <button>O</button>
-          <button>P</button>
-        </div>
-        <div class="keyboard-row">
-          <button>A</button>
-          <button>S</button>
-          <button>D</button>
-          <button>F</button>
-          <button>G</button>
-          <button>H</button>
-          <button>J</button>
-          <button>K</button>
-          <button>L</button>
-        </div>
-        <div class="keyboard-row">
-          <button>Ç</button>
-          <button>İ</button>
-          <button>Ğ</button>
-          <button>Ö</button>
-          <button>Ş</button>
-          <button>Z</button>
-          <button>X</button>
-          <button>C</button>
-          <button>V</button>
-          <button>B</button>
-        </div>
-        <div class="keyboard-row">
-          <button>N</button>
-          <button>M</button>
-        </div>
-<!-- Klavyedeki son satırı bul ve şununla değiştir -->
-<div class="keyboard-row keyboard-row-wide">
-  <button id="" class="wide-button">Enter</button>
-  <button class="wide-button">⌫</button>
-  <button id="menu-button" class="wide-button" type="button" onclick="openGameMenu()"><i class="fas fa-bars"></i> <span data-lang="menu">Menü</span></button>
-  <button id="reset-button" class="wide-button" type="button" onclick="resetWordleGame()"><span data-lang="refresh">Yenile</span></button>
-</div>
+      <!-- Mobile keyboard removed - using native keyboard -->
+      <div id="keyboard" style="display: none;">
+        <!-- Keyboard content hidden -->
+      </div>
+      
+      <!-- Mobile keyboard controls -->
+      <div style="text-align: center; margin: 10px 0; display: none;" id="mobileControls">
+        <button onclick="focusWordleInput()" style="
+          background: linear-gradient(45deg, #667eea, #764ba2);
+          color: white;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 25px;
+          font-size: 16px;
+          font-weight: bold;
+          cursor: pointer;
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        ">📱 Klavyeyi Aç</button>
+      </div>
    
 <!-- Modal taşındı: Artık body sonunda -->
 
@@ -642,9 +623,124 @@
       if (mainMenu) mainMenu.classList.remove('hidden');
     }
     
+    // Native keyboard functions
+    function focusWordleInput() {
+      const input = document.getElementById('wordleInput');
+      if (input) {
+        input.focus();
+        // Prevent zoom on iOS
+        input.style.fontSize = '16px';
+      }
+    }
+    
+    function setupNativeKeyboard() {
+      const input = document.getElementById('wordleInput');
+      if (!input) return;
+      
+      // Handle input events
+      input.addEventListener('input', function(e) {
+        const value = e.target.value.toUpperCase();
+        const currentRow = getCurrentRow();
+        const tiles = currentRow.querySelectorAll('.tile');
+        
+        // Clear current row tiles
+        tiles.forEach(tile => tile.textContent = '');
+        
+        // Fill tiles with input
+        for (let i = 0; i < Math.min(value.length, 5); i++) {
+          if (tiles[i]) {
+            tiles[i].textContent = value[i];
+          }
+        }
+        
+        // Remove auto-submit - let user press Enter manually
+      });
+      
+      // Handle backspace
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          submitWord();
+          // Don't clear input here - let submitWord handle it
+        } else if (e.key === 'Backspace') {
+          // Let the browser handle backspace for input field
+          setTimeout(() => {
+            const value = e.target.value.toUpperCase();
+            const currentRow = getCurrentRow();
+            const tiles = currentRow.querySelectorAll('.tile');
+            
+            // Clear and refill tiles
+            tiles.forEach(tile => tile.textContent = '');
+            for (let i = 0; i < Math.min(value.length, 5); i++) {
+              if (tiles[i]) {
+                tiles[i].textContent = value[i];
+              }
+            }
+          }, 10);
+        }
+      });
+      
+      // Prevent scroll on focus
+      input.addEventListener('focus', function() {
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+      });
+      
+      // Auto-focus when game starts
+      setTimeout(() => {
+        focusWordleInput();
+      }, 500);
+    }
+    
+    function getCurrentRow() {
+      const rows = document.querySelectorAll('#game-board .row');
+      for (let row of rows) {
+        const tiles = row.querySelectorAll('.tile');
+        const isEmpty = Array.from(tiles).every(tile => !tile.textContent);
+        if (!isEmpty) {
+          // Check if this row is complete
+          const isComplete = Array.from(tiles).every(tile => tile.textContent);
+          if (!isComplete) {
+            return row; // Current incomplete row
+          }
+        }
+      }
+      // Find first empty row
+      for (let row of rows) {
+        const tiles = row.querySelectorAll('.tile');
+        const isEmpty = Array.from(tiles).every(tile => !tile.textContent);
+        if (isEmpty) {
+          return row;
+        }
+      }
+      return rows[0]; // Fallback to first row
+    }
+    
+    function submitWord() {
+      const currentRow = getCurrentRow();
+      const tiles = currentRow.querySelectorAll('.tile');
+      const word = Array.from(tiles).map(tile => tile.textContent).join('');
+      
+      if (word.length === 5) {
+        console.log('Submitting word:', word);
+        // Trigger the original game's submit logic
+        if (window.submitWord) {
+          window.submitWord(word);
+          // Clear input only after successful submission
+          const input = document.getElementById('wordleInput');
+          if (input) {
+            input.value = '';
+          }
+        }
+      }
+    }
+    
     // Fallback: Ensure buttons work even if script fails
     document.addEventListener('DOMContentLoaded', function() {
       console.log('DOM loaded, setting up fallback button handlers');
+      
+      // Setup native keyboard
+      setupNativeKeyboard();
       
       // Start Game button
       const startBtn = document.getElementById('startGame');
