@@ -2958,8 +2958,8 @@
             <h1 id="startTitle" data-lang="gameTitle">🌟 ELEMENTIST 🌟</h1>
             <p id="startSubtitle" data-lang="subtitle">Collect energy in a neon universe, grow, and defeat your rivals!</p>
             
-            <!-- Banner Ad -->
-            <div style="display: flex; justify-content: center; margin: 15px 0;">
+            <!-- Banner Ad - Desktop Only -->
+            <div class="desktop-ad" style="display: flex; justify-content: center; margin: 15px 0;">
                 <script>
                     atOptions = {
                         'key' : 'ce673f1e09efadddcb7e75ee9d586e4a',
@@ -2985,8 +2985,8 @@
                 <button id="backToHubBtn" class="primary-btn" data-lang="backToMenuBtn">BACK TO MENU</button>
             </div>
             
-            <!-- Adsterra 320x50 - Strategic Placement in Game Menu -->
-            <div style="display: flex; justify-content: center; margin: 15px 0;">
+            <!-- Adsterra 320x50 - Strategic Placement in Game Menu (Desktop Only) -->
+            <div class="desktop-ad" style="display: flex; justify-content: center; margin: 15px 0;">
                 <div style="width: 320px; height: 50px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center;">
                     <script>
                         atOptions = {
@@ -5974,6 +5974,63 @@
         }
       `;
       document.head.appendChild(style);
+    </script>
+    
+    <!-- Side Ads for Mobile -->
+    <div id="leftAd" style="position: fixed; left: 0; top: 50%; transform: translateY(-50%); z-index: 9999; width: 468px; height: 60px; display: none;">
+        <script>
+            atOptions = {
+                'key' : 'd48fff2b59ec4dfb05673304089e4939',
+                'format' : 'iframe',
+                'height' : 60,
+                'width' : 468,
+                'params' : {}
+            };
+        </script>
+        <script src="https://www.highperformanceformat.com/d48fff2b59ec4dfb05673304089e4939/invoke.js"></script>
+    </div>
+    
+    <div id="rightAd" style="position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 9999; width: 468px; height: 60px; display: none;">
+        <script>
+            atOptions = {
+                'key' : 'd48fff2b59ec4dfb05673304089e4939',
+                'format' : 'iframe',
+                'height' : 60,
+                'width' : 468,
+                'params' : {}
+            };
+        </script>
+        <script src="https://www.highperformanceformat.com/d48fff2b59ec4dfb05673304089e4939/invoke.js"></script>
+    </div>
+    
+    <!-- Mobile Ad Management -->
+    <script>
+        function manageAds() {
+            const isMobile = window.innerWidth <= 768;
+            const leftAd = document.getElementById('leftAd');
+            const rightAd = document.getElementById('rightAd');
+            const desktopAds = document.querySelectorAll('.desktop-ad');
+            
+            if (isMobile) {
+                // Show side ads on mobile
+                if (leftAd) leftAd.style.display = 'block';
+                if (rightAd) rightAd.style.display = 'block';
+                
+                // Hide desktop ads on mobile
+                desktopAds.forEach(ad => ad.style.display = 'none');
+            } else {
+                // Hide side ads on desktop
+                if (leftAd) leftAd.style.display = 'none';
+                if (rightAd) rightAd.style.display = 'none';
+                
+                // Show desktop ads on desktop
+                desktopAds.forEach(ad => ad.style.display = 'flex');
+            }
+        }
+        
+        // Run on load and resize
+        window.addEventListener('load', manageAds);
+        window.addEventListener('resize', manageAds);
     </script>
   </body>
 </html>
