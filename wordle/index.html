@@ -40,10 +40,6 @@
         }
       }
     </script>
-    
-    <!-- Disable CSP for Adsterra -->
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src *; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';">
-    
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-57L2NFVJYL"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -238,16 +234,6 @@
       
 
     </div>
-    
-    <script>
-      // Wait for DOM to be ready before loading scripts
-      document.addEventListener('DOMContentLoaded', function() {
-        // Load main script after DOM is ready
-        const script = document.createElement('script');
-        script.src = 'script.js';
-        document.head.appendChild(script);
-      });
-    </script>
     
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -580,4 +566,5 @@
   </div>
   </body>
 
+  <script src="script.js"></script>
 </html>
