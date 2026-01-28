@@ -618,19 +618,48 @@
       // Use the original game's reset function
       if (window.resetGame) {
         window.resetGame();
+        
+        // Additional cleanup for our custom styles
+        setTimeout(() => {
+          const tiles = document.querySelectorAll('.tile');
+          tiles.forEach(tile => {
+            tile.style.borderColor = '';
+            tile.style.boxShadow = '';
+            tile.style.transition = '';
+          });
+        }, 100);
       } else {
-        // Fallback: Clear the game board manually
+        // Fallback: Clear the game board manually with animation
         const tiles = document.querySelectorAll('.tile');
-        tiles.forEach(tile => {
-          tile.textContent = '';
-          tile.className = 'tile';
-          tile.style.borderColor = '';
-          tile.style.boxShadow = '';
+        tiles.forEach((tile, index) => {
+          setTimeout(() => {
+            tile.style.transition = 'all 0.3s ease';
+            tile.style.transform = 'scale(0.8)';
+            tile.style.opacity = '0';
+            
+            setTimeout(() => {
+              tile.textContent = '';
+              tile.className = 'tile';
+              tile.style.borderColor = '';
+              tile.style.boxShadow = '';
+              tile.style.transform = '';
+              tile.style.opacity = '1';
+              tile.style.transition = '';
+            }, 300);
+          }, index * 30); // Stagger the reset animation
         });
         
         // Clear message
         const message = document.getElementById('message');
-        if (message) message.textContent = '';
+        if (message) {
+          message.style.transition = 'opacity 0.3s ease';
+          message.style.opacity = '0';
+          setTimeout(() => {
+            message.textContent = '';
+            message.style.opacity = '1';
+            message.style.transition = '';
+          }, 300);
+        }
         
         // Reset game state (basic reset)
         window.currentWord = '';
@@ -643,7 +672,7 @@
       const input = document.getElementById('wordleInput');
       if (input) input.value = '';
       
-      console.log('Wordle game reset');
+      console.log('Wordle game reset with animation');
     }
     
     // Modal control functions
@@ -718,6 +747,14 @@
       input.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
           e.preventDefault();
+          
+          // Check if game is over
+          if (window.gameOver) {
+            console.log('Game over, resetting game');
+            resetWordleGame();
+            return;
+          }
+          
           submitWord();
           // Don't clear input here - let submitWord handle it
         } else if (e.key === 'Backspace') {
@@ -833,18 +870,41 @@
         const nextRow = window.rows[window.currentRow];
         if (nextRow) {
           const tiles = nextRow.querySelectorAll('.tile');
+          const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#6c5ce7', '#a29bfe'];
+          
           tiles.forEach((tile, index) => {
             setTimeout(() => {
-              tile.style.transition = 'border-color 0.3s ease';
-              tile.style.borderColor = '#667eea';
-              tile.style.boxShadow = '0 0 10px rgba(102, 126, 234, 0.5)';
+              // Cycle through colors
+              const colorIndex = index % colors.length;
+              const color = colors[colorIndex];
               
-              // Fade out after 1 second
-              setTimeout(() => {
-                tile.style.transition = 'border-color 0.3s ease, box-shadow 0.3s ease';
-                tile.style.borderColor = '';
-                tile.style.boxShadow = '';
-              }, 1000);
+              tile.style.transition = 'border-color 0.3s ease, box-shadow 0.3s ease';
+              tile.style.borderColor = color;
+              tile.style.boxShadow = `0 0 15px ${color}40, inset 0 0 10px ${color}20`;
+              
+              // Create pulsing effect
+              let pulseCount = 0;
+              const pulseInterval = setInterval(() => {
+                pulseCount++;
+                if (pulseCount % 2 === 0) {
+                  tile.style.borderColor = color;
+                  tile.style.boxShadow = `0 0 15px ${color}40, inset 0 0 10px ${color}20`;
+                } else {
+                  tile.style.borderColor = `${color}80`;
+                  tile.style.boxShadow = `0 0 8px ${color}20, inset 0 0 5px ${color}10`;
+                }
+                
+                // Stop after 1 second
+                if (pulseCount >= 4) {
+                  clearInterval(pulseInterval);
+                  // Fade out
+                  setTimeout(() => {
+                    tile.style.transition = 'border-color 0.3s ease, box-shadow 0.3s ease';
+                    tile.style.borderColor = '';
+                    tile.style.boxShadow = '';
+                  }, 100);
+                }
+              }, 250); // Pulse every 250ms
             }, index * 50); // Stagger the animation
           });
         }
