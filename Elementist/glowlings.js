@@ -8748,9 +8748,9 @@ class GlowlingsGame {
     addPlayerHitFlash(damage) {
         if (!this.player) return;
         
-        // Vignette-style damage flash effect - more professional and eye-friendly
-        this.screenFlashUntil = Date.now() + 120; // Slightly longer for better effect
-        this.screenFlashIntensity = Math.min(0.4, 0.1 + (damage / 180)); // Adjusted intensity
+        // Reduced screen flash effect - more subtle
+        this.screenFlashUntil = Date.now() + 100; // Reduced from 150ms
+        this.screenFlashIntensity = Math.min(0.25, 0.05 + (damage / 200)); // Reduced intensity
         
         // Damage number particles
         for (let i = 0; i < 3; i++) {
@@ -9220,26 +9220,10 @@ class GlowlingsGame {
         // Draw background by selected map (fallback to stars)
         this.drawBackgroundByMap();
         
-        // Apply vignette-style screen flash if active
+        // Apply screen flash if active
         if (this.screenFlashUntil && Date.now() < this.screenFlashUntil) {
             const intensity = this.screenFlashIntensity || 0.3;
-            const centerX = this.canvas.width / 2;
-            const centerY = this.canvas.height / 2;
-            const maxRadius = Math.sqrt(centerX * centerX + centerY * centerY);
-            
-            // Create vignette gradient
-            const gradient = this.ctx.createRadialGradient(
-                centerX, centerY, 0,
-                centerX, centerY, maxRadius
-            );
-            
-            // Vignette effect: transparent center, red edges
-            gradient.addColorStop(0, `rgba(255, 100, 100, 0)`);
-            gradient.addColorStop(0.4, `rgba(255, 100, 100, ${intensity * 0.3})`);
-            gradient.addColorStop(0.7, `rgba(255, 80, 80, ${intensity * 0.6})`);
-            gradient.addColorStop(1, `rgba(255, 60, 60, ${intensity})`);
-            
-            this.ctx.fillStyle = gradient;
+            this.ctx.fillStyle = `rgba(255, 100, 100, ${intensity})`;
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
         
