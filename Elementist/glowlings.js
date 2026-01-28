@@ -595,6 +595,8 @@ class GlowlingsGame {
 
         // Lives system (Hearts)
         this.lives = 1; // başlangıç kalbi
+        // Statistics tracking
+        this.totalKills = 0; // Toplam öldürülen düşman sayısı
         // Pause/Sound
         this.paused = false;
         this.muted = false;
@@ -7018,11 +7020,12 @@ class GlowlingsGame {
         this.usedFreeSkill = false;
         this.purchaseUsedForWave = false;
         this.shopLocked = false;
-        this.boss5Spawned = false;
-        this.boss10Spawned = false;
-        this.boss15Spawned = false;
-        this.boss20Spawned = false;
+        this.boss5CutscenePlayed = false;
+        this.boss10CutscenePlayed = false;
+        this.boss15CutscenePlayed = false;
+        this.boss20CutscenePlayed = false;
         this.lives = 1;
+        this.totalKills = 0; // Reset kills on restart
         this.abilityReady = true;
         this.abilityCooldown = 0;
         this.abilityDuration = 0;
@@ -8242,6 +8245,8 @@ class GlowlingsGame {
                             const idx = this.aiBots.indexOf(e.obj);
                             if (idx >= 0) this.aiBots.splice(idx, 1);
                             this.score += 200;
+                            // Track total kills
+                            this.totalKills = (this.totalKills || 0) + 1;
                             // SFX: kill
                             this.playKill();
                             // Combo: projectile kill by player
@@ -8645,24 +8650,23 @@ class GlowlingsGame {
 
         // Show final stats with enhanced information
         const finalStats = document.getElementById('finalStats');
-        if (finalStats) {
-            // Update run time stats before showing
-            this.updateRunTimeStats();
-            
-            finalStats.innerHTML = `
-                <div style="margin-bottom:8px;">
-                    <span style="color:#22c55e; font-weight:700; font-size:16px;">🏆 Final Skor: ${this.score}</span>
-                </div>
-                <div style="margin-bottom:4px;">
-                    <span style="color:#94a3b8;">Boyut:</span> 
-                    <span style="color:#e5e7eb; font-weight:600;">${this.player ? this.player.size.toFixed(1) : '0'}</span>
-                </div>
-                <div style="margin-bottom:4px;">
-                    <span style="color:#94a3b8;">Element:</span> 
-                    <span style="color:#e5e7eb; font-weight:600;">${this.player ? this.getElementDisplayName(this.player.element) : '-'}</span>
-                </div>
-            `;
-        }
+        if (finalStats) finalStats.innerHTML = `
+            <div style="margin-bottom:8px;">
+                <span style="color:#22c55e; font-weight:700; font-size:16px;">🏆 Final Skor: ${this.score}</span>
+            </div>
+            <div style="margin-bottom:4px;">
+                <span style="color:#94a3b8;">Boyut:</span> 
+                <span style="color:#e5e7eb; font-weight:600;">${this.player ? this.player.size.toFixed(1) : '0'}</span>
+            </div>
+            <div style="margin-bottom:4px;">
+                <span style="color:#94a3b8;">Element:</span> 
+                <span style="color:#e5e7eb; font-weight:600;">${this.player ? this.getElementDisplayName(this.player.element) : '-'}</span>
+            </div>
+            <div>
+                <span style="color:#94a3b8;">Süre:</span> 
+                <span style="color:#e5e7eb; font-weight:600;">${this.formatRunTime(this.gameTime - this.remainingTime)}</span>
+            </div>
+        `;
 
         // Update enhanced stats
         this.updateRunTimeStats();
@@ -8697,18 +8701,8 @@ class GlowlingsGame {
             const currentRunTime = this.gameTime - this.remainingTime;
             const formattedTime = this.formatRunTime(currentRunTime);
             
-            console.log('updateRunTimeStats called:', {
-                gameTime: this.gameTime,
-                remainingTime: this.remainingTime,
-                currentRunTime: currentRunTime,
-                formattedTime: formattedTime,
-                waveNumber: this.waveNumber,
-                totalKills: this.totalKills
-            });
-            
             // Update last run time
             const lastRunEl = document.getElementById('lastRunTime');
-            console.log('lastRunEl found:', !!lastRunEl);
             if (lastRunEl) {
                 lastRunEl.textContent = formattedTime;
             }
@@ -8716,20 +8710,17 @@ class GlowlingsGame {
             // Get and update best run time
             const bestRunTime = this.getBestRunTime();
             const bestRunEl = document.getElementById('bestRunTime');
-            console.log('bestRunEl found:', !!bestRunEl, 'bestRunTime:', bestRunTime);
             if (bestRunEl) {
                 bestRunEl.textContent = bestRunTime || formattedTime;
             }
             
             // Update wave and kills
             const finalWaveEl = document.getElementById('finalWave');
-            console.log('finalWaveEl found:', !!finalWaveEl);
             if (finalWaveEl) {
                 finalWaveEl.textContent = this.waveNumber || 0;
             }
             
             const finalKillsEl = document.getElementById('finalKills');
-            console.log('finalKillsEl found:', !!finalKillsEl);
             if (finalKillsEl) {
                 finalKillsEl.textContent = this.totalKills || 0;
             }
@@ -9236,22 +9227,16 @@ class GlowlingsGame {
         
         // Apply screen flash if active - vignette style effect
         if (this.screenFlashUntil && Date.now() < this.screenFlashUntil) {
-            const intensity = this.screenFlashIntensity || 0.25;
-            const fadeProgress = 1 - ((Date.now() - (this.screenFlashUntil - 100)) / 100); // Fade over 100ms
-            const currentIntensity = intensity * Math.max(0, fadeProgress);
-            
-            // Create vignette-style flash effect
+            const intensity = this.screenFlashIntensity || 0.3;
             const centerX = this.canvas.width / 2;
             const centerY = this.canvas.height / 2;
-            const radius = Math.max(this.canvas.width, this.canvas.height) * 0.7;
+            const radius = Math.min(this.canvas.width, this.canvas.height) * 0.7;
             
-            const gradient = this.ctx.createRadialGradient(
-                centerX, centerY, 0,
-                centerX, centerY, radius
-            );
+            // Create radial gradient for vignette effect
+            const gradient = this.ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
             gradient.addColorStop(0, `rgba(255, 100, 100, 0)`);
-            gradient.addColorStop(0.7, `rgba(255, 100, 100, ${currentIntensity * 0.3})`);
-            gradient.addColorStop(1, `rgba(255, 100, 100, ${currentIntensity})`);
+            gradient.addColorStop(0.6, `rgba(255, 100, 100, ${intensity * 0.3})`);
+            gradient.addColorStop(1, `rgba(255, 100, 100, ${intensity})`);
             
             this.ctx.fillStyle = gradient;
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
