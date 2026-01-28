@@ -6115,8 +6115,8 @@
             localStorage.setItem('elementist_game_count', gameSessionCount.toString());
             localStorage.setItem('elementist_last_game_time', now.toString());
             
-            // Show ad every 3 games, but wait at least 45 seconds
-            if (gameSessionCount % 3 === 0 && timeSinceLastGame >= minTimeBetweenGames) {
+            // Show ad every 2 games, but wait at least 45 seconds
+            if (gameSessionCount % 2 === 0 && timeSinceLastGame >= minTimeBetweenGames) {
                 canShowAd = true;
                 console.log('🎯 Ad eligible: Game', gameSessionCount, 'Time since last:', timeSinceLastGame + 'ms');
             } else {
