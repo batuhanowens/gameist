@@ -203,6 +203,44 @@
             font-size: 16px !important;
           }
         }
+        
+        /* Dark mode styles */
+        .dark-mode {
+          background-color: #121213 !important;
+          color: #ffffff !important;
+        }
+        
+        .dark-mode #wordleGameScreen {
+          background-color: #121213 !important;
+        }
+        
+        .dark-mode .tile {
+          border-color: #3a3a3c !important;
+          color: #ffffff !important;
+        }
+        
+        .dark-mode .tile.filled {
+          background-color: #818384 !important;
+          border-color: #818384 !important;
+        }
+        
+        .dark-mode .menu-btn {
+          background-color: #818384 !important;
+          color: #ffffff !important;
+          border-color: #3a3a3c !important;
+        }
+        
+        .dark-mode .menu-btn:hover {
+          background-color: #3a3a3c !important;
+        }
+        
+        .dark-mode h1, .dark-mode h2, .dark-mode h3 {
+          color: #ffffff !important;
+        }
+        
+        .dark-mode #message {
+          color: #ffffff !important;
+        }
       </style>
 
       <div id="game-board" onclick="focusWordleInput()">
@@ -955,6 +993,39 @@
       
       // Setup native keyboard
       setupNativeKeyboard();
+      
+      // Setup dark mode toggle
+      const themeToggle = document.getElementById('themeToggle');
+      if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+          console.log('Theme toggle clicked');
+          document.body.classList.toggle('dark-mode');
+          const icon = themeToggle.querySelector('i');
+          if (icon) {
+            if (document.body.classList.contains('dark-mode')) {
+              icon.classList.remove('fa-moon');
+              icon.classList.add('fa-sun');
+            } else {
+              icon.classList.remove('fa-sun');
+              icon.classList.add('fa-moon');
+            }
+          }
+          
+          // Save preference
+          localStorage.setItem('wordle-theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+        
+        // Load saved theme
+        const savedTheme = localStorage.getItem('wordle-theme');
+        if (savedTheme === 'dark') {
+          document.body.classList.add('dark-mode');
+          const icon = themeToggle.querySelector('i');
+          if (icon) {
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+          }
+        }
+      }
       
       // Start Game button
       const startBtn = document.getElementById('startGame');
