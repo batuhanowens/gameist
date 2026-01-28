@@ -170,6 +170,32 @@
           left: 50% !important;
           transform: translate(-50%, -50%) !important;
         }
+        
+        /* Mobile specific fixes */
+        @media (max-width: 768px) {
+          body {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+          }
+          
+          #wordleGameScreen {
+            height: 100vh;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+          }
+          
+          /* Prevent viewport zoom on focus */
+          #wordleInput {
+            font-size: 16px !important;
+            transform: scale(0.01) !important;
+            opacity: 0 !important;
+          }
+        }
       </style>
 
       <div id="game-board" onclick="focusWordleInput()">
@@ -688,9 +714,13 @@
               
               // Add row change animation after checkRow completes
               setTimeout(() => {
+                console.log('Animation check - currentRow:', window.currentRow);
+                
                 if (window.currentRow !== undefined && window.rows && window.rows[window.currentRow]) {
                   const newRow = window.rows[window.currentRow];
                   const tiles = newRow.querySelectorAll('.tile');
+                  
+                  console.log('Animating row', window.currentRow, 'with', tiles.length, 'tiles');
                   
                   // Add fade animation to borders
                   tiles.forEach((tile, index) => {
@@ -698,16 +728,22 @@
                       tile.style.transition = 'border-color 0.3s ease, box-shadow 0.3s ease';
                       tile.style.borderColor = '#667eea';
                       tile.style.boxShadow = '0 0 10px rgba(102, 126, 234, 0.5)';
+                      tile.style.borderWidth = '2px';
+                      tile.style.borderStyle = 'solid';
+                      
+                      console.log('Animated tile', index);
                       
                       // Fade back to normal after 1 second
                       setTimeout(() => {
                         tile.style.borderColor = '';
                         tile.style.boxShadow = '';
+                        tile.style.borderWidth = '';
+                        tile.style.borderStyle = '';
                       }, 1000);
                     }, index * 50); // Stagger the animation
                   });
                 }
-              }, 100);
+              }, 200); // Increased delay for mobile
               
               return result;
             };
@@ -829,14 +865,33 @@
         // Check if game is over
         if (window.gameOver) {
           console.log('Game is over, resetting...');
-          if (window.resetGame) {
-            window.resetGame();
+          // Force reset all tiles
+          document.querySelectorAll('.tile').forEach(tile => {
+            tile.textContent = '';
+            tile.className = 'tile';
+            tile.style.backgroundColor = '';
+            tile.style.borderColor = '';
+            tile.style.border = '';
+          });
+          
+          // Reset game variables
+          if (window.currentRow !== undefined) window.currentRow = 0;
+          if (window.currentTile !== undefined) window.currentTile = 0;
+          window.gameOver = false;
+          
+          // Clear message
+          const messageEl = document.getElementById('message');
+          if (messageEl) {
+            messageEl.textContent = '';
+            messageEl.className = '';
           }
-          // Clear input after reset
-          const input = document.getElementById('wordleInput');
-          if (input) {
-            input.value = '';
+          
+          // Get new word
+          if (window.getRandomWord) {
+            window.targetWord = window.getRandomWord();
           }
+          
+          console.log('Game reset complete');
           return;
         }
         
