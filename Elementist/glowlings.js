@@ -8723,11 +8723,23 @@ class GlowlingsGame {
                 lastRunEl.textContent = formattedTime;
             }
             
+            // Update last run time display in death screen
+            const lastRunDisplayEl = document.getElementById('lastRunTimeDisplay');
+            if (lastRunDisplayEl) {
+                lastRunDisplayEl.textContent = formattedTime;
+            }
+            
             // Get and update best run time
             const bestRunTime = this.getBestRunTime();
             const bestRunEl = document.getElementById('bestRunTime');
             if (bestRunEl) {
                 bestRunEl.textContent = bestRunTime || formattedTime;
+            }
+            
+            // Update best run time display in death screen
+            const bestRunDisplayEl = document.getElementById('bestRunTimeDisplay');
+            if (bestRunDisplayEl) {
+                bestRunDisplayEl.textContent = bestRunTime || formattedTime;
             }
             
             // Update wave and kills

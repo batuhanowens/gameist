@@ -2966,45 +2966,51 @@
         <div id="magnetOverlay">
             <div id="magnetOverlayIcon">🧲</div>
         </div>
-        <div id="gameOverScreen" style="display:none; position:fixed; inset:0; width:100vw; height:100vh; align-items:center; justify-content:center; background:rgba(0,0,0,0.85); z-index:9999; backdrop-filter: blur(4px);">
-            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:linear-gradient(135deg, rgba(0,20,40,0.95), rgba(0,10,30,0.95)); border:2px solid #00ffff; box-shadow:0 0 40px rgba(0,255,255,0.3), inset 0 0 20px rgba(0,255,255,0.1); border-radius:20px; padding:30px 25px; width:min(580px, 94vw); text-align:center; animation: gameOverPulse 0.6s ease-out;">
-                <h2 id="gameOverTitle" data-lang="gameOverTitle" style="color:#00ffff; margin:0 0 12px 0; letter-spacing:2px; font-size:clamp(24px, 5vw, 32px); text-shadow:0 0 20px rgba(0,255,255,0.5); animation: titleGlow 2s ease-in-out infinite;">YOU DIED</h2>
+        <div id="gameOverScreen" style="display:none; position:fixed; inset:0; width:100vw; height:100vh; align-items:center; justify-content:center; background:rgba(0,0,0,0.92); z-index:9999; backdrop-filter: blur(8px);">
+            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:linear-gradient(135deg, rgba(10,10,15,0.98), rgba(26,26,46,0.95)); border:2px solid var(--neon-cyan); box-shadow:0 0 25px var(--neon-cyan), 0 8px 32px rgba(0,0,0,0.4), inset 0 0 20px rgba(0,255,255,0.05); border-radius:24px; padding:40px 35px; width:min(620px, 92vw); text-align:center; animation: gameOverPulse 0.8s ease-out;">
+                <h2 id="gameOverTitle" data-lang="gameOverTitle" style="color:var(--neon-cyan); margin:0 0 20px 0; letter-spacing:3px; font-size:clamp(28px, 6vw, 36px); text-shadow:0 0 25px var(--neon-cyan); animation: titleGlow 2.5s ease-in-out infinite; font-weight:800;">YOU DIED</h2>
                 
                 <!-- Enhanced Stats Container -->
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; padding:16px; background:rgba(0,0,0,0.4); border-radius:12px; border:1px solid rgba(0,255,255,0.2);">
-                    <!-- Left Column -->
-                    <div style="text-align:left;">
-                        <div id="finalStats" style="color:#e5e7eb; font-size:14px; line-height:1.8; margin-bottom:8px;"></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:25px; padding:20px; background:rgba(0,0,0,0.6); border-radius:16px; border:1px solid rgba(0,255,255,0.15); backdrop-filter: blur(4px);">
+                    <!-- Left Column - Main Stats -->
+                    <div style="text-align:left; padding-right:10px;">
+                        <div id="finalStats" style="color:var(--text-secondary); font-size:15px; line-height:2; margin-bottom:10px;"></div>
                     </div>
-                    <!-- Right Column - New Stats -->
-                    <div style="text-align:left;">
-                        <div id="runTimeStats" style="color:#b6c2d1; font-size:13px; line-height:1.8;">
-                            <div style="margin-bottom:6px;">
-                                <span style="color:#7dd3fc; font-weight:700;">⏱️ Son Koşu:</span>
-                                <span id="lastRunTime" style="color:#22c55e; font-weight:600;">--:--</span>
+                    <!-- Right Column - Run Stats -->
+                    <div style="text-align:left; padding-left:10px; border-left:1px solid rgba(0,255,255,0.1);">
+                        <div id="runTimeStats" style="color:var(--text-muted); font-size:14px; line-height:2;">
+                            <div style="margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+                                <span style="color:var(--neon-green); font-weight:700; font-size:16px;">⏱️</span>
+                                <span data-lang="lastRunLabel">Son Koşu:</span>
+                                <span id="lastRunTime" style="color:var(--neon-green); font-weight:600; margin-left:auto;">--:--</span>
                             </div>
-                            <div style="margin-bottom:6px;">
-                                <span style="color:#7dd3fc; font-weight:700;">🏆 En İyi:</span>
-                                <span id="bestRunTime" style="color:#fbbf24; font-weight:600;">--:--</span>
+                            <div style="margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+                                <span style="color:var(--neon-orange); font-weight:700; font-size:16px;">🏆</span>
+                                <span data-lang="bestRunLabel">En İyi:</span>
+                                <span id="bestRunTime" style="color:var(--neon-orange); font-weight:600; margin-left:auto;">--:--</span>
                             </div>
-                            <div style="margin-bottom:6px;">
-                                <span style="color:#7dd3fc; font-weight:700;">🌊 Wave:</span>
-                                <span id="finalWave" style="color:#60a5fa; font-weight:600;">0</span>
+                            <div style="margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+                                <span style="color:var(--neon-blue); font-weight:700; font-size:16px;">🌊</span>
+                                <span data-lang="waveLabel">Wave:</span>
+                                <span id="finalWave" style="color:var(--neon-blue); font-weight:600; margin-left:auto;">0</span>
                             </div>
-                            <div>
-                                <span style="color:#7dd3fc; font-weight:700;">💀 Kills:</span>
-                                <span id="finalKills" style="color:#f87171; font-weight:600;">0</span>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="color:var(--neon-red); font-weight:700; font-size:16px;">💀</span>
+                                <span data-lang="killsLabel">Kills:</span>
+                                <span id="finalKills" style="color:var(--neon-red); font-weight:600; margin-left:auto;">0</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <div id="deathHint" data-lang="deathHint" style="color:#b6c2d1; font-size:13px; margin: -6px 0 20px 0; opacity:0.95; font-style:italic;"></div>
-                
-                <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
-                    <button id="restartBtn" data-lang="restartBtn" style="padding:12px 20px; border-radius:12px; border:2px solid #22c55e; background:linear-gradient(135deg, #052e1f, #0a4c2e); color:#22c55e; cursor:pointer; font-weight:700; font-size:14px; transition:all 0.3s ease; box-shadow:0 4px 15px rgba(34,197,94,0.2);">RETRY</button>
-                    <button id="backToMenuBtn" data-lang="backToMenuBtn" style="padding:12px 20px; border-radius:12px; border:2px solid #0ea5e9; background:linear-gradient(135deg, #042433, #0a3a4a); color:#0ea5e9; cursor:pointer; font-weight:700; font-size:14px; transition:all 0.3s ease; box-shadow:0 4px 15px rgba(14,165,233,0.2);">BACK TO MENU</button>
+                <!-- Action Buttons -->
+                <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                    <button id="restartBtn" class="btn btn-green" data-lang="restartBtn" style="flex:1; min-width:140px; padding:12px 20px; font-size:16px; font-weight:700; border-radius:12px;">RETRY</button>
+                    <button id="backToMenuBtn" class="btn btn-red" data-lang="backToMenuBtn" style="flex:1; min-width:140px; padding:12px 20px; font-size:16px; font-weight:700; border-radius:12px;">BACK TO MENU</button>
                 </div>
+                
+                <!-- Death Hint -->
+                <div id="deathHint" style="margin-top:20px; padding:12px; background:rgba(0,255,255,0.05); border:1px solid rgba(0,255,255,0.2); border-radius:8px; color:var(--text-muted); font-size:13px; font-style:italic;"></div>
             </div>
         </div>
         <div id="inGameMenu">
@@ -3167,9 +3173,13 @@
             wavePrefix: 'Wave',
             weaponUpgrades: 'WEAPON UPGRADES',
             deathHint_tryElement: 'Try a different element next run.',
-            deathHint_fire: 'Fire excels at close-range combat.',
-            deathHint_lightning: 'Lightning works well with crit builds.',
-            deathHint: 'Try a different element next run.',
+            deathHint_fire: 'Ateş yakın mesafede iyidir.',
+            deathHint_lightning: 'Yıldırım kritik buildlerle iyi çalışır.',
+            deathHint: 'Bir sonraki koşuda farklı element dene.',
+            lastRunLabel: 'Son Koşu',
+            bestRunLabel: 'En İyi',
+            waveLabel: 'Wave',
+            killsLabel: 'Kills',
             onboarding1: 'Your character moves automatically on mobile. You control dodging and positioning.',
             onboarding2: 'Enemies come in waves. Survive each wave to unlock upgrades.',
             onboarding3: 'Elements change how your build plays. Experiment — no run is the same.',
@@ -3206,9 +3216,13 @@
             wavePrefix: 'Dalga',
             weaponUpgrades: 'SİLAH YÜKSELTMELERİ',
             deathHint_tryElement: 'Sonraki rund farklı element dene.',
-            deathHint_fire: 'Ateş buildleri alan hasarında güçlüdür.',
-            deathHint_lightning: 'Yıldırım kritik buildleriyle iyi çalışır.',
-            deathHint: 'Sonraki rund farklı element dene.',
+            deathHint_fire: 'Feuer ist im Nahkampf stark.',
+            deathHint_lightning: 'Blitz funktioniert gut mit kritischen Builds.',
+            deathHint: 'Versuche ein anderes Element im nächsten Lauf.',
+            lastRunLabel: 'Letzter Lauf',
+            bestRunLabel: 'Bester Lauf',
+            waveLabel: 'Welle',
+            killsLabel: 'Kills',
             onboarding1: 'Karakterin mobilde otomatik hareket eder. Sen dash ve konumlanmayı kontrol edersin.',
             onboarding2: 'Düşmanlar dalgalar halinde gelir. Her dalgadan sonra yükseltme seç.',
             onboarding3: 'Elementler buildini değiştirir. Dene — her run farklıdır.',
