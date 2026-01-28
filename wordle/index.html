@@ -573,9 +573,9 @@
     function startWordleGame() {
       console.log('Start Wordle Game clicked');
       const mainMenu = document.getElementById('mainMenu');
-      const gameContainer = document.getElementById('gameContainer');
+      const gameScreen = document.getElementById('wordleGameScreen');
       if (mainMenu) mainMenu.classList.add('hidden');
-      if (gameContainer) gameContainer.classList.remove('hidden');
+      if (gameScreen) gameScreen.classList.remove('hidden');
     }
     
     function showSettingsScreen() {
@@ -604,9 +604,9 @@
         startBtn.addEventListener('click', function() {
           console.log('Start button clicked');
           const mainMenu = document.getElementById('mainMenu');
-          const gameContainer = document.getElementById('gameContainer');
+          const gameScreen = document.getElementById('wordleGameScreen');
           if (mainMenu) mainMenu.classList.add('hidden');
-          if (gameContainer) gameContainer.classList.remove('hidden');
+          if (gameScreen) gameScreen.classList.remove('hidden');
         });
       }
       
