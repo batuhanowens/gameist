@@ -8645,23 +8645,28 @@ class GlowlingsGame {
 
         // Show final stats with enhanced information
         const finalStats = document.getElementById('finalStats');
-        if (finalStats) finalStats.innerHTML = `
-            <div style="margin-bottom:8px;">
-                <span style="color:var(--neon-green); font-weight:700; font-size:18px;">🏆 Final Score: ${this.score}</span>
-            </div>
-            <div style="margin-bottom:6px;">
-                <span style="color:#94a3b8;">Size:</span> 
-                <span style="color:#e5e7eb; font-weight:600;">${this.player ? this.player.size.toFixed(1) : '0'}</span>
-            </div>
-            <div style="margin-bottom:6px;">
-                <span style="color:#94a3b8;">Element:</span> 
-                <span style="color:#e5e7eb; font-weight:600;">${this.player ? this.getElementDisplayName(this.player.element) : '-'}</span>
-            </div>
-            <div>
-                <span style="color:#94a3b8;">Duration:</span> 
-                <span style="color:#e5e7eb; font-weight:600;">${this.formatRunTime(this.gameTime - this.remainingTime)}</span>
-            </div>
-        `;
+        if (finalStats) {
+            const runDuration = this.gameTime - this.remainingTime;
+            const formattedDuration = this.formatRunTime(runDuration);
+            
+            finalStats.innerHTML = `
+                <div style="margin-bottom:8px;">
+                    <span style="color:var(--neon-green); font-weight:700; font-size:18px;">🏆 Final Score: ${this.score}</span>
+                </div>
+                <div style="margin-bottom:6px;">
+                    <span style="color:#94a3b8;">Size:</span> 
+                    <span style="color:#e5e7eb; font-weight:600;">${this.player ? this.player.size.toFixed(1) : '0'}</span>
+                </div>
+                <div style="margin-bottom:6px;">
+                    <span style="color:#94a3b8;">Element:</span> 
+                    <span style="color:#e5e7eb; font-weight:600;">${this.player ? this.getElementDisplayName(this.player.element) : '-'}</span>
+                </div>
+                <div>
+                    <span style="color:#94a3b8;">Duration:</span> 
+                    <span style="color:#e5e7eb; font-weight:600;">${formattedDuration}</span>
+                </div>
+            `;
+        }
 
         // Update enhanced stats
         this.updateRunTimeStats();
@@ -8684,6 +8689,8 @@ class GlowlingsGame {
 
     // Helper function to format run time
     formatRunTime(milliseconds) {
+        if (!milliseconds || milliseconds <= 0) return '0:00';
+        
         const totalSeconds = Math.floor(milliseconds / 1000);
         const minutes = Math.floor(totalSeconds / 60);
         const seconds = totalSeconds % 60;
