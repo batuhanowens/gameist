@@ -787,28 +787,36 @@
                   
                   console.log('Animating row', window.currentRow, 'with', tiles.length, 'tiles');
                   
-                  // Add fade animation to borders
+                  // Add fade animation to borders - more visible
                   tiles.forEach((tile, index) => {
                     setTimeout(() => {
-                      tile.style.transition = 'border-color 0.3s ease, box-shadow 0.3s ease';
-                      tile.style.borderColor = '#667eea';
-                      tile.style.boxShadow = '0 0 10px rgba(102, 126, 234, 0.5)';
-                      tile.style.borderWidth = '2px';
-                      tile.style.borderStyle = 'solid';
+                      // Force visible border animation
+                      tile.style.transition = 'all 0.5s ease';
+                      tile.style.borderColor = '#667eea !important';
+                      tile.style.borderWidth = '3px !important';
+                      tile.style.borderStyle = 'solid !important';
+                      tile.style.boxShadow = '0 0 15px rgba(102, 126, 234, 0.8) !important';
+                      tile.style.transform = 'scale(1.05)';
+                      tile.style.zIndex = '10';
                       
-                      console.log('Animated tile', index);
+                      console.log('Animated tile', index, 'with visible border');
                       
-                      // Fade back to normal after 1 second
+                      // Fade back to normal after 1.5 seconds
                       setTimeout(() => {
+                        tile.style.transition = 'all 0.3s ease';
                         tile.style.borderColor = '';
-                        tile.style.boxShadow = '';
                         tile.style.borderWidth = '';
                         tile.style.borderStyle = '';
-                      }, 1000);
-                    }, index * 50); // Stagger the animation
+                        tile.style.boxShadow = '';
+                        tile.style.transform = '';
+                        tile.style.zIndex = '';
+                        
+                        console.log('Tile animation ended', index);
+                      }, 1500);
+                    }, index * 100); // Slower stagger for better visibility
                   });
                 }
-              }, 200); // Increased delay for mobile
+              }, 300); // Slightly longer delay
               
               return result;
             };
@@ -932,9 +940,9 @@
       if (word.length === 5) {
         console.log('Submitting word:', word);
         
-        // Check if game is over
-        if (window.gameOver) {
-          console.log('Game is over, resetting...');
+        // Check if game is over by checking if we're on the last row
+        if (window.currentRow !== undefined && window.currentRow >= 5) {
+          console.log('Game is over (last row), resetting...');
           // Force reset all tiles
           document.querySelectorAll('.tile').forEach(tile => {
             tile.textContent = '';
@@ -942,6 +950,8 @@
             tile.style.backgroundColor = '';
             tile.style.borderColor = '';
             tile.style.border = '';
+            tile.style.removeProperty('background-color');
+            tile.style.removeProperty('border-color');
           });
           
           // Reset game variables
@@ -961,7 +971,7 @@
             window.targetWord = window.getRandomWord();
           }
           
-          console.log('Game reset complete');
+          console.log('Game reset complete - starting from row 0');
           return;
         }
         
