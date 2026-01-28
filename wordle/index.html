@@ -93,15 +93,15 @@
             </div>
 
             <div class="menu-buttons">
-                <button id="startGame" class="menu-btn primary">
+                <button id="startGame" class="menu-btn primary" onclick="startWordleGame()">
                     <i class="fas fa-play"></i>
                     <span data-lang="startGame">Oyuna Başla</span>
                 </button>
-                <button id="showSettings" class="menu-btn settings">
+                <button id="showSettings" class="menu-btn settings" onclick="showSettingsScreen()">
                     <i class="fas fa-cog"></i>
                     <span data-lang="settings">Ayarlar</span>
                 </button>
-                <button id="showRules" class="menu-btn secondary">
+                <button id="showRules" class="menu-btn secondary" onclick="showRulesScreen()">
                     <i class="fas fa-book"></i>
                     <span data-lang="rules">Kurallar</span>
                 </button>
@@ -569,6 +569,31 @@
   <!-- Game Script - Load with defer and DOM ready check -->
   <script defer src="script.js"></script>
   <script>
+    // Simple inline functions for button clicks
+    function startWordleGame() {
+      console.log('Start Wordle Game clicked');
+      const mainMenu = document.getElementById('mainMenu');
+      const gameContainer = document.getElementById('gameContainer');
+      if (mainMenu) mainMenu.classList.add('hidden');
+      if (gameContainer) gameContainer.classList.remove('hidden');
+    }
+    
+    function showSettingsScreen() {
+      console.log('Settings clicked');
+      const mainMenu = document.getElementById('mainMenu');
+      const settingsScreen = document.getElementById('settingsScreen');
+      if (mainMenu) mainMenu.classList.add('hidden');
+      if (settingsScreen) settingsScreen.classList.remove('hidden');
+    }
+    
+    function showRulesScreen() {
+      console.log('Rules clicked');
+      const mainMenu = document.getElementById('mainMenu');
+      const rulesScreen = document.getElementById('rulesScreen');
+      if (mainMenu) mainMenu.classList.add('hidden');
+      if (rulesScreen) rulesScreen.classList.remove('hidden');
+    }
+    
     // Fallback: Ensure buttons work even if script fails
     document.addEventListener('DOMContentLoaded', function() {
       console.log('DOM loaded, setting up fallback button handlers');
