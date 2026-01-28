@@ -578,6 +578,7 @@ class GlowlingsGame {
         this.particles = [];
         this.leaderboard = [];
         this.score = 0;
+        this.totalKills = 0; // Kill sayısını takip etmek için
         this.camera = { x: 0, y: 0 };
         // Reset run-end guards
         this._runEnded = false;
@@ -4251,6 +4252,7 @@ class GlowlingsGame {
                             const idx = this.aiBots.indexOf(b);
                             if (idx >= 0) this.aiBots.splice(idx, 1);
                             this.score += 200;
+                            this.totalKills++; // Kill sayısını artır
                             // Combo: player aura kill
                             try {
                                 p.comboCount = (p.comboCount || 0) + 1;
@@ -4736,6 +4738,7 @@ class GlowlingsGame {
                             const idx = this.aiBots.indexOf(b);
                             if (idx >= 0) this.aiBots.splice(idx, 1);
                             this.score += 180;
+                            this.totalKills++; // Kill sayısını artır
                             this.updatePlayerHPFromScore && this.updatePlayerHPFromScore();
                         }
                     }
@@ -7009,6 +7012,7 @@ class GlowlingsGame {
         this.paused = false;
         this.updateTouchControlsVisibility();
         this.score = 0;
+        this.totalKills = 0; // Kill sayısını sıfırla
         this.materials = 0;
         this.xp = 0;
         this.waveNumber = 0;
@@ -7176,6 +7180,7 @@ class GlowlingsGame {
                                 const idx = this.aiBots.indexOf(b);
                                 if (idx >= 0) this.aiBots.splice(idx, 1);
                                 this.score += 150;
+                                this.totalKills++; // Kill sayısını artır
                                 this.updatePlayerHPFromScore();
                             }
                         }
@@ -7560,6 +7565,7 @@ class GlowlingsGame {
                 if (bot.hp <= 0) {
                     this.aiBots.splice(i, 1);
                     this.score += 200;
+                    this.totalKills++; // Kill sayısını artır
                     // SFX: kill via burn
                     this.playKill();
                     // Combo: attribute burn kills if applied by player
@@ -8242,6 +8248,7 @@ class GlowlingsGame {
                             const idx = this.aiBots.indexOf(e.obj);
                             if (idx >= 0) this.aiBots.splice(idx, 1);
                             this.score += 200;
+                            this.totalKills++; // Kill sayısını artır
                             // SFX: kill
                             this.playKill();
                             // Combo: projectile kill by player
