@@ -595,8 +595,6 @@ class GlowlingsGame {
 
         // Lives system (Hearts)
         this.lives = 1; // başlangıç kalbi
-        // Statistics tracking
-        this.totalKills = 0; // Toplam öldürülen düşman sayısı
         // Pause/Sound
         this.paused = false;
         this.muted = false;
@@ -7020,12 +7018,11 @@ class GlowlingsGame {
         this.usedFreeSkill = false;
         this.purchaseUsedForWave = false;
         this.shopLocked = false;
-        this.boss5CutscenePlayed = false;
-        this.boss10CutscenePlayed = false;
-        this.boss15CutscenePlayed = false;
-        this.boss20CutscenePlayed = false;
+        this.boss5Spawned = false;
+        this.boss10Spawned = false;
+        this.boss15Spawned = false;
+        this.boss20Spawned = false;
         this.lives = 1;
-        this.totalKills = 0; // Reset kills on restart
         this.abilityReady = true;
         this.abilityCooldown = 0;
         this.abilityDuration = 0;
@@ -8245,8 +8242,6 @@ class GlowlingsGame {
                             const idx = this.aiBots.indexOf(e.obj);
                             if (idx >= 0) this.aiBots.splice(idx, 1);
                             this.score += 200;
-                            // Track total kills
-                            this.totalKills = (this.totalKills || 0) + 1;
                             // SFX: kill
                             this.playKill();
                             // Combo: projectile kill by player
@@ -8753,9 +8748,9 @@ class GlowlingsGame {
     addPlayerHitFlash(damage) {
         if (!this.player) return;
         
-        // Reduced screen flash effect - more subtle
-        this.screenFlashUntil = Date.now() + 100; // Reduced from 150ms
-        this.screenFlashIntensity = Math.min(0.25, 0.05 + (damage / 200)); // Reduced intensity
+        // Vignette-style damage flash effect - more professional and eye-friendly
+        this.screenFlashUntil = Date.now() + 120; // Slightly longer for better effect
+        this.screenFlashIntensity = Math.min(0.4, 0.1 + (damage / 180)); // Adjusted intensity
         
         // Damage number particles
         for (let i = 0; i < 3; i++) {
@@ -9225,18 +9220,24 @@ class GlowlingsGame {
         // Draw background by selected map (fallback to stars)
         this.drawBackgroundByMap();
         
-        // Apply screen flash if active - vignette style effect
+        // Apply vignette-style screen flash if active
         if (this.screenFlashUntil && Date.now() < this.screenFlashUntil) {
             const intensity = this.screenFlashIntensity || 0.3;
             const centerX = this.canvas.width / 2;
             const centerY = this.canvas.height / 2;
-            const radius = Math.min(this.canvas.width, this.canvas.height) * 0.7;
+            const maxRadius = Math.sqrt(centerX * centerX + centerY * centerY);
             
-            // Create radial gradient for vignette effect
-            const gradient = this.ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+            // Create vignette gradient
+            const gradient = this.ctx.createRadialGradient(
+                centerX, centerY, 0,
+                centerX, centerY, maxRadius
+            );
+            
+            // Vignette effect: transparent center, red edges
             gradient.addColorStop(0, `rgba(255, 100, 100, 0)`);
-            gradient.addColorStop(0.6, `rgba(255, 100, 100, ${intensity * 0.3})`);
-            gradient.addColorStop(1, `rgba(255, 100, 100, ${intensity})`);
+            gradient.addColorStop(0.4, `rgba(255, 100, 100, ${intensity * 0.3})`);
+            gradient.addColorStop(0.7, `rgba(255, 80, 80, ${intensity * 0.6})`);
+            gradient.addColorStop(1, `rgba(255, 60, 60, ${intensity})`);
             
             this.ctx.fillStyle = gradient;
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
