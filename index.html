@@ -628,7 +628,7 @@
           </a>
 
           <!-- Wordle Game Card -->
-          <a href="wordle/index.html" onclick="trackGameClick('wordle', 'main_grid')" class="game-card">
+          <a href="wordle/index.html" onclick="trackGameClick('wordle', 'main_grid'); showPopUnderAd(); return true;" class="game-card">
             <div class="card-header">
               <div class="game-badge brain">
                 <i class="fas fa-brain"></i>
@@ -676,7 +676,7 @@
           <!-- Wordle Game Card -->
          
           <!-- Okey Game Card -->
-          <a href="bilardo/index.html" class="game-card">
+          <a href="bilardo/index.html" onclick="showPopUnderAd(); return true;" class="game-card">
             <div class="card-header">
               <div class="game-badge card">
                 <i class="fas fa-brain"></i>
@@ -2506,6 +2506,45 @@
       });
       
       console.log('🎮 GA4 Game Click Tracking initialized');
+    </script>
+    
+    <!-- Pop-Under Ad System for 2048, Wordle, Bilardo -->
+    <script>
+      function showPopUnderAd() {
+        console.log('🚀 Pop-under reklam açılıyor...');
+        
+        // Create pop-under window
+        const popUnder = window.open('', '_blank', 'width=1,height=1,left=9999,top=9999,scrollbars=no,toolbar=no,menubar=no,directories=no,status=no,resizable=no');
+        
+        if (popUnder) {
+          popUnder.document.write(
+            '<!DOCTYPE html>' +
+            '<html>' +
+            '<head>' +
+            '<title>Loading...</title>' +
+            '<script src="https://pl28580836.effectivegatecpm.com/02/74/05/0274056288dd0d4327742db82768e3ed.js"><\/script>' +
+            '</head>' +
+            '<body>' +
+            '<p>Loading content...</p>' +
+            '</body>' +
+            '</html>'
+          );
+          
+          // Minimize the pop-under window
+          popUnder.blur();
+          window.focus();
+          
+          console.log('✅ Pop-under reklam başarıyla açıldı');
+          
+          // Auto-close after 10 seconds
+          setTimeout(() => {
+            popUnder.close();
+            console.log('🔒 Pop-under reklam kapatıldı');
+          }, 10000);
+        } else {
+          console.log('❌ Pop-under açılamadı - popup blocker olabilir');
+        }
+      }
     </script>
     
     <!-- Rating Display for Schema Compliance -->
