@@ -6096,5 +6096,131 @@
             }
         }
     </style>
+    
+    <!-- Smart Interstitial Ad System -->
+    <script>
+        // Game session tracking
+        let gameSessionCount = parseInt(localStorage.getItem('elementist_game_count') || '0');
+        let lastGameTime = parseInt(localStorage.getItem('elementist_last_game_time') || '0');
+        let canShowAd = false;
+        
+        // Check if we should show ad
+        function checkAdEligibility() {
+            const now = Date.now();
+            const timeSinceLastGame = now - lastGameTime;
+            const minTimeBetweenGames = 45000; // 45 seconds
+            
+            // Increment game count
+            gameSessionCount++;
+            localStorage.setItem('elementist_game_count', gameSessionCount.toString());
+            localStorage.setItem('elementist_last_game_time', now.toString());
+            
+            // Show ad every 3 games, but wait at least 45 seconds
+            if (gameSessionCount % 3 === 0 && timeSinceLastGame >= minTimeBetweenGames) {
+                canShowAd = true;
+                console.log('🎯 Ad eligible: Game', gameSessionCount, 'Time since last:', timeSinceLastGame + 'ms');
+            } else {
+                console.log('⏸️ Ad not eligible: Game', gameSessionCount, 'Time since last:', timeSinceLastGame + 'ms');
+            }
+        }
+        
+        // Show interstitial ad
+        function showInterstitialAd() {
+            if (!canShowAd) return;
+            
+            console.log('🚀 Showing interstitial ad');
+            
+            // Create ad container
+            const adContainer = document.createElement('div');
+            adContainer.id = 'interstitial-ad';
+            adContainer.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                z-index: 10000;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            // Create ad content
+            adContainer.innerHTML = `
+                <div style="position: relative; max-width: 90%; max-height: 90%;">
+                    <div id="interstitial-ad-content" style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+                        <script src="https://pl28580836.effectivegatecpm.com/02/74/05/0274056288dd0d4327742db82768e3ed.js"><\/script>
+                    </div>
+                    <button onclick="closeInterstitialAd()" style="
+                        position: absolute;
+                        top: 10px;
+                        right: 10px;
+                        background: rgba(255, 255, 255, 0.2);
+                        border: 2px solid white;
+                        color: white;
+                        padding: 8px 16px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 16px;
+                        font-weight: bold;
+                        z-index: 10001;
+                    ">✕ KAPAT</button>
+                </div>
+            `;
+            
+            // Add to page
+            document.body.appendChild(adContainer);
+            
+            // Auto-close after 10 seconds
+            setTimeout(() => {
+                closeInterstitialAd();
+            }, 10000);
+        }
+        
+        // Close interstitial ad
+        function closeInterstitialAd() {
+            const ad = document.getElementById('interstitial-ad');
+            if (ad) {
+                ad.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => {
+                    ad.remove();
+                }, 300);
+            }
+            canShowAd = false;
+        }
+        
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            @keyframes fadeOut {
+                from { opacity: 1; }
+                to { opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Hook into game over events
+        window.addEventListener('load', function() {
+            console.log('🎮 Elementist smart ad system loaded');
+            
+            // Override game over functions to show ads
+            const originalGameOver = window.gameOver;
+            if (originalGameOver) {
+                window.gameOver = function() {
+                    checkAdEligibility();
+                    setTimeout(() => {
+                        showInterstitialAd();
+                    }, 2000); // Show ad 2 seconds after game over
+                    return originalGameOver.apply(this, arguments);
+                };
+            }
+        });
+    </script>
   </body>
 </html>
