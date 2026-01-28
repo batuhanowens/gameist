@@ -1,0 +1,11 @@
+# Content Security Policy for Adsterra
+<IfModule mod_headers.c>
+    Header always set Content-Security-Policy "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://www.gstatic.com https://apis.google.com https://pagead2.googlesyndication.com https://*.firebaseio.com https://firebase.googleapis.com https://www.highperformanceformat.com https://pl28580836.effectivegatecpm.com https://*.effectivegatecpm.com; img-src 'self' data: https:; connect-src 'self' https:; font-src 'self' https:; style-src 'self' 'unsafe-inline' https:;"
+</IfModule>
+
+# Enable CORS for ad scripts
+<IfModule mod_headers.c>
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+    Header always set Access-Control-Allow-Headers "Content-Type"
+</IfModule>
