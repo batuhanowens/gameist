@@ -566,5 +566,48 @@
   </div>
   </body>
 
-  <script src="script.js"></script>
+  <!-- Game Script - Load with defer and DOM ready check -->
+  <script defer src="script.js"></script>
+  <script>
+    // Fallback: Ensure buttons work even if script fails
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM loaded, setting up fallback button handlers');
+      
+      // Start Game button
+      const startBtn = document.getElementById('startGame');
+      if (startBtn) {
+        startBtn.addEventListener('click', function() {
+          console.log('Start button clicked');
+          const mainMenu = document.getElementById('mainMenu');
+          const gameContainer = document.getElementById('gameContainer');
+          if (mainMenu) mainMenu.classList.add('hidden');
+          if (gameContainer) gameContainer.classList.remove('hidden');
+        });
+      }
+      
+      // Settings button
+      const settingsBtn = document.getElementById('showSettings');
+      if (settingsBtn) {
+        settingsBtn.addEventListener('click', function() {
+          console.log('Settings button clicked');
+          const mainMenu = document.getElementById('mainMenu');
+          const settingsScreen = document.getElementById('settingsScreen');
+          if (mainMenu) mainMenu.classList.add('hidden');
+          if (settingsScreen) settingsScreen.classList.remove('hidden');
+        });
+      }
+      
+      // Rules button
+      const rulesBtn = document.getElementById('showRules');
+      if (rulesBtn) {
+        rulesBtn.addEventListener('click', function() {
+          console.log('Rules button clicked');
+          const mainMenu = document.getElementById('mainMenu');
+          const rulesScreen = document.getElementById('rulesScreen');
+          if (mainMenu) mainMenu.classList.add('hidden');
+          if (rulesScreen) rulesScreen.classList.remove('hidden');
+        });
+      }
+    });
+  </script>
 </html>
