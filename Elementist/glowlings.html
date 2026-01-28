@@ -1169,7 +1169,7 @@
             padding: var(--spacing-xl);
             border-radius: var(--radius-2xl);
             border: 2px solid var(--neon-cyan);
-            box-shadow: 0 0 30px var(--neon-cyan), 0 8px 32px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 15px var(--neon-cyan), 0 4px 20px rgba(0, 0, 0, 0.3);
             text-align: center;
             display: none;
             pointer-events: all;
@@ -1212,14 +1212,14 @@
             font-size: var(--font-size-sm);
             cursor: pointer;
             transition: var(--transition-normal);
-            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 255, 255, 0.15);
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
         }
 
         #inGameMenu .menu-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 255, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 255, 255, 0.2);
             filter: brightness(1.1);
             background: linear-gradient(135deg, rgba(0, 30, 60, 0.9), rgba(0, 15, 45, 0.9));
         }
@@ -1227,6 +1227,33 @@
         #inGameMenu .menu-btn:active {
             transform: translateY(0);
             filter: brightness(0.95);
+        }
+
+        /* Important action buttons - Resume (green) and Back to Menu (red) */
+        #inGameMenu #resumeBtn {
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(22, 163, 74, 0.15));
+            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
+        }
+
+        #inGameMenu #resumeBtn:hover {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(22, 163, 74, 0.25));
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+            filter: brightness(1.1);
+        }
+
+        #inGameMenu #backToMenuIngameBtn {
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.15));
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+        }
+
+        #inGameMenu #backToMenuIngameBtn:hover {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(220, 38, 38, 0.25));
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+            filter: brightness(1.1);
         }
 
         #inGameMenu label {
