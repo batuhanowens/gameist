@@ -588,10 +588,12 @@
       
       // GA4 Event Tracking
       if (typeof gtag !== 'undefined') {
-        gtag('event', 'oyun_basladi', {
+        gtag('event', 'wordle_oyun_basladi', {
           'game_name': 'wordle',
+          'game_full_name': 'Wordle - Kelime Tahmin Oyunu',
           'method': 'button_click',
-          'source': 'main_menu'
+          'source': 'main_menu',
+          'game_type': 'word_puzzle'
         });
       }
     }
@@ -605,10 +607,12 @@
       
       // GA4 Event Tracking
       if (typeof gtag !== 'undefined') {
-        gtag('event', 'ayarlar_acildi', {
+        gtag('event', 'wordle_ayarlar_acildi', {
           'game_name': 'wordle',
+          'game_full_name': 'Wordle - Kelime Tahmin Oyunu',
           'method': 'button_click',
-          'source': 'main_menu'
+          'source': 'main_menu',
+          'game_type': 'word_puzzle'
         });
       }
     }
@@ -622,10 +626,12 @@
       
       // GA4 Event Tracking
       if (typeof gtag !== 'undefined') {
-        gtag('event', 'kurallar_acildi', {
+        gtag('event', 'wordle_kurallar_acildi', {
           'game_name': 'wordle',
+          'game_full_name': 'Wordle - Kelime Tahmin Oyunu',
           'method': 'button_click',
-          'source': 'main_menu'
+          'source': 'main_menu',
+          'game_type': 'word_puzzle'
         });
       }
     }
@@ -640,10 +646,12 @@
       
       // GA4 Event Tracking
       if (typeof gtag !== 'undefined') {
-        gtag('event', 'oyun_menu_acildi', {
+        gtag('event', 'wordle_oyun_menu_acildi', {
           'game_name': 'wordle',
+          'game_full_name': 'Wordle - Kelime Tahmin Oyunu',
           'method': 'button_click',
-          'source': 'in_game'
+          'source': 'in_game',
+          'game_type': 'word_puzzle'
         });
       }
     }
@@ -653,10 +661,12 @@
       
       // GA4 Event Tracking - Before reset
       if (typeof gtag !== 'undefined') {
-        gtag('event', 'oyun_yenilendi', {
+        gtag('event', 'wordle_oyun_yenilendi', {
           'game_name': 'wordle',
+          'game_full_name': 'Wordle - Kelime Tahmin Oyunu',
           'method': 'button_click',
-          'source': 'in_game'
+          'source': 'in_game',
+          'game_type': 'word_puzzle'
         });
       }
       
@@ -730,10 +740,12 @@
       
       // GA4 Event Tracking
       if (typeof gtag !== 'undefined') {
-        gtag('event', 'oyuna_devam_edildi', {
+        gtag('event', 'wordle_oyuna_devam_edildi', {
           'game_name': 'wordle',
+          'game_full_name': 'Wordle - Kelime Tahmin Oyunu',
           'method': 'button_click',
-          'source': 'game_menu'
+          'source': 'game_menu',
+          'game_type': 'word_puzzle'
         });
       }
     }
@@ -747,10 +759,12 @@
       
       // GA4 Event Tracking
       if (typeof gtag !== 'undefined') {
-        gtag('event', 'ana_menuye_donuldu', {
+        gtag('event', 'wordle_ana_menuye_donuldu', {
           'game_name': 'wordle',
+          'game_full_name': 'Wordle - Kelime Tahmin Oyunu',
           'method': 'button_click',
-          'source': 'game_menu'
+          'source': 'game_menu',
+          'game_type': 'word_puzzle'
         });
       }
     }
@@ -903,11 +917,13 @@
         
         // GA4 Event Tracking - Word submission
         if (typeof gtag !== 'undefined') {
-          gtag('event', 'kelime_gonderildi', {
+          gtag('event', 'wordle_kelime_gonderildi', {
             'game_name': 'wordle',
+            'game_full_name': 'Wordle - Kelime Tahmin Oyunu',
             'method': 'enter_key',
             'word_length': word.length,
-            'current_row': window.currentRow || 1
+            'current_row': window.currentRow || 1,
+            'game_type': 'word_puzzle'
           });
         }
         

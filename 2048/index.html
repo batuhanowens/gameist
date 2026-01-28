@@ -665,5 +665,184 @@
             }
         });
     </script>
+    
+    <!-- GA4 2048 Event Tracking -->
+    <script>
+      // 2048 specific event tracking
+      function track2048Event(eventName, parameters = {}) {
+        console.log(`🎮 2048 Event: ${eventName}`, parameters);
+        
+        if (typeof gtag !== 'undefined') {
+          gtag('event', eventName, {
+            'game_name': '2048',
+            'game_full_name': '2048 - Number Puzzle Game',
+            'game_type': 'number_puzzle',
+            ...parameters
+          });
+        }
+      }
+      
+      document.addEventListener('DOMContentLoaded', function() {
+        // Track new game button
+        const newGameBtn = document.getElementById('new-game-button');
+        if (newGameBtn) {
+          newGameBtn.addEventListener('click', function() {
+            track2048Event('2048_yeni_oyun_basladi', {
+              'method': 'button_click',
+              'source': 'game_controls'
+            });
+          });
+        }
+        
+        // Track try again button
+        const tryAgainBtn = document.getElementById('try-again');
+        if (tryAgainBtn) {
+          tryAgainBtn.addEventListener('click', function() {
+            track2048Event('2048_tekrar_dene', {
+              'method': 'button_click',
+              'source': 'game_over_screen'
+            });
+          });
+        }
+        
+        // Track menu buttons
+        const menuSettings = document.getElementById('menu-settings');
+        if (menuSettings) {
+          menuSettings.addEventListener('click', function() {
+            track2048Event('2048_ayarlar_acildi', {
+              'method': 'button_click',
+              'source': 'game_menu'
+            });
+          });
+        }
+        
+        const menuExit = document.getElementById('menu-exit');
+        if (menuExit) {
+          menuExit.addEventListener('click', function() {
+            track2048Event('2048_oyundan_cikildi', {
+              'method': 'button_click',
+              'source': 'game_menu'
+            });
+          });
+        }
+        
+        const menuHub = document.getElementById('menu-hub');
+        if (menuHub) {
+          menuHub.addEventListener('click', function() {
+            track2048Event('2048_ana_menuye_donuldu', {
+              'method': 'button_click',
+              'source': 'game_menu'
+            });
+          });
+        }
+        
+        // Track score milestones
+        let lastScoreMilestone = 0;
+        const scoreMilestones = [128, 256, 512, 1024, 2048, 4096, 8192];
+        
+        function check2048ScoreMilestones(currentScore) {
+          scoreMilestones.forEach(milestone => {
+            if (currentScore >= milestone && lastScoreMilestone < milestone) {
+              track2048Event('2048_skor_miles_tamamlandi', {
+                'method': 'gameplay',
+                'milestone': milestone,
+                'current_score': currentScore
+              });
+              lastScoreMilestone = milestone;
+            }
+          });
+        }
+        
+        // Hook into score updates
+        if (window.updateScore) {
+          const originalUpdateScore = window.updateScore;
+          window.updateScore = function(newScore) {
+            check2048ScoreMilestones(newScore);
+            return originalUpdateScore.apply(this, arguments);
+          };
+        }
+        
+        // Track game duration
+        let gameStartTime = Date.now();
+        
+        function trackGameDuration() {
+          const duration = Math.floor((Date.now() - gameStartTime) / 1000);
+          track2048Event('2048_oyun_suresi', {
+            'method': 'gameplay',
+            'duration_seconds': duration,
+            'source': 'session_end'
+          });
+        }
+        
+        // Track when user leaves the game
+        window.addEventListener('beforeunload', trackGameDuration);
+        
+        // Track swipe/keyboard moves
+        let moveCount = 0;
+        
+        function trackMove() {
+          moveCount++;
+          if (moveCount % 10 === 0) { // Track every 10 moves
+            track2048Event('2048_hamle_yapildi', {
+              'method': 'gameplay',
+              'move_count': moveCount,
+              'source': 'gameplay'
+            });
+          }
+        }
+        
+        // Hook into move functions
+        if (window.move) {
+          const originalMove = window.move;
+          window.move = function(direction) {
+            trackMove();
+            return originalMove.apply(this, arguments);
+          };
+        }
+        
+        // Track undo usage
+        const undoBtn = document.getElementById('undo-button');
+        if (undoBtn) {
+          undoBtn.addEventListener('click', function() {
+            track2048Event('2048_geri_al_kullanildi', {
+              'method': 'button_click',
+              'source': 'game_controls'
+            });
+          });
+        }
+        
+        // Track game over
+        if (window.gameOver) {
+          const originalGameOver = window.gameOver;
+          window.gameOver = function() {
+            const finalScore = this.score || 0;
+            track2048Event('2048_oyun_bitti', {
+              'method': 'gameplay',
+              'final_score': finalScore,
+              'total_moves': moveCount
+            });
+            return originalGameOver.apply(this, arguments);
+          };
+        }
+        
+        // Track win condition (reaching 2048)
+        if (window.checkWin) {
+          const originalCheckWin = window.checkWin;
+          window.checkWin = function() {
+            const currentScore = this.score || 0;
+            if (currentScore >= 2048) {
+              track2048Event('2048_oyun_kazandi', {
+                'method': 'gameplay',
+                'winning_score': currentScore,
+                'total_moves': moveCount
+              });
+            }
+            return originalCheckWin.apply(this, arguments);
+          };
+        }
+      });
+      
+      console.log('🎮 GA4 2048 Event Tracking initialized');
+    </script>
   </body>
 </html>

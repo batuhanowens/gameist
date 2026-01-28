@@ -2328,8 +2328,30 @@
         
         // GA4 Event Tracking
         if (typeof gtag !== 'undefined') {
-          gtag('event', 'oyun_secildi', {
+          const gameInfo = {
+            'elementist': {
+              'game_full_name': 'Elementist - Creature Battle Game',
+              'game_type': 'creature_battle'
+            },
+            '2048': {
+              'game_full_name': '2048 - Number Puzzle Game',
+              'game_type': 'number_puzzle'
+            },
+            'wordle': {
+              'game_full_name': 'Wordle - Kelime Tahmin Oyunu',
+              'game_type': 'word_puzzle'
+            }
+          };
+          
+          const info = gameInfo[gameName] || {
+            'game_full_name': gameName,
+            'game_type': 'unknown'
+          };
+          
+          gtag('event', `${gameName.toLowerCase()}_secildi`, {
             'game_name': gameName,
+            'game_full_name': info.game_full_name,
+            'game_type': info.game_type,
             'method': 'card_click',
             'source': source,
             'page_location': window.location.pathname
@@ -2347,9 +2369,10 @@
         if (loginBtn) {
           loginBtn.addEventListener('click', function() {
             if (typeof gtag !== 'undefined') {
-              gtag('event', 'giris_denemesi', {
+              gtag('event', 'ana_sayfa_giris_denemesi', {
                 'method': 'google_login',
-                'source': 'main_page'
+                'source': 'main_page',
+                'page_type': 'main_hub'
               });
             }
           });
@@ -2360,9 +2383,10 @@
         if (themeToggle) {
           themeToggle.addEventListener('click', function() {
             if (typeof gtag !== 'undefined') {
-              gtag('event', 'tema_degistirildi', {
+              gtag('event', 'ana_sayfa_tema_degistirildi', {
                 'method': 'button_click',
-                'source': 'main_page'
+                'source': 'main_page',
+                'page_type': 'main_hub'
               });
             }
           });
@@ -2373,13 +2397,100 @@
         if (langToggle) {
           langToggle.addEventListener('click', function() {
             if (typeof gtag !== 'undefined') {
-              gtag('event', 'dil_degistirildi', {
+              gtag('event', 'ana_sayfa_dil_degistirildi', {
                 'method': 'button_click',
-                'source': 'main_page'
+                'source': 'main_page',
+                'page_type': 'main_hub'
               });
             }
           });
         }
+        
+        // Track search functionality
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+          searchInput.addEventListener('input', function() {
+            if (this.value.length > 2) {
+              if (typeof gtag !== 'undefined') {
+                gtag('event', 'ana_sayfa_arama_yapildi', {
+                  'method': 'search_input',
+                  'source': 'main_page',
+                  'page_type': 'main_hub',
+                  'search_term_length': this.value.length
+                });
+              }
+            }
+          });
+        }
+        
+        // Track category filters
+        const categoryButtons = document.querySelectorAll('.category-btn');
+        categoryButtons.forEach(btn => {
+          btn.addEventListener('click', function() {
+            const category = this.getAttribute('data-category') || 'unknown';
+            if (typeof gtag !== 'undefined') {
+              gtag('event', 'ana_sayfa_kategori_filtrelendi', {
+                'method': 'category_click',
+                'source': 'main_page',
+                'page_type': 'main_hub',
+                'category': category
+              });
+            }
+          });
+        });
+        
+        // Track scroll depth
+        let maxScrollDepth = 0;
+        function trackScrollDepth() {
+          const scrollPercent = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+          if (scrollPercent > maxScrollDepth) {
+            maxScrollDepth = scrollPercent;
+            
+            // Track milestones: 25%, 50%, 75%, 90%
+            if ([25, 50, 75, 90].includes(scrollPercent)) {
+              if (typeof gtag !== 'undefined') {
+                gtag('event', 'ana_sayfa_scroll_derinligi', {
+                  'method': 'page_scroll',
+                  'source': 'main_page',
+                  'page_type': 'main_hub',
+                  'scroll_depth': scrollPercent
+                });
+              }
+            }
+          }
+        }
+        
+        window.addEventListener('scroll', trackScrollDepth);
+        
+        // Track page load time
+        window.addEventListener('load', function() {
+          const loadTime = performance.now();
+          if (typeof gtag !== 'undefined') {
+            gtag('event', 'ana_sayfa_yukleme_suresi', {
+              'method': 'page_load',
+              'source': 'main_page',
+              'page_type': 'main_hub',
+              'load_time_ms': Math.round(loadTime)
+            });
+          }
+        });
+        
+        // Track user session duration
+        let sessionStartTime = Date.now();
+        
+        function trackSessionDuration() {
+          const duration = Math.floor((Date.now() - sessionStartTime) / 1000);
+          if (typeof gtag !== 'undefined') {
+            gtag('event', 'ana_sayfa_oturum_suresi', {
+              'method': 'session_end',
+              'source': 'main_page',
+              'page_type': 'main_hub',
+              'duration_seconds': duration
+            });
+          }
+        }
+        
+        window.addEventListener('beforeunload', trackSessionDuration);
       });
       
       console.log('🎮 GA4 Game Click Tracking initialized');

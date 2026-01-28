@@ -6233,6 +6233,7 @@
         if (typeof gtag !== 'undefined') {
           gtag('event', eventName, {
             'game_name': 'elementist',
+            'game_full_name': 'Elementist - Creature Battle Game',
             ...parameters
           });
         }
@@ -6243,9 +6244,10 @@
         const startBtn = document.getElementById('startBtn');
         if (startBtn) {
           startBtn.addEventListener('click', function() {
-            trackElementistEvent('oyun_basladi', {
+            trackElementistEvent('elementist_oyun_basladi', {
               'method': 'button_click',
-              'source': 'start_screen'
+              'source': 'start_screen',
+              'game_type': 'creature_battle'
             });
           });
         }
@@ -6254,9 +6256,10 @@
         const backToHubBtn = document.getElementById('backToHubBtn');
         if (backToHubBtn) {
           backToHubBtn.addEventListener('click', function() {
-            trackElementistEvent('ana_menuye_donuldu', {
+            trackElementistEvent('elementist_ana_menuye_donuldu', {
               'method': 'button_click',
-              'source': 'game_menu'
+              'source': 'game_menu',
+              'game_type': 'creature_battle'
             });
           });
         }
@@ -6265,9 +6268,10 @@
         const closeGameBtn = document.getElementById('closeGameBtn');
         if (closeGameBtn) {
           closeGameBtn.addEventListener('click', function() {
-            trackElementistEvent('oyun_kapatildi', {
+            trackElementistEvent('elementist_oyun_kapatildi', {
               'method': 'button_click',
-              'source': 'game_menu'
+              'source': 'game_menu',
+              'game_type': 'creature_battle'
             });
           });
         }
@@ -6276,9 +6280,10 @@
         const buildsBtn = document.getElementById('buildsBtn');
         if (buildsBtn) {
           buildsBtn.addEventListener('click', function() {
-            trackElementistEvent('builds_acildi', {
+            trackElementistEvent('elementist_builds_acildi', {
               'method': 'button_click',
-              'source': 'game_menu'
+              'source': 'game_menu',
+              'game_type': 'creature_battle'
             });
           });
         }
@@ -6287,9 +6292,10 @@
         const charactersBtn = document.getElementById('charactersBtn');
         if (charactersBtn) {
           charactersBtn.addEventListener('click', function() {
-            trackElementistEvent('karakterler_acildi', {
+            trackElementistEvent('elementist_karakterler_acildi', {
               'method': 'button_click',
-              'source': 'game_menu'
+              'source': 'game_menu',
+              'game_type': 'creature_battle'
             });
           });
         }
@@ -6298,10 +6304,11 @@
         const settingsTabs = document.querySelectorAll('[data-tab]');
         settingsTabs.forEach(tab => {
           tab.addEventListener('click', function() {
-            trackElementistEvent('ayar_sekmesi_acildi', {
+            trackElementistEvent('elementist_ayar_sekmesi_acildi', {
               'method': 'tab_click',
               'tab_name': this.getAttribute('data-tab'),
-              'source': 'settings'
+              'source': 'settings',
+              'game_type': 'creature_battle'
             });
           });
         });
@@ -6310,9 +6317,10 @@
         const fullscreenToggleBtn = document.getElementById('fullscreenToggleBtn');
         if (fullscreenToggleBtn) {
           fullscreenToggleBtn.addEventListener('click', function() {
-            trackElementistEvent('tam_ekran_degistirildi', {
+            trackElementistEvent('elementist_tam_ekran_degistirildi', {
               'method': 'button_click',
-              'source': 'settings'
+              'source': 'settings',
+              'game_type': 'creature_battle'
             });
           });
         }
@@ -6321,9 +6329,10 @@
         const fpsInfoToggleBtn = document.getElementById('fpsInfoToggleBtn');
         if (fpsInfoToggleBtn) {
           fpsInfoToggleBtn.addEventListener('click', function() {
-            trackElementistEvent('fps_bilgisi_degistirildi', {
+            trackElementistEvent('elementist_fps_bilgisi_degistirildi', {
               'method': 'button_click',
-              'source': 'settings'
+              'source': 'settings',
+              'game_type': 'creature_battle'
             });
           });
         }
@@ -6333,10 +6342,11 @@
         abilityButtons.forEach(btn => {
           btn.addEventListener('click', function() {
             const abilityType = this.getAttribute('data-ability') || 'unknown';
-            trackElementistEvent('yetenek_kullanildi', {
+            trackElementistEvent('elementist_yetenek_kullanildi', {
               'method': 'button_click',
               'ability_type': abilityType,
-              'source': 'gameplay'
+              'source': 'gameplay',
+              'game_type': 'creature_battle'
             });
           });
         });
@@ -6348,10 +6358,11 @@
         function checkScoreMilestones(currentScore) {
           scoreMilestones.forEach(milestone => {
             if (currentScore >= milestone && lastScoreMilestone < milestone) {
-              trackElementistEvent('skor_miles_tamamlandi', {
+              trackElementistEvent('elementist_skor_miles_tamamlandi', {
                 'method': 'gameplay',
                 'milestone': milestone,
-                'current_score': currentScore
+                'current_score': currentScore,
+                'game_type': 'creature_battle'
               });
               lastScoreMilestone = milestone;
             }
@@ -6372,10 +6383,11 @@
         
         function trackGameDuration() {
           const duration = Math.floor((Date.now() - gameStartTime) / 1000);
-          trackElementistEvent('oyun_suresi', {
+          trackElementistEvent('elementist_oyun_suresi', {
             'method': 'gameplay',
             'duration_seconds': duration,
-            'source': 'session_end'
+            'source': 'session_end',
+            'game_type': 'creature_battle'
           });
         }
         
@@ -6386,9 +6398,10 @@
         const dodgeBtn = document.getElementById('dodgeBtn');
         if (dodgeBtn) {
           dodgeBtn.addEventListener('click', function() {
-            trackElementistEvent('dodge_yetenegi_kullanildi', {
+            trackElementistEvent('elementist_dodge_yetenegi_kullanildi', {
               'method': 'button_click',
-              'source': 'gameplay'
+              'source': 'gameplay',
+              'game_type': 'creature_battle'
             });
           });
         }
@@ -6398,10 +6411,11 @@
         buildButtons.forEach(btn => {
           btn.addEventListener('click', function() {
             const buildType = this.getAttribute('data-build') || 'unknown';
-            trackElementistEvent('build_secildi', {
+            trackElementistEvent('elementist_build_secildi', {
               'method': 'button_click',
               'build_type': buildType,
-              'source': 'builds_overlay'
+              'source': 'builds_overlay',
+              'game_type': 'creature_battle'
             });
           });
         });
@@ -6411,10 +6425,11 @@
         characterButtons.forEach(btn => {
           btn.addEventListener('click', function() {
             const characterType = this.getAttribute('data-character') || 'unknown';
-            trackElementistEvent('karakter_secildi', {
+            trackElementistEvent('elementist_karakter_secildi', {
               'method': 'button_click',
               'character_type': characterType,
-              'source': 'characters_overlay'
+              'source': 'characters_overlay',
+              'game_type': 'creature_battle'
             });
           });
         });
@@ -6423,10 +6438,11 @@
         const languageSelect = document.getElementById('languageSelect');
         if (languageSelect) {
           languageSelect.addEventListener('change', function() {
-            trackElementistEvent('dil_degistirildi', {
+            trackElementistEvent('elementist_dil_degistirildi', {
               'method': 'dropdown_change',
               'new_language': this.value,
-              'source': 'settings'
+              'source': 'settings',
+              'game_type': 'creature_battle'
             });
           });
         }
