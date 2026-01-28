@@ -23,6 +23,83 @@
       content="An intense action game where you master elements, defeat enemies, and survive in a neon arena. Play free on Gameist!"
     />
     <meta name="twitter:image" content="../2048/logo.png" />
+    
+    <!-- Enhanced CSS Variables for Consistent Design -->
+    <style>
+        :root {
+            /* Neon Color Palette */
+            --neon-cyan: #00ffff;
+            --neon-cyan-dark: #00cccc;
+            --neon-cyan-light: #40ffff;
+            --neon-pink: #ff00ff;
+            --neon-pink-dark: #cc00cc;
+            --neon-pink-light: #ff40ff;
+            --neon-green: #22c55e;
+            --neon-green-dark: #16a34a;
+            --neon-green-light: #4ade80;
+            --neon-orange: #fb923c;
+            --neon-orange-dark: #ea580c;
+            --neon-orange-light: #fdba74;
+            --neon-red: #ef4444;
+            --neon-red-dark: #dc2626;
+            --neon-red-light: #f87171;
+            --neon-blue: #3b82f6;
+            --neon-blue-dark: #2563eb;
+            --neon-blue-light: #60a5fa;
+            
+            /* Background Colors */
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #1a1a2e;
+            --bg-tertiary: #16213e;
+            --bg-overlay: rgba(0, 0, 0, 0.85);
+            
+            /* Text Colors */
+            --text-primary: #ffffff;
+            --text-secondary: #e5e7eb;
+            --text-muted: #94a3b8;
+            --text-accent: var(--neon-cyan);
+            
+            /* Typography */
+            --font-family-primary: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --font-family-secondary: 'Courier New', monospace;
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 1.875rem;
+            --font-size-4xl: 2.25rem;
+            
+            /* Spacing */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            
+            /* Border Radius */
+            --radius-sm: 0.25rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-2xl: 1.5rem;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --shadow-neon: 0 0 20px var(--neon-cyan);
+            --shadow-neon-pink: 0 0 20px var(--neon-pink);
+            --shadow-neon-green: 0 0 20px var(--neon-green);
+            
+            /* Transitions */
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.3s ease;
+            --transition-slow: 0.5s ease;
+        }
+    </style>
     <script>
       (function(){
         try{
@@ -116,16 +193,97 @@
             box-sizing: border-box;
         }
 
+        /* Enhanced Base Styles with CSS Variables */
+        html, body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-base);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Enhanced Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-family-primary);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: var(--spacing-md);
+            color: var(--text-primary);
+        }
+
+        h1 { font-size: var(--font-size-4xl); }
+        h2 { font-size: var(--font-size-3xl); }
+        h3 { font-size: var(--font-size-2xl); }
+        h4 { font-size: var(--font-size-xl); }
+        h5 { font-size: var(--font-size-lg); }
+        h6 { font-size: var(--font-size-base); }
+
+        p {
+            margin-bottom: var(--spacing-md);
+            color: var(--text-secondary);
+        }
+
+        /* Enhanced Button Styles */
+        .btn {
+            font-family: var(--font-family-primary);
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 2px solid var(--neon-cyan);
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+            color: var(--neon-cyan);
+            cursor: pointer;
+            transition: var(--transition-normal);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            box-shadow: var(--shadow-neon);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px var(--neon-cyan-light);
+            filter: brightness(1.1);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            filter: brightness(0.95);
+        }
+
+        .btn.btn-green {
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+            box-shadow: var(--shadow-neon-green);
+        }
+
+        .btn.btn-green:hover {
+            box-shadow: 0 0 25px var(--neon-green-light);
+        }
+
+        .btn.btn-red {
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+            box-shadow: 0 0 20px var(--neon-red);
+        }
+
+        .btn.btn-red:hover {
+            box-shadow: 0 0 25px var(--neon-red-light);
+        }
 
         /* Mobile in-game menu (pause) button styling is applied inline where used inside #touchControls */
-
-        html, body {
-            height: 100%;
-        }
+        
         body {
-            font-family: 'Arial', sans-serif;
+            height: 100%;
+            font-family: var(--font-family-primary);
             background: radial-gradient(circle at center, #0a0a1a 0%, #000000 100%);
-            color: white;
+            color: var(--text-primary);
             overflow: hidden;
             /* Use small viewport unit to avoid URL bar shrinking issues on mobile */
             height: 100svh;
@@ -1375,6 +1533,88 @@
         bottom: calc(16px + env(safe-area-inset-bottom)) !important;
         transform: translateX(-50%) scale(.82) !important;
       }
+        /* Game Over Screen Animations */
+        @keyframes gameOverPulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.05);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes titleGlow {
+            0%, 100% {
+                text-shadow: 0 0 20px rgba(0,255,255,0.5);
+                filter: brightness(1);
+            }
+            50% {
+                text-shadow: 0 0 30px rgba(0,255,255,0.8), 0 0 40px rgba(255,0,255,0.4);
+                filter: brightness(1.2);
+            }
+        }
+
+        /* Enhanced button hover effects */
+        #gameOverScreen button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34,197,94,0.3) !important;
+            filter: brightness(1.1);
+        }
+
+        #gameOverScreen button:active {
+            transform: translateY(0);
+            filter: brightness(0.95);
+        }
+
+        /* Stats entry animations */
+        @keyframes statSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        #runTimeStats > div {
+            animation: statSlideIn 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        #runTimeStats > div:nth-child(1) { animation-delay: 0.1s; }
+        #runTimeStats > div:nth-child(2) { animation-delay: 0.2s; }
+        #runTimeStats > div:nth-child(3) { animation-delay: 0.3s; }
+        #runTimeStats > div:nth-child(4) { animation-delay: 0.4s; }
+
+        /* Mobile responsive adjustments for game over screen */
+        @media (max-width: 600px) {
+            #gameOverScreen > div {
+                padding: 20px 15px !important;
+                width: 95vw !important;
+            }
+            
+            #gameOverScreen .grid {
+                grid-template-columns: 1fr !important;
+                gap: 12px !important;
+            }
+            
+            #gameOverScreen h2 {
+                font-size: 20px !important;
+            }
+            
+            #gameOverScreen button {
+                padding: 10px 16px !important;
+                font-size: 12px !important;
+            }
+        }
   </style>
 </head>
 <body>
@@ -2586,14 +2826,44 @@
         <div id="magnetOverlay">
             <div id="magnetOverlayIcon">🧲</div>
         </div>
-        <div id="gameOverScreen" style="display:none; position:fixed; inset:0; width:100vw; height:100vh; align-items:center; justify-content:center; background:rgba(0,0,0,0.7); z-index:9999;">
-            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(0,0,0,0.92); border:2px solid #00ffff; box-shadow:0 0 30px #00ffff; border-radius:18px; padding:22px 20px; width:min(520px, 92vw); text-align:center;">
-                <h2 id="gameOverTitle" data-lang="gameOverTitle" style="color:#00ffff; margin:0 0 8px 0; letter-spacing:1px;">YOU DIED</h2>
-                <div id="finalStats" style="color:#e5e7eb; font-size:14px; line-height:1.6; margin-bottom:14px;"></div>
-                <div id="deathHint" data-lang="deathHint" style="color:#b6c2d1; font-size:13px; margin: -6px 0 14px 0; opacity:0.95;"></div>
-                <div style="display:flex; gap:12px; justify-content:center;">
-                    <button id="restartBtn" data-lang="restartBtn" style="padding:10px 16px; border-radius:10px; border:2px solid #22c55e; background:#052e1f; color:#22c55e; cursor:pointer; font-weight:700;">RETRY</button>
-                    <button id="backToMenuBtn" data-lang="backToMenuBtn" style="padding:10px 16px; border-radius:10px; border:2px solid #0ea5e9; background:#042433; color:#0ea5e9; cursor:pointer; font-weight:700;">BACK TO MENU</button>
+        <div id="gameOverScreen" style="display:none; position:fixed; inset:0; width:100vw; height:100vh; align-items:center; justify-content:center; background:rgba(0,0,0,0.85); z-index:9999; backdrop-filter: blur(4px);">
+            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:linear-gradient(135deg, rgba(0,20,40,0.95), rgba(0,10,30,0.95)); border:2px solid #00ffff; box-shadow:0 0 40px rgba(0,255,255,0.3), inset 0 0 20px rgba(0,255,255,0.1); border-radius:20px; padding:30px 25px; width:min(580px, 94vw); text-align:center; animation: gameOverPulse 0.6s ease-out;">
+                <h2 id="gameOverTitle" data-lang="gameOverTitle" style="color:#00ffff; margin:0 0 12px 0; letter-spacing:2px; font-size:clamp(24px, 5vw, 32px); text-shadow:0 0 20px rgba(0,255,255,0.5); animation: titleGlow 2s ease-in-out infinite;">YOU DIED</h2>
+                
+                <!-- Enhanced Stats Container -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; padding:16px; background:rgba(0,0,0,0.4); border-radius:12px; border:1px solid rgba(0,255,255,0.2);">
+                    <!-- Left Column -->
+                    <div style="text-align:left;">
+                        <div id="finalStats" style="color:#e5e7eb; font-size:14px; line-height:1.8; margin-bottom:8px;"></div>
+                    </div>
+                    <!-- Right Column - New Stats -->
+                    <div style="text-align:left;">
+                        <div id="runTimeStats" style="color:#b6c2d1; font-size:13px; line-height:1.8;">
+                            <div style="margin-bottom:6px;">
+                                <span style="color:#7dd3fc; font-weight:700;">⏱️ Son Koşu:</span>
+                                <span id="lastRunTime" style="color:#22c55e; font-weight:600;">--:--</span>
+                            </div>
+                            <div style="margin-bottom:6px;">
+                                <span style="color:#7dd3fc; font-weight:700;">🏆 En İyi:</span>
+                                <span id="bestRunTime" style="color:#fbbf24; font-weight:600;">--:--</span>
+                            </div>
+                            <div style="margin-bottom:6px;">
+                                <span style="color:#7dd3fc; font-weight:700;">🌊 Wave:</span>
+                                <span id="finalWave" style="color:#60a5fa; font-weight:600;">0</span>
+                            </div>
+                            <div>
+                                <span style="color:#7dd3fc; font-weight:700;">💀 Kills:</span>
+                                <span id="finalKills" style="color:#f87171; font-weight:600;">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="deathHint" data-lang="deathHint" style="color:#b6c2d1; font-size:13px; margin: -6px 0 20px 0; opacity:0.95; font-style:italic;"></div>
+                
+                <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+                    <button id="restartBtn" data-lang="restartBtn" style="padding:12px 20px; border-radius:12px; border:2px solid #22c55e; background:linear-gradient(135deg, #052e1f, #0a4c2e); color:#22c55e; cursor:pointer; font-weight:700; font-size:14px; transition:all 0.3s ease; box-shadow:0 4px 15px rgba(34,197,94,0.2);">RETRY</button>
+                    <button id="backToMenuBtn" data-lang="backToMenuBtn" style="padding:12px 20px; border-radius:12px; border:2px solid #0ea5e9; background:linear-gradient(135deg, #042433, #0a3a4a); color:#0ea5e9; cursor:pointer; font-weight:700; font-size:14px; transition:all 0.3s ease; box-shadow:0 4px 15px rgba(14,165,233,0.2);">BACK TO MENU</button>
                 </div>
             </div>
         </div>

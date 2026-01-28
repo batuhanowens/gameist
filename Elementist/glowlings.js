@@ -5006,7 +5006,9 @@ class GlowlingsGame {
                         // Brotato: open shop first (intermission) until player starts wave
                         if (this.gameMode === 'brotato') {
                             this.inWave = false;
-                            this.intermissionTimer = 10000;
+                            // First upgrade timing optimization: 10% faster for first wave only
+                            const isFirstWave = this.waveNumber === 0;
+                            this.intermissionTimer = isFirstWave ? 9000 : 10000; // 9s instead of 10s for first wave
                             this.updateShopCounters();
                             // Ensure shop offers match chosen element
                             this.refreshShopItems && this.refreshShopItems();
@@ -8168,7 +8170,13 @@ class GlowlingsGame {
                     const maxHP = e.obj.maxHP || 100;
                     e.obj.hp = Math.max(0, (e.obj.hp != null ? e.obj.hp : maxHP) - dmg);
                     // SFX on hit
-                    if (e.isPlayer) this.playPlayerHurt(); else this.playHit();
+                    if (e.isPlayer) {
+                        this.playPlayerHurt();
+                        // Add player hit flash effect
+                        this.addPlayerHitFlash(dmg);
+                    } else {
+                        this.playHit();
+                    }
 
                     // Hitstop + mini knockback + hit flash for bots (not player)
                     if (!e.isPlayer) {
@@ -8635,17 +8643,166 @@ class GlowlingsGame {
             this.recordRunEnd && this.recordRunEnd(outcome);
         } catch (_) {}
 
-        // Show final stats
+        // Show final stats with enhanced information
         const finalStats = document.getElementById('finalStats');
         if (finalStats) finalStats.innerHTML = `
-            <h3>Final Skor: ${this.score}</h3>
-            <p>Boyut: ${this.player ? this.player.size.toFixed(1) : '0'}</p>
-            <p>Element: ${this.player ? this.player.element : '-'}</p>
+            <div style="margin-bottom:8px;">
+                <span style="color:#22c55e; font-weight:700; font-size:16px;">🏆 Final Skor: ${this.score}</span>
+            </div>
+            <div style="margin-bottom:4px;">
+                <span style="color:#94a3b8;">Boyut:</span> 
+                <span style="color:#e5e7eb; font-weight:600;">${this.player ? this.player.size.toFixed(1) : '0'}</span>
+            </div>
+            <div style="margin-bottom:4px;">
+                <span style="color:#94a3b8;">Element:</span> 
+                <span style="color:#e5e7eb; font-weight:600;">${this.player ? this.getElementDisplayName(this.player.element) : '-'}</span>
+            </div>
+            <div>
+                <span style="color:#94a3b8;">Süre:</span> 
+                <span style="color:#e5e7eb; font-weight:600;">${this.formatRunTime(this.gameTime - this.remainingTime)}</span>
+            </div>
         `;
+
+        // Update enhanced stats
+        this.updateRunTimeStats();
+        
         const restartBtn = document.getElementById('restartBtn');
         if (restartBtn) restartBtn.onclick = () => this.restartRun();
         const backBtn = document.getElementById('backToMenuBtn');
         if (backBtn) backBtn.onclick = () => location.reload();
+    }
+
+    // Helper function to get element display name in Turkish
+    getElementDisplayName(element) {
+        const elementNames = {
+            'fire': '🔥 Ateş',
+            'water': '💧 Su',
+            'air': '🌬️ Hava'
+        };
+        return elementNames[element] || element || 'Bilinmeyen';
+    }
+
+    // Helper function to format run time
+    formatRunTime(milliseconds) {
+        const totalSeconds = Math.floor(milliseconds / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    // Update run time statistics
+    updateRunTimeStats() {
+        try {
+            const currentRunTime = this.gameTime - this.remainingTime;
+            const formattedTime = this.formatRunTime(currentRunTime);
+            
+            // Update last run time
+            const lastRunEl = document.getElementById('lastRunTime');
+            if (lastRunEl) {
+                lastRunEl.textContent = formattedTime;
+            }
+            
+            // Get and update best run time
+            const bestRunTime = this.getBestRunTime();
+            const bestRunEl = document.getElementById('bestRunTime');
+            if (bestRunEl) {
+                bestRunEl.textContent = bestRunTime || formattedTime;
+            }
+            
+            // Update wave and kills
+            const finalWaveEl = document.getElementById('finalWave');
+            if (finalWaveEl) {
+                finalWaveEl.textContent = this.waveNumber || 0;
+            }
+            
+            const finalKillsEl = document.getElementById('finalKills');
+            if (finalKillsEl) {
+                finalKillsEl.textContent = this.totalKills || 0;
+            }
+            
+            // Save current run to localStorage
+            this.saveRunStats(currentRunTime, this.score, this.waveNumber, this.totalKills || 0);
+            
+        } catch (error) {
+            console.error('Error updating run time stats:', error);
+        }
+    }
+
+    // Get best run time from localStorage
+    getBestRunTime() {
+        try {
+            const stats = localStorage.getItem('elementist_run_stats');
+            if (stats) {
+                const parsed = JSON.parse(stats);
+                if (parsed.bestTime) {
+                    return this.formatRunTime(parsed.bestTime);
+                }
+            }
+        } catch (error) {
+            console.error('Error getting best run time:', error);
+        }
+        return null;
+    }
+
+    // Add player hit flash effect
+    addPlayerHitFlash(damage) {
+        if (!this.player) return;
+        
+        // Screen flash effect
+        this.screenFlashUntil = Date.now() + 150;
+        this.screenFlashIntensity = Math.min(0.6, 0.1 + (damage / 100));
+        
+        // Damage number particles
+        for (let i = 0; i < 3; i++) {
+            this.particles.push({
+                pos: this.player.pos.clone(),
+                velocity: new Vector2(
+                    (Math.random() - 0.5) * 50,
+                    -Math.random() * 80 - 20
+                ),
+                color: damage > 30 ? '#ff4444' : '#ffaa00',
+                life: 800,
+                size: damage > 30 ? 8 : 6,
+                text: `-${damage}`,
+                isDamageNumber: true
+            });
+        }
+        
+        // Screen shake
+        this.screenShakeUntil = Date.now() + 200;
+        this.screenShakeIntensity = damage > 30 ? 3 : 2;
+    }
+
+    saveRunStats(runTime, score, wave, kills) {
+        try {
+            const stats = localStorage.getItem('elementist_run_stats');
+            let parsed = stats ? JSON.parse(stats) : {};
+            
+            // Update best time if current run is better
+            if (!parsed.bestTime || runTime > parsed.bestTime) {
+                parsed.bestTime = runTime;
+            }
+            
+            // Add to recent runs
+            if (!parsed.recentRuns) {
+                parsed.recentRuns = [];
+            }
+            
+            parsed.recentRuns.unshift({
+                time: runTime,
+                score: score,
+                wave: wave,
+                kills: kills,
+                date: new Date().toISOString()
+            });
+            
+            // Keep only last 10 runs
+            parsed.recentRuns = parsed.recentRuns.slice(0, 10);
+            
+            localStorage.setItem('elementist_run_stats', JSON.stringify(parsed));
+        } catch (error) {
+            console.error('Error saving run stats:', error);
+        }
     }
 
     saveScoreToGameist(score, wave) {
@@ -9051,8 +9208,25 @@ class GlowlingsGame {
         this.ctx.fillStyle = 'rgba(0, 0, 0, 1)';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
+        // Apply screen shake if active
+        if (this.screenShakeUntil && Date.now() < this.screenShakeUntil) {
+            const intensity = this.screenShakeIntensity || 2;
+            const shakeX = (Math.random() - 0.5) * intensity;
+            const shakeY = (Math.random() - 0.5) * intensity;
+            this.ctx.save();
+            this.ctx.translate(shakeX, shakeY);
+        }
+        
         // Draw background by selected map (fallback to stars)
         this.drawBackgroundByMap();
+        
+        // Apply screen flash if active
+        if (this.screenFlashUntil && Date.now() < this.screenFlashUntil) {
+            const intensity = this.screenFlashIntensity || 0.3;
+            this.ctx.fillStyle = `rgba(255, 100, 100, ${intensity})`;
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+        
         // Add themed screen border/frame per map for a professional finish
         this.drawWorldBorderByMap();
         // Mask any residual dot at dash start for a short time window
@@ -10157,10 +10331,26 @@ class GlowlingsGame {
             );
             const lifeAlpha = (typeof particle.life === 'number') ? (particle.life / 1000) : 0.8;
             const alpha = Math.max(0, Math.min(1, lifeAlpha));
-            this.ctx.fillStyle = particle.color + Math.floor(alpha * 255).toString(16).padStart(2, '0');
-            this.ctx.beginPath();
-            this.ctx.arc(screenPos.x, screenPos.y, particle.size || 2, 0, Math.PI * 2);
-            this.ctx.fill();
+            
+            // Handle damage number particles
+            if (particle.isDamageNumber && particle.text) {
+                this.ctx.save();
+                this.ctx.font = `bold ${particle.size || 6}px Arial`;
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                this.ctx.fillStyle = particle.color + Math.floor(alpha * 255).toString(16).padStart(2, '0');
+                this.ctx.strokeStyle = '#000000' + Math.floor(alpha * 128).toString(16).padStart(2, '0');
+                this.ctx.lineWidth = 2;
+                this.ctx.strokeText(particle.text, screenPos.x, screenPos.y);
+                this.ctx.fillText(particle.text, screenPos.x, screenPos.y);
+                this.ctx.restore();
+            } else {
+                // Regular particles
+                this.ctx.fillStyle = particle.color + Math.floor(alpha * 255).toString(16).padStart(2, '0');
+                this.ctx.beginPath();
+                this.ctx.arc(screenPos.x, screenPos.y, particle.size || 2, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
         });
     }
 
@@ -10550,6 +10740,11 @@ class GlowlingsGame {
         this.updateCamera();
         this.updateLeaderboard();
         this.updateUI();
+        
+        // Restore context if screen shake was applied
+        if (this.screenShakeUntil && Date.now() < this.screenShakeUntil) {
+            this.ctx.restore();
+        }
     }
 
     // Dev helper: jump directly to a specific wave
@@ -10714,7 +10909,9 @@ class GlowlingsGame {
 
     endWaveToShop() {
         this.inWave = false;
-        this.intermissionTimer = 10000; // 10s
+        // First upgrade timing optimization: 10% faster for first wave only
+        const isFirstWave = this.waveNumber === 0;
+        this.intermissionTimer = isFirstWave ? 9000 : 10000; // 9s instead of 10s for first wave
         // Reset per-intermission purchase allowance
         this.purchaseUsedForWave = false;
         // Optionally reduce remaining enemies
