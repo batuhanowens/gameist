@@ -173,11 +173,12 @@
         
         /* Mobile specific fixes */
         @media (max-width: 768px) {
-          body {
+          html, body {
             position: fixed;
             width: 100%;
             height: 100%;
             overflow: hidden;
+            -webkit-overflow-scrolling: touch;
           }
           
           #wordleGameScreen {
@@ -194,6 +195,12 @@
             font-size: 16px !important;
             transform: scale(0.01) !important;
             opacity: 0 !important;
+            pointer-events: none !important;
+          }
+          
+          /* Prevent mobile zoom */
+          input, textarea, select {
+            font-size: 16px !important;
           }
         }
       </style>
@@ -602,7 +609,25 @@
   </body>
 
   <!-- Game Script - Load with defer and DOM ready check -->
-  <script defer src="script.js"></script>
+  <script>
+    // Wait for DOM to be ready before loading script.js
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM ready, loading script.js...');
+      
+      // Load script.js after DOM is ready and after a delay
+      setTimeout(() => {
+        const script = document.createElement('script');
+        script.src = 'script.js';
+        script.onload = function() {
+          console.log('script.js loaded successfully');
+        };
+        script.onerror = function() {
+          console.log('script.js failed to load');
+        };
+        document.body.appendChild(script);
+      }, 2000); // 2 second delay to ensure everything is loaded
+    });
+  </script>
   <script>
     // Simple inline functions for button clicks
     function startWordleGame() {
@@ -707,6 +732,8 @@
       // Override original functions to add our animations
       window.addEventListener('load', function() {
         setTimeout(() => {
+          console.log('Setting up keyboard override...');
+          
           if (window.checkRow) {
             const originalCheckRow = window.checkRow;
             window.checkRow = function() {
@@ -747,8 +774,13 @@
               
               return result;
             };
+            console.log('Keyboard override setup complete');
+          } else {
+            console.log('checkRow function not found, retrying...');
+            // Retry after 1 second
+            setTimeout(arguments.callee, 1000);
           }
-        }, 1000);
+        }, 3000); // 3 second delay to ensure script.js is loaded
       });
       
       // Handle input events
