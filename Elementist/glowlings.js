@@ -8684,14 +8684,23 @@ class GlowlingsGame {
         if (backBtn) backBtn.onclick = () => location.reload();
     }
 
-    // Helper function to get element display name in Turkish
+    // Helper function to get element display name based on current language
     getElementDisplayName(element) {
+        // Use translation system if available
+        if (this && typeof this.t === 'function') {
+            const translation = this.t(`element_${element}`);
+            if (translation && translation !== `element_${element}`) {
+                return translation;
+            }
+        }
+        
+        // Fallback to hardcoded names
         const elementNames = {
-            'fire': '🔥 Ateş',
-            'water': '💧 Su',
-            'air': '🌬️ Hava'
+            'fire': this.lang === 'tr' ? '🔥 Ateş' : '🔥 Fire',
+            'water': this.lang === 'tr' ? '💧 Su' : '💧 Water',
+            'air': this.lang === 'tr' ? '🌬️ Hava' : '🌬️ Air'
         };
-        return elementNames[element] || element || 'Bilinmeyen';
+        return elementNames[element] || element || (this.lang === 'tr' ? 'Bilinmeyen' : 'Unknown');
     }
 
     // Helper function to format run time
