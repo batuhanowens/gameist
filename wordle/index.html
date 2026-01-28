@@ -678,6 +678,43 @@
       const input = document.getElementById('wordleInput');
       if (!input) return;
       
+      // Override original functions to add our animations
+      window.addEventListener('load', function() {
+        setTimeout(() => {
+          if (window.checkRow) {
+            const originalCheckRow = window.checkRow;
+            window.checkRow = function() {
+              const result = originalCheckRow.apply(this, arguments);
+              
+              // Add row change animation after checkRow completes
+              setTimeout(() => {
+                if (window.currentRow !== undefined && window.rows && window.rows[window.currentRow]) {
+                  const newRow = window.rows[window.currentRow];
+                  const tiles = newRow.querySelectorAll('.tile');
+                  
+                  // Add fade animation to borders
+                  tiles.forEach((tile, index) => {
+                    setTimeout(() => {
+                      tile.style.transition = 'border-color 0.3s ease, box-shadow 0.3s ease';
+                      tile.style.borderColor = '#667eea';
+                      tile.style.boxShadow = '0 0 10px rgba(102, 126, 234, 0.5)';
+                      
+                      // Fade back to normal after 1 second
+                      setTimeout(() => {
+                        tile.style.borderColor = '';
+                        tile.style.boxShadow = '';
+                      }, 1000);
+                    }, index * 50); // Stagger the animation
+                  });
+                }
+              }, 100);
+              
+              return result;
+            };
+          }
+        }, 1000);
+      });
+      
       // Handle input events
       input.addEventListener('input', function(e) {
         const value = e.target.value.toUpperCase();
@@ -748,43 +785,7 @@
       // Auto-focus when game starts
       setTimeout(() => {
         focusWordleInput();
-        setupRowAnimationMonitor();
       }, 500);
-    }
-    
-    function setupRowAnimationMonitor() {
-      // Monitor row changes and add animation
-      let lastCurrentRow = -1;
-      
-      setInterval(() => {
-        if (window.currentRow !== undefined && window.currentRow !== lastCurrentRow) {
-          // Row has changed
-          console.log('Row changed from', lastCurrentRow, 'to', window.currentRow);
-          
-          // Animate the new row
-          if (window.rows && window.rows[window.currentRow]) {
-            const newRow = window.rows[window.currentRow];
-            const tiles = newRow.querySelectorAll('.tile');
-            
-            // Add fade animation to borders
-            tiles.forEach((tile, index) => {
-              setTimeout(() => {
-                tile.style.transition = 'border-color 0.3s ease';
-                tile.style.borderColor = '#667eea';
-                tile.style.boxShadow = '0 0 10px rgba(102, 126, 234, 0.5)';
-                
-                // Fade back to normal after 1 second
-                setTimeout(() => {
-                  tile.style.borderColor = '';
-                  tile.style.boxShadow = '';
-                }, 1000);
-              }, index * 50); // Stagger the animation
-            });
-          }
-          
-          lastCurrentRow = window.currentRow;
-        }
-      }, 100);
     }
     
     function getCurrentRow() {
