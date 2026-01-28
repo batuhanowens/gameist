@@ -576,7 +576,7 @@
             </div>
           </a>
           <!-- Bilardo Game Card -->
-          <a href="2048/index.html" onclick="trackGameClick('2048', 'main_grid'); showPopUnderAd(); return true;" class="game-card">
+          <a href="2048/index.html" onclick="trackGameClick('2048', 'main_grid'); openCasualGame('2048', '2048/index.html'); return false;" class="game-card">
             <div class="card-header">
               <div class="game-badge tas">
                 <i class="fas fa-brain"></i>
@@ -628,7 +628,7 @@
           </a>
 
           <!-- Wordle Game Card -->
-          <a href="wordle/index.html" onclick="trackGameClick('wordle', 'main_grid'); showPopUnderAd(); return true;" class="game-card">
+          <a href="wordle/index.html" onclick="trackGameClick('wordle', 'main_grid'); openCasualGame('Wordle', 'wordle/index.html'); return false;" class="game-card">
             <div class="card-header">
               <div class="game-badge brain">
                 <i class="fas fa-brain"></i>
@@ -676,7 +676,7 @@
           <!-- Wordle Game Card -->
          
           <!-- Okey Game Card -->
-          <a href="bilardo/index.html" onclick="showPopUnderAd(); return true;" class="game-card">
+          <a href="bilardo/index.html" onclick="openCasualGame('Bilardo', 'bilardo/index.html'); return false;" class="game-card">
             <div class="card-header">
               <div class="game-badge card">
                 <i class="fas fa-brain"></i>
@@ -2508,9 +2508,33 @@
       console.log('🎮 GA4 Game Click Tracking initialized');
     </script>
     
-    <!-- Pop-Under Ad System for 2048, Wordle, Bilardo -->
+    <!-- Global Pop-Under Ad System with Cooldown -->
     <script>
-      function showPopUnderAd() {
+      let lastPopunderTime = 0;
+      const globalCooldown = 300000; // 5 Dakika (Tüm oyunlar için ortak sayaç)
+
+      function openCasualGame(gameName, gameUrl) {
+        const now = Date.now();
+        
+        console.log('🎮 ' + gameName + ' oyunu başlatılıyor...');
+        console.log('⏰ Son reklamdan bu yana:', Math.floor((now - lastPopunderTime) / 1000) + ' saniye');
+        
+        // Eğer son reklamdan bu yana 5 dakika geçtiyse --> YAPIŞTIR
+        if (now - lastPopunderTime > globalCooldown) {
+          console.log('💰 5 dakika doldu - Pop-under reklam açılıyor...');
+          showAdsterraPopunder();
+          lastPopunderTime = now;
+        } else {
+          console.log('⏸️ Cooldown devam ediyor - Reklam gösterilmiyor');
+          console.log('⏳ Kalan süre:', Math.floor((globalCooldown - (now - lastPopunderTime)) / 1000) + ' saniye');
+        }
+
+        // Her halükarda oyunu başlat (Reklamı bekleme)
+        console.log('🚀 ' + gameName + ' oyununa yönlendiriliyor...');
+        window.location.href = gameUrl;
+      }
+
+      function showAdsterraPopunder() {
         console.log('🚀 Pop-under reklam açılıyor...');
         
         // Create pop-under window
