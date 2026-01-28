@@ -452,7 +452,7 @@
         </div>
 
         <div class="games-grid">
-           <a href="Elementist/glowlings.html"  class="game-card featured">
+           <a href="Elementist/glowlings.html" onclick="trackGameClick('elementist', 'main_grid')" class="game-card featured">
             <div class="card-header">
             
               <div class="game-badge">
@@ -515,7 +515,7 @@
             </div>
           </a>
           <!-- Bilardo Game Card -->
-          <a href="2048/index.html" class="game-card">
+          <a href="2048/index.html" onclick="trackGameClick('2048', 'main_grid')" class="game-card">
             <div class="card-header">
               <div class="game-badge tas">
                 <i class="fas fa-brain"></i>
@@ -583,7 +583,7 @@
           </a>
 
           <!-- Wordle Game Card -->
-          <a href="wordle/index.html" class="game-card">
+          <a href="wordle/index.html" onclick="trackGameClick('wordle', 'main_grid')" class="game-card">
             <div class="card-header">
               <div class="game-badge brain">
                 <i class="fas fa-brain"></i>
@@ -2208,5 +2208,181 @@
       console.log("🔥 Firebase Authentication initialized successfully");
     </script>
     
+    <!-- Global Key Events Analytics -->
+    <script>
+      // Global Key Events Tracking System
+      const globalKeyAnalytics = {
+        totalKeys: 0,
+        sessionStart: Date.now(),
+        pagePath: window.location.pathname,
+        keyFrequency: {},
+        specialKeys: {
+          'Enter': 0,
+          'Backspace': 0,
+          'Tab': 0,
+          'Escape': 0,
+          'ArrowUp': 0,
+          'ArrowDown': 0,
+          'ArrowLeft': 0,
+          'ArrowRight': 0,
+          'Space': 0
+        },
+        
+        trackKey(key, target) {
+          this.totalKeys++;
+          
+          // Track special keys
+          if (this.specialKeys.hasOwnProperty(key)) {
+            this.specialKeys[key]++;
+          }
+          
+          // Track letter/number frequency
+          if (key.length === 1 && key.match(/[A-Za-z0-9]/)) {
+            this.keyFrequency[key] = (this.keyFrequency[key] || 0) + 1;
+          }
+          
+          // Log every 50th key to avoid spam
+          if (this.totalKeys % 50 === 0) {
+            console.log(`📊 Global Key Analytics: ${this.totalKeys} keys tracked on ${this.pagePath}`);
+          }
+        },
+        
+        getStats() {
+          const sessionTime = Math.floor((Date.now() - this.sessionStart) / 1000);
+          return {
+            pagePath: this.pagePath,
+            totalKeys: this.totalKeys,
+            sessionTime: sessionTime,
+            keysPerMinute: Math.round((this.totalKeys / sessionTime) * 60),
+            specialKeys: {...this.specialKeys},
+            keyFrequency: {...this.keyFrequency}
+          };
+        },
+        
+        sendToAnalytics() {
+          const stats = this.getStats();
+          
+          // Send to Google Analytics
+          if (window.gtag) {
+            gtag('event', 'global_key_stats', {
+              'page_path': stats.pagePath,
+              'total_keys': stats.totalKeys,
+              'session_time': stats.sessionTime,
+              'keys_per_minute': stats.keysPerMinute,
+              'enter_count': stats.specialKeys['Enter'],
+              'backspace_count': stats.specialKeys['Backspace']
+            });
+          }
+          
+          // Send to Firebase if user is logged in
+          try {
+            if (window.firebase && window.firebase.auth) {
+              const user = firebase.auth().currentUser;
+              if (user) {
+                const database = firebase.database();
+                database.ref(`analytics/${user.uid}/global_key_events`).push({
+                  stats: stats,
+                  timestamp: Date.now(),
+                  userAgent: navigator.userAgent,
+                  referrer: document.referrer
+                });
+              }
+            }
+          } catch (error) {
+            console.log('Global analytics send error:', error);
+          }
+        }
+      };
+      
+      // Track all key events on the page
+      document.addEventListener('keydown', function(e) {
+        // Don't track keys in password fields
+        if (e.target.type === 'password' || e.target.type === 'email') return;
+        
+        globalKeyAnalytics.trackKey(e.key, e.target.tagName);
+      });
+      
+      // Send analytics every 60 seconds
+      setInterval(() => {
+        globalKeyAnalytics.sendToAnalytics();
+      }, 60000);
+      
+      // Send analytics on page unload
+      window.addEventListener('beforeunload', () => {
+        globalKeyAnalytics.sendToAnalytics();
+      });
+      
+      // Console command to view stats
+      window.getGlobalKeyStats = () => {
+        console.log('📊 Global Key Event Analytics:', globalKeyAnalytics.getStats());
+      };
+      
+      console.log('🌐 Global Key Events Analytics initialized');
+    </script>
+    
+    <!-- GA4 Game Click Tracking -->
+    <script>
+      // Game click tracking function
+      function trackGameClick(gameName, source) {
+        console.log(`🎮 Game clicked: ${gameName} from ${source}`);
+        
+        // GA4 Event Tracking
+        if (typeof gtag !== 'undefined') {
+          gtag('event', 'oyun_secildi', {
+            'game_name': gameName,
+            'method': 'card_click',
+            'source': source,
+            'page_location': window.location.pathname
+          });
+        }
+        
+        // Allow the navigation to proceed
+        return true;
+      }
+      
+      // Track other important interactions
+      document.addEventListener('DOMContentLoaded', function() {
+        // Track login button clicks
+        const loginBtn = document.getElementById('googleLogin');
+        if (loginBtn) {
+          loginBtn.addEventListener('click', function() {
+            if (typeof gtag !== 'undefined') {
+              gtag('event', 'giris_denemesi', {
+                'method': 'google_login',
+                'source': 'main_page'
+              });
+            }
+          });
+        }
+        
+        // Track theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+          themeToggle.addEventListener('click', function() {
+            if (typeof gtag !== 'undefined') {
+              gtag('event', 'tema_degistirildi', {
+                'method': 'button_click',
+                'source': 'main_page'
+              });
+            }
+          });
+        }
+        
+        // Track language toggle
+        const langToggle = document.getElementById('languageToggle');
+        if (langToggle) {
+          langToggle.addEventListener('click', function() {
+            if (typeof gtag !== 'undefined') {
+              gtag('event', 'dil_degistirildi', {
+                'method': 'button_click',
+                'source': 'main_page'
+              });
+            }
+          });
+        }
+      });
+      
+      console.log('🎮 GA4 Game Click Tracking initialized');
+    </script>
   </body>
 </html>

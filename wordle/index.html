@@ -585,6 +585,15 @@
       const gameScreen = document.getElementById('wordleGameScreen');
       if (mainMenu) mainMenu.classList.add('hidden');
       if (gameScreen) gameScreen.classList.remove('hidden');
+      
+      // GA4 Event Tracking
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'oyun_basladi', {
+          'game_name': 'wordle',
+          'method': 'button_click',
+          'source': 'main_menu'
+        });
+      }
     }
     
     function showSettingsScreen() {
@@ -593,6 +602,15 @@
       const settingsScreen = document.getElementById('settingsScreen');
       if (mainMenu) mainMenu.classList.add('hidden');
       if (settingsScreen) settingsScreen.classList.remove('hidden');
+      
+      // GA4 Event Tracking
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'ayarlar_acildi', {
+          'game_name': 'wordle',
+          'method': 'button_click',
+          'source': 'main_menu'
+        });
+      }
     }
     
     function showRulesScreen() {
@@ -601,6 +619,15 @@
       const rulesScreen = document.getElementById('rulesScreen');
       if (mainMenu) mainMenu.classList.add('hidden');
       if (rulesScreen) rulesScreen.classList.remove('hidden');
+      
+      // GA4 Event Tracking
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'kurallar_acildi', {
+          'game_name': 'wordle',
+          'method': 'button_click',
+          'source': 'main_menu'
+        });
+      }
     }
     
     // Game control functions
@@ -610,10 +637,28 @@
       const gameMenuModal = document.getElementById('gameMenuModal');
       if (gameScreen) gameScreen.classList.add('hidden');
       if (gameMenuModal) gameMenuModal.style.display = 'block';
+      
+      // GA4 Event Tracking
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'oyun_menu_acildi', {
+          'game_name': 'wordle',
+          'method': 'button_click',
+          'source': 'in_game'
+        });
+      }
     }
     
     function resetWordleGame() {
       console.log('Reset game clicked');
+      
+      // GA4 Event Tracking - Before reset
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'oyun_yenilendi', {
+          'game_name': 'wordle',
+          'method': 'button_click',
+          'source': 'in_game'
+        });
+      }
       
       // Use the original game's reset function
       if (window.resetGame) {
@@ -682,6 +727,15 @@
       const gameScreen = document.getElementById('wordleGameScreen');
       if (gameMenuModal) gameMenuModal.style.display = 'none';
       if (gameScreen) gameScreen.classList.remove('hidden');
+      
+      // GA4 Event Tracking
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'oyuna_devam_edildi', {
+          'game_name': 'wordle',
+          'method': 'button_click',
+          'source': 'game_menu'
+        });
+      }
     }
     
     function backToMainMenuFromMenu() {
@@ -690,6 +744,15 @@
       const mainMenu = document.getElementById('mainMenu');
       if (gameMenuModal) gameMenuModal.style.display = 'none';
       if (mainMenu) mainMenu.classList.remove('hidden');
+      
+      // GA4 Event Tracking
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'ana_menuye_donuldu', {
+          'game_name': 'wordle',
+          'method': 'button_click',
+          'source': 'game_menu'
+        });
+      }
     }
     
     // Native keyboard functions
@@ -837,6 +900,17 @@
       
       if (word.length === 5) {
         console.log('Submitting word:', word);
+        
+        // GA4 Event Tracking - Word submission
+        if (typeof gtag !== 'undefined') {
+          gtag('event', 'kelime_gonderildi', {
+            'game_name': 'wordle',
+            'method': 'enter_key',
+            'word_length': word.length,
+            'current_row': window.currentRow || 1
+          });
+        }
+        
         // Trigger the original game's checkRow function
         if (window.checkRow) {
           window.checkRow();
@@ -911,7 +985,99 @@
       }
     }
     
-    // Fallback: Ensure buttons work even if script fails
+    // Key Events Analytics
+    const keyAnalytics = {
+      totalKeys: 0,
+      backspaceCount: 0,
+      enterCount: 0,
+      sessionStart: Date.now(),
+      keyFrequency: {},
+      
+      trackKey(key) {
+        this.totalKeys++;
+        
+        if (key === 'Backspace') {
+          this.backspaceCount++;
+        } else if (key === 'Enter') {
+          this.enterCount++;
+        }
+        
+        // Track letter frequency
+        if (key.length === 1 && key.match(/[A-ZÇİĞÖŞÜ]/)) {
+          this.keyFrequency[key] = (this.keyFrequency[key] || 0) + 1;
+        }
+        
+        console.log(`📊 Key Analytics: Total=${this.totalKeys}, Backspace=${this.backspaceCount}, Enter=${this.enterCount}, Key=${key}`);
+      },
+      
+      getStats() {
+        const sessionTime = Math.floor((Date.now() - this.sessionStart) / 1000);
+        return {
+          totalKeys: this.totalKeys,
+          backspaceCount: this.backspaceCount,
+          enterCount: this.enterCount,
+          sessionTime: sessionTime,
+          keysPerMinute: Math.round((this.totalKeys / sessionTime) * 60),
+          backspaceRate: Math.round((this.backspaceCount / this.totalKeys) * 100),
+          keyFrequency: this.keyFrequency
+        };
+      },
+      
+      sendToAnalytics() {
+        const stats = this.getStats();
+        
+        // Send to Google Analytics
+        if (window.gtag) {
+          gtag('event', 'wordle_key_stats', {
+            'total_keys': stats.totalKeys,
+            'backspace_count': stats.backspaceCount,
+            'enter_count': stats.enterCount,
+            'session_time': stats.sessionTime,
+            'keys_per_minute': stats.keysPerMinute,
+            'backspace_rate': stats.backspaceRate
+          });
+        }
+        
+        // Send to Firebase if available
+        try {
+          const user = firebase.auth().currentUser;
+          if (user && window.gameistAuth) {
+            const database = firebase.database();
+            database.ref(`analytics/${user.uid}/wordle_key_events`).push({
+              stats: stats,
+              timestamp: Date.now(),
+              game: 'wordle'
+            });
+          }
+        } catch (error) {
+          console.log('Analytics send error:', error);
+        }
+        
+        console.log('📈 Analytics Stats:', stats);
+      }
+    };
+    
+    // Track key events
+    document.addEventListener('keydown', function(e) {
+      if (document.getElementById('wordleGameScreen').classList.contains('hidden')) return;
+      
+      keyAnalytics.trackKey(e.key);
+    });
+    
+    // Send analytics every 30 seconds
+    setInterval(() => {
+      keyAnalytics.sendToAnalytics();
+    }, 30000);
+    
+    // Send analytics on page unload
+    window.addEventListener('beforeunload', () => {
+      keyAnalytics.sendToAnalytics();
+    });
+    
+    // Console command to view stats
+    window.getKeyStats = () => {
+      console.log('📊 Key Event Analytics:', keyAnalytics.getStats());
+    };
     document.addEventListener('DOMContentLoaded', function() {
       console.log('DOM loaded, setting up fallback button handlers');
       

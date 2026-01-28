@@ -6220,7 +6220,219 @@
                     return originalGameOver.apply(this, arguments);
                 };
             }
+          });
         });
+    </script>
+    
+    <!-- GA4 Elementist Event Tracking -->
+    <script>
+      // Elementist specific event tracking
+      function trackElementistEvent(eventName, parameters = {}) {
+        console.log(`🎮 Elementist Event: ${eventName}`, parameters);
+        
+        if (typeof gtag !== 'undefined') {
+          gtag('event', eventName, {
+            'game_name': 'elementist',
+            ...parameters
+          });
+        }
+      }
+      
+      document.addEventListener('DOMContentLoaded', function() {
+        // Track game start
+        const startBtn = document.getElementById('startBtn');
+        if (startBtn) {
+          startBtn.addEventListener('click', function() {
+            trackElementistEvent('oyun_basladi', {
+              'method': 'button_click',
+              'source': 'start_screen'
+            });
+          });
+        }
+        
+        // Track back to menu
+        const backToHubBtn = document.getElementById('backToHubBtn');
+        if (backToHubBtn) {
+          backToHubBtn.addEventListener('click', function() {
+            trackElementistEvent('ana_menuye_donuldu', {
+              'method': 'button_click',
+              'source': 'game_menu'
+            });
+          });
+        }
+        
+        // Track close game
+        const closeGameBtn = document.getElementById('closeGameBtn');
+        if (closeGameBtn) {
+          closeGameBtn.addEventListener('click', function() {
+            trackElementistEvent('oyun_kapatildi', {
+              'method': 'button_click',
+              'source': 'game_menu'
+            });
+          });
+        }
+        
+        // Track builds button
+        const buildsBtn = document.getElementById('buildsBtn');
+        if (buildsBtn) {
+          buildsBtn.addEventListener('click', function() {
+            trackElementistEvent('builds_acildi', {
+              'method': 'button_click',
+              'source': 'game_menu'
+            });
+          });
+        }
+        
+        // Track characters button
+        const charactersBtn = document.getElementById('charactersBtn');
+        if (charactersBtn) {
+          charactersBtn.addEventListener('click', function() {
+            trackElementistEvent('karakterler_acildi', {
+              'method': 'button_click',
+              'source': 'game_menu'
+            });
+          });
+        }
+        
+        // Track settings tabs
+        const settingsTabs = document.querySelectorAll('[data-tab]');
+        settingsTabs.forEach(tab => {
+          tab.addEventListener('click', function() {
+            trackElementistEvent('ayar_sekmesi_acildi', {
+              'method': 'tab_click',
+              'tab_name': this.getAttribute('data-tab'),
+              'source': 'settings'
+            });
+          });
+        });
+        
+        // Track fullscreen toggle
+        const fullscreenToggleBtn = document.getElementById('fullscreenToggleBtn');
+        if (fullscreenToggleBtn) {
+          fullscreenToggleBtn.addEventListener('click', function() {
+            trackElementistEvent('tam_ekran_degistirildi', {
+              'method': 'button_click',
+              'source': 'settings'
+            });
+          });
+        }
+        
+        // Track FPS info toggle
+        const fpsInfoToggleBtn = document.getElementById('fpsInfoToggleBtn');
+        if (fpsInfoToggleBtn) {
+          fpsInfoToggleBtn.addEventListener('click', function() {
+            trackElementistEvent('fps_bilgisi_degistirildi', {
+              'method': 'button_click',
+              'source': 'settings'
+            });
+          });
+        }
+        
+        // Track ability usage
+        const abilityButtons = document.querySelectorAll('.ability-btn');
+        abilityButtons.forEach(btn => {
+          btn.addEventListener('click', function() {
+            const abilityType = this.getAttribute('data-ability') || 'unknown';
+            trackElementistEvent('yetenek_kullanildi', {
+              'method': 'button_click',
+              'ability_type': abilityType,
+              'source': 'gameplay'
+            });
+          });
+        });
+        
+        // Track score milestones
+        let lastScoreMilestone = 0;
+        const scoreMilestones = [100, 500, 1000, 5000, 10000, 50000, 100000];
+        
+        function checkScoreMilestones(currentScore) {
+          scoreMilestones.forEach(milestone => {
+            if (currentScore >= milestone && lastScoreMilestone < milestone) {
+              trackElementistEvent('skor_miles_tamamlandi', {
+                'method': 'gameplay',
+                'milestone': milestone,
+                'current_score': currentScore
+              });
+              lastScoreMilestone = milestone;
+            }
+          });
+        }
+        
+        // Hook into score updates
+        if (window.updateScore) {
+          const originalUpdateScore = window.updateScore;
+          window.updateScore = function(newScore) {
+            checkScoreMilestones(newScore);
+            return originalUpdateScore.apply(this, arguments);
+          };
+        }
+        
+        // Track game duration
+        let gameStartTime = Date.now();
+        
+        function trackGameDuration() {
+          const duration = Math.floor((Date.now() - gameStartTime) / 1000);
+          trackElementistEvent('oyun_suresi', {
+            'method': 'gameplay',
+            'duration_seconds': duration,
+            'source': 'session_end'
+          });
+        }
+        
+        // Track when user leaves the game
+        window.addEventListener('beforeunload', trackGameDuration);
+        
+        // Track dodge ability usage
+        const dodgeBtn = document.getElementById('dodgeBtn');
+        if (dodgeBtn) {
+          dodgeBtn.addEventListener('click', function() {
+            trackElementistEvent('dodge_yetenegi_kullanildi', {
+              'method': 'button_click',
+              'source': 'gameplay'
+            });
+          });
+        }
+        
+        // Track build selection
+        const buildButtons = document.querySelectorAll('[data-build]');
+        buildButtons.forEach(btn => {
+          btn.addEventListener('click', function() {
+            const buildType = this.getAttribute('data-build') || 'unknown';
+            trackElementistEvent('build_secildi', {
+              'method': 'button_click',
+              'build_type': buildType,
+              'source': 'builds_overlay'
+            });
+          });
+        });
+        
+        // Track character selection
+        const characterButtons = document.querySelectorAll('[data-character]');
+        characterButtons.forEach(btn => {
+          btn.addEventListener('click', function() {
+            const characterType = this.getAttribute('data-character') || 'unknown';
+            trackElementistEvent('karakter_secildi', {
+              'method': 'button_click',
+              'character_type': characterType,
+              'source': 'characters_overlay'
+            });
+          });
+        });
+        
+        // Track language changes
+        const languageSelect = document.getElementById('languageSelect');
+        if (languageSelect) {
+          languageSelect.addEventListener('change', function() {
+            trackElementistEvent('dil_degistirildi', {
+              'method': 'dropdown_change',
+              'new_language': this.value,
+              'source': 'settings'
+            });
+          });
+        }
+      });
+      
+      console.log('🎮 GA4 Elementist Event Tracking initialized');
     </script>
   </body>
 </html>
