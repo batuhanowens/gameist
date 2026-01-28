@@ -640,20 +640,25 @@
       // Handle input events
       input.addEventListener('input', function(e) {
         const value = e.target.value.toUpperCase();
-        const currentRow = getCurrentRow();
-        const tiles = currentRow.querySelectorAll('.tile');
         
-        // Clear current row tiles
-        tiles.forEach(tile => tile.textContent = '');
+        // Clear current input to prevent accumulation
+        e.target.value = '';
         
-        // Fill tiles with input
-        for (let i = 0; i < Math.min(value.length, 5); i++) {
-          if (tiles[i]) {
-            tiles[i].textContent = value[i];
+        // Add each letter using the original game's addLetter function
+        for (let i = 0; i < value.length; i++) {
+          if (window.addLetter) {
+            window.addLetter(value[i]);
+          } else {
+            // Fallback: manually add to tiles
+            const currentRow = getCurrentRow();
+            const tiles = currentRow.querySelectorAll('.tile');
+            let emptyTile = Array.from(tiles).find(tile => !tile.textContent);
+            if (emptyTile) {
+              emptyTile.textContent = value[i];
+              emptyTile.classList.add('filled');
+            }
           }
         }
-        
-        // Remove auto-submit - let user press Enter manually
       });
       
       // Handle backspace
@@ -663,20 +668,21 @@
           submitWord();
           // Don't clear input here - let submitWord handle it
         } else if (e.key === 'Backspace') {
-          // Let the browser handle backspace for input field
-          setTimeout(() => {
-            const value = e.target.value.toUpperCase();
+          e.preventDefault();
+          // Use the original game's deleteLetter function
+          if (window.deleteLetter) {
+            window.deleteLetter();
+          } else {
+            // Fallback: manual backspace handling
             const currentRow = getCurrentRow();
             const tiles = currentRow.querySelectorAll('.tile');
-            
-            // Clear and refill tiles
-            tiles.forEach(tile => tile.textContent = '');
-            for (let i = 0; i < Math.min(value.length, 5); i++) {
-              if (tiles[i]) {
-                tiles[i].textContent = value[i];
-              }
+            const filledTiles = Array.from(tiles).filter(tile => tile.textContent);
+            if (filledTiles.length > 0) {
+              const lastTile = filledTiles[filledTiles.length - 1];
+              lastTile.textContent = '';
+              lastTile.classList.remove('filled');
             }
-          }, 10);
+          }
         }
       });
       
@@ -693,6 +699,12 @@
     }
     
     function getCurrentRow() {
+      // Use the original script's currentRow variable
+      if (window.currentRow !== undefined && window.rows) {
+        return window.rows[window.currentRow];
+      }
+      
+      // Fallback to our own logic
       const rows = document.querySelectorAll('#game-board .row');
       for (let row of rows) {
         const tiles = row.querySelectorAll('.tile');
@@ -723,13 +735,23 @@
       
       if (word.length === 5) {
         console.log('Submitting word:', word);
-        // Trigger the original game's submit logic
-        if (window.submitWord) {
-          window.submitWord(word);
-          // Clear input only after successful submission
+        // Trigger the original game's checkRow function
+        if (window.checkRow) {
+          window.checkRow();
+          // Clear input after successful submission
           const input = document.getElementById('wordleInput');
           if (input) {
             input.value = '';
+          }
+        } else {
+          console.log('checkRow function not found, trying submitWord');
+          // Fallback to submitWord if checkRow doesn't exist
+          if (window.submitWord) {
+            window.submitWord(word);
+            const input = document.getElementById('wordleInput');
+            if (input) {
+              input.value = '';
+            }
           }
         }
       }
