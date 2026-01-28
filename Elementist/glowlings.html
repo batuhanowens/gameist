@@ -842,21 +842,49 @@
         /* On mobile, keep perfect centering and adjust spacing/typography instead of scaling */
         body.touch #inGameMenu {
             transform: translate(-50%, -50%);
-            padding: 6px;
+            padding: var(--spacing-md);
             width: min(280px, 90vw);
             max-height: min(68vh, 420px);
             overflow: auto;
+            border-radius: var(--radius-xl);
         }
-        body.touch #inGameMenu .menu-btn { padding: 4px 8px; font-size: 11px; }
-        body.touch #inGameMenu h3 { font-size: 14px; margin-bottom: 8px; }
-        body.touch #inGameMenu label { font-size: 11px; }
-        body.touch #inGameMenu input[type="range"] { height: 20px; }
+        body.touch #inGameMenu .menu-btn { 
+            padding: var(--spacing-sm) var(--spacing-md); 
+            font-size: var(--font-size-xs); 
+            border-radius: var(--radius-md);
+        }
+        body.touch #inGameMenu h3 { 
+            font-size: var(--font-size-lg); 
+            margin-bottom: var(--spacing-md); 
+        }
+        body.touch #inGameMenu label { 
+            font-size: var(--font-size-xs); 
+        }
+        body.touch #inGameMenu input[type="range"] { 
+            height: 6px; 
+        }
+        body.touch #inGameMenu input[type="range"]::-webkit-slider-thumb {
+            width: 16px;
+            height: 16px;
+        }
 
         @media (max-height: 600px) {
-            body.touch #inGameMenu { width: min(92vw, 300px); padding: 6px; }
-            body.touch #inGameMenu .menu-btn { padding: 4px 7px; font-size: 10.5px; }
-            body.touch #inGameMenu h3 { font-size: 13px; }
-            body.touch #inGameMenu label { font-size: 10.5px; }
+            body.touch #inGameMenu { 
+                width: min(92vw, 300px); 
+                padding: var(--spacing-sm); 
+                border-radius: var(--radius-lg);
+            }
+            body.touch #inGameMenu .menu-btn { 
+                padding: var(--spacing-xs) var(--spacing-sm); 
+                font-size: var(--font-size-xs); 
+            }
+            body.touch #inGameMenu h3 { 
+                font-size: var(--font-size-base); 
+                margin-bottom: var(--spacing-sm);
+            }
+            body.touch #inGameMenu label { 
+                font-size: var(--font-size-xs); 
+            }
         }
 
         /* Ensure mobile touch buttons are always tappable when playing */
@@ -1137,17 +1165,19 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.95);
-            padding: 30px;
-            border-radius: 15px;
-            border: 2px solid #00ffff;
-            box-shadow: 0 0 25px #00ffff;
+            background: linear-gradient(135deg, rgba(10, 10, 15, 0.98), rgba(26, 26, 46, 0.95));
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-2xl);
+            border: 2px solid var(--neon-cyan);
+            box-shadow: 0 0 30px var(--neon-cyan), 0 8px 32px rgba(0, 0, 0, 0.3);
             text-align: center;
             display: none;
             pointer-events: all;
             z-index: 20000;
             width: min(520px, 92vw);
             box-sizing: border-box;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         /* While in-game menu is open, keep HUD below and non-interactive */
@@ -1161,8 +1191,91 @@
         }
 
         #inGameMenu h3 {
-            color: #00ffff;
-            margin-bottom: 20px;
+            color: var(--neon-cyan);
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            margin-bottom: var(--spacing-lg);
+            text-shadow: 0 0 20px var(--neon-cyan);
+            letter-spacing: 2px;
+        }
+
+        #inGameMenu .menu-btn {
+            width: 100%;
+            padding: var(--spacing-md) var(--spacing-lg);
+            margin: var(--spacing-sm) 0;
+            border: 2px solid var(--neon-cyan);
+            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, rgba(0, 20, 40, 0.8), rgba(0, 10, 30, 0.8));
+            color: var(--neon-cyan);
+            font-family: var(--font-family-primary);
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+            transition: var(--transition-normal);
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        #inGameMenu .menu-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 255, 0.3);
+            filter: brightness(1.1);
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.9), rgba(0, 15, 45, 0.9));
+        }
+
+        #inGameMenu .menu-btn:active {
+            transform: translateY(0);
+            filter: brightness(0.95);
+        }
+
+        #inGameMenu label {
+            color: var(--neon-cyan-light);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            margin: var(--spacing-sm) 0 var(--spacing-xs);
+            display: block;
+        }
+
+        #inGameMenu input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(90deg, var(--neon-cyan-dark), var(--neon-cyan));
+            outline: none;
+            opacity: 0.8;
+            transition: var(--transition-fast);
+            margin: var(--spacing-sm) 0;
+        }
+
+        #inGameMenu input[type="range"]:hover {
+            opacity: 1;
+        }
+
+        #inGameMenu input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--neon-cyan);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--neon-cyan);
+            transition: var(--transition-fast);
+        }
+
+        #inGameMenu input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 15px var(--neon-cyan-light);
+        }
+
+        #inGameMenu .state-chip {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            font-weight: 600;
+            font-size: var(--font-size-xs);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 999px;
         }
 
         .menu-btn {

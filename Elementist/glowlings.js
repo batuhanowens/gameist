@@ -8748,9 +8748,9 @@ class GlowlingsGame {
     addPlayerHitFlash(damage) {
         if (!this.player) return;
         
-        // Screen flash effect
-        this.screenFlashUntil = Date.now() + 150;
-        this.screenFlashIntensity = Math.min(0.6, 0.1 + (damage / 100));
+        // Reduced screen flash effect - more subtle
+        this.screenFlashUntil = Date.now() + 100; // Reduced from 150ms
+        this.screenFlashIntensity = Math.min(0.25, 0.05 + (damage / 200)); // Reduced intensity
         
         // Damage number particles
         for (let i = 0; i < 3; i++) {
@@ -8768,9 +8768,9 @@ class GlowlingsGame {
             });
         }
         
-        // Screen shake
-        this.screenShakeUntil = Date.now() + 200;
-        this.screenShakeIntensity = damage > 30 ? 3 : 2;
+        // Reduced screen shake
+        this.screenShakeUntil = Date.now() + 120; // Reduced from 200ms
+        this.screenShakeIntensity = damage > 30 ? 2 : 1.5; // Reduced intensity
     }
 
     saveRunStats(runTime, score, wave, kills) {
