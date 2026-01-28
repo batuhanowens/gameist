@@ -3,23 +3,58 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gameist | Elementist - Free Online Roguelite Game</title>
+    <title>Gameist | Play Free Online Games - Elementist, 2048, Wordle & More</title>
     <meta
       name="description"
-      content="Elementist: A challenging roguelite game where you discover the power of elements. Play now for free!"
+      content="Play the best free online games at Gameist! Challenge yourself with Elementist (action roguelite), 2048 (puzzle), Wordle (word game), and more. No downloads required!"
     />
+    <meta name="keywords" content="free online games, browser games, Elementist, 2048, Wordle, puzzle games, action games, word games, no download games, HTML5 games" />
     <meta name="robots" content="index,follow" />
-    <link rel="canonical" href="./index.html" />
+    <link rel="canonical" href="https://gameist.fun/" />
     <meta property="og:site_name" content="Gameist" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Elementist - Roguelite Game | Gameist" />
+    <meta property="og:title" content="Gameist | Play Free Online Games" />
+    <meta property="og:description" content="Discover amazing free online games! Play Elementist, 2048, Wordle and more. No downloads, instant play!" />
+    <meta property="og:url" content="https://gameist.fun/" />
+    <meta property="og:image" content="https://gameist.fun/assets/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Gameist | Play Free Online Games" />
+    <meta name="twitter:description" content="Play the best free online games! Elementist, 2048, Wordle and more. Instant play, no downloads!" />
+    <meta name="twitter:image" content="https://gameist.fun/assets/og-image.jpg" />
+    <meta name="twitter:site" content="@GameistHQ" />
+    <meta name="geo.region" content="US" />
+    <meta name="geo.placename" content="United States" />
+    <meta name="ICBM" content="40.7128;-74.0060" />
+    <link rel="alternate" hreflang="en" href="https://gameist.fun/" />
+    <link rel="alternate" hreflang="en-US" href="https://gameist.fun/" />
+    <link rel="alternate" hreflang="en-GB" href="https://gameist.fun/" />
+    <link rel="alternate" hreflang="x-default" href="https://gameist.fun/" />
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-57L2NFVJYL"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
-      gtag('config', 'G-57L2NFVJYL');
+      gtag('config', 'G-57L2NFVJYL', {
+        'custom_map': {'custom_parameter_1': 'game_type'},
+        'content_group1': 'Gaming Hub',
+        'geo': 'US'
+      });
     </script>
+    
+    <!-- Preconnect to external domains for faster loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    <link rel="preconnect" href="https://www.google-analytics.com" />
+    <link rel="preconnect" href="https://firebase.googleapis.com" />
+    
+    <!-- DNS prefetch for external resources -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="//www.google-analytics.com" />
+    <link rel="dns-prefetch" href="//firebase.googleapis.com" />
     <script>
       (function() {
         var script = document.createElement('script');
@@ -146,7 +181,18 @@
         "name": "Gameist",
         "url": "./index.html",
         "inLanguage": "en",
-        "description": "Gameist main menu that brings all games together in one hub.",
+        "description": "Gameist main hub that brings all free online games together in one place. Play Elementist, 2048, Wordle and more!",
+        "audience": {
+          "@type": "Audience",
+          "audienceType": "Global gamers"
+        },
+        "genre": ["Games", "Entertainment", "Puzzle", "Action"],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock"
+        },
         "hasPart": [
           {
             "@type": "WebPage",
@@ -484,7 +530,7 @@
                 <span class="game-icon">🃏</span>
               </div>
               <p class="game-description" data-i18n="game_elementist_desc">
-              Discover the power of elements, defeat enemies and survive in the most challenging arena!
+              Master the elements in this intense roguelite action game! Battle waves of enemies, collect power-ups, and survive in the neon arena. Perfect for players who love challenging gameplay.
               </p>
               <div class="game-features">
                 <span class="feature-tag">
@@ -519,7 +565,7 @@
             <div class="card-header">
               <div class="game-badge tas">
                 <i class="fas fa-brain"></i>
-                <span data-i18n="badge_classic">Classic</span>
+                <span data-i18n="badge_classic">Viral Hit</span>
               </div>
               <div class="card-actions">
                 <button class="action-btn favorite">
@@ -551,7 +597,7 @@
                 <span class="game-icon">🔢</span>
               </div>
               <p class="game-description" data-i18n="game_2048_desc">
-              Combine numbers, build your strategy and reach 2048!
+              The classic 2048 puzzle game that took the world by storm! Swipe to combine tiles and reach the coveted 2048 tile. Addictive, strategic, and endlessly fun.
               </p>
               <div class="game-features">
                 <span class="feature-tag">
@@ -587,7 +633,7 @@
             <div class="card-header">
               <div class="game-badge brain">
                 <i class="fas fa-brain"></i>
-                <span data-i18n="badge_brain">Brain</span>
+                <span data-i18n="badge_brain">Brain Teaser</span>
               </div>
               <div class="card-actions">
                 <button class="action-btn favorite">
@@ -614,8 +660,7 @@
                 <span class="game-icon">🧠</span>
               </div>
               <p class="game-description" data-i18n="game_wordlist_desc">
-                Become a word master! Combine letters, find hidden words.
-                Perfect experience for brain development and mental gymnastics.
+                Challenge your vocabulary with this addictive word puzzle! Guess the hidden 5-letter word in just 6 tries. Perfect for word puzzle enthusiasts and brain training.
               </p>
               <div class="game-features">
                 <span class="feature-tag">
