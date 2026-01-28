@@ -6047,6 +6047,53 @@
             #gameist-auth-container {
                 display: none !important;
             }
+            
+            /* Hide all desktop ads on mobile */
+            .desktop-ad {
+                display: none !important;
+            }
+            
+            /* Optimize side ads for mobile */
+            #leftAd {
+                position: fixed;
+                left: -468px;
+                top: 20px;
+                transform: none;
+                z-index: 9999;
+                width: 468px;
+                height: 60px;
+                display: block !important;
+                animation: slideInLeft 0.5s ease-out forwards;
+            }
+            
+            #rightAd {
+                position: fixed;
+                right: -468px;
+                top: 20px;
+                transform: none;
+                z-index: 9999;
+                width: 468px;
+                height: 60px;
+                display: block !important;
+                animation: slideInRight 0.5s ease-out forwards;
+            }
+            
+            @keyframes slideInLeft {
+                from { left: -468px; }
+                to { left: 0; }
+            }
+            
+            @keyframes slideInRight {
+                from { right: -468px; }
+                to { right: 0; }
+            }
+        }
+        
+        @media (min-width: 769px) {
+            /* Hide side ads on desktop */
+            #leftAd, #rightAd {
+                display: none !important;
+            }
         }
     </style>
   </body>
