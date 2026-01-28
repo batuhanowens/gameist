@@ -137,12 +137,47 @@
       <!-- Hidden input for mobile keyboard -->
       <input type="text" id="wordleInput" style="
         position: fixed;
-        top: -9999px;
-        left: -9999px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         opacity: 0;
         pointer-events: none;
         z-index: -1;
+        font-size: 16px;
       " autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+      <!-- Prevent scroll styles -->
+      <style>
+        body {
+          overflow: hidden;
+          position: fixed;
+          width: 100%;
+          height: 100%;
+        }
+        
+        #wordleGameScreen {
+          overflow: hidden;
+          position: relative;
+          height: 100vh;
+        }
+        
+        #game-board {
+          overflow: hidden;
+        }
+        
+        /* Allow scroll only for specific cases */
+        #gameMenuModal {
+          overflow-y: auto;
+        }
+        
+        /* Prevent input from causing scroll */
+        #wordleInput {
+          position: fixed !important;
+          top: 50% !important;
+          left: 50% !important;
+          transform: translate(-50%, -50%) !important;
+        }
+      </style>
 
       <div id="game-board" onclick="focusWordleInput()">
         <div class="row">
@@ -627,7 +662,20 @@
     function focusWordleInput() {
       const input = document.getElementById('wordleInput');
       if (input) {
+        // Save current scroll position
+        const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
+        const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+        
+        // Focus the input
         input.focus();
+        
+        // Restore scroll position immediately
+        setTimeout(() => {
+          window.scrollTo(scrollX, scrollY);
+          document.body.scrollTop = scrollY;
+          document.documentElement.scrollTop = scrollY;
+        }, 0);
+        
         // Prevent zoom on iOS
         input.style.fontSize = '16px';
       }
@@ -686,11 +734,60 @@
         }
       });
       
-      // Prevent scroll on focus
+      // Prevent scroll on focus and during typing
       input.addEventListener('focus', function() {
         window.scrollTo(0, 0);
         document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
       });
+      
+      // Prevent scroll during input
+      input.addEventListener('input', function() {
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+      });
+      
+      // Prevent scroll on keydown
+      input.addEventListener('keydown', function() {
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+      });
+      
+      // Prevent scroll on touch events
+      input.addEventListener('touchstart', function() {
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+      });
+      
+      // Prevent scroll on game board click
+      const gameBoard = document.getElementById('game-board');
+      if (gameBoard) {
+        gameBoard.addEventListener('click', function(e) {
+          e.preventDefault();
+          window.scrollTo(0, 0);
+          document.body.scrollTop = 0;
+          document.documentElement.scrollTop = 0;
+          focusWordleInput();
+        });
+      }
+      
+      // Global scroll prevention
+      let scrollTimeout;
+      function preventScroll() {
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+      }
+      
+      // Check scroll position frequently
+      setInterval(() => {
+        if (window.pageYOffset > 0 || document.body.scrollTop > 0 || document.documentElement.scrollTop > 0) {
+          preventScroll();
+        }
+      }, 100);
       
       // Auto-focus when game starts
       setTimeout(() => {
