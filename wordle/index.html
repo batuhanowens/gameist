@@ -224,8 +224,8 @@
 <div class="keyboard-row keyboard-row-wide">
   <button id="" class="wide-button">Enter</button>
   <button class="wide-button">⌫</button>
-  <button id="menu-button" class="wide-button" type="button"><i class="fas fa-bars"></i> <span data-lang="menu">Menü</span></button>
-  <button id="reset-button" class="wide-button" type="button"><span data-lang="refresh">Yenile</span></button>
+  <button id="menu-button" class="wide-button" type="button" onclick="openGameMenu()"><i class="fas fa-bars"></i> <span data-lang="menu">Menü</span></button>
+  <button id="reset-button" class="wide-button" type="button" onclick="resetWordleGame()"><span data-lang="refresh">Yenile</span></button>
 </div>
    
 <!-- Modal taşındı: Artık body sonunda -->
@@ -553,11 +553,11 @@
       </div>
 
       <div class="modal-buttons">
-        <button id="resumeGame" class="menu-btn primary">
+        <button id="resumeGame" class="menu-btn primary" onclick="resumeGameFromMenu()">
           <i class="fas fa-play"></i>
           <span data-lang="resumeGame">Oyuna Devam Et</span>
         </button>
-        <button id="backToMainMenu" class="menu-btn secondary">
+        <button id="backToMainMenu" class="menu-btn secondary" onclick="backToMainMenuFromMenu()">
           <i class="fas fa-home"></i>
           <span data-lang="back">Geri</span>
         </button>
@@ -592,6 +592,54 @@
       const rulesScreen = document.getElementById('rulesScreen');
       if (mainMenu) mainMenu.classList.add('hidden');
       if (rulesScreen) rulesScreen.classList.remove('hidden');
+    }
+    
+    // Game control functions
+    function openGameMenu() {
+      console.log('Game menu clicked');
+      const gameScreen = document.getElementById('wordleGameScreen');
+      const gameMenuModal = document.getElementById('gameMenuModal');
+      if (gameScreen) gameScreen.classList.add('hidden');
+      if (gameMenuModal) gameMenuModal.style.display = 'block';
+    }
+    
+    function resetWordleGame() {
+      console.log('Reset game clicked');
+      // Clear the game board
+      const tiles = document.querySelectorAll('.tile');
+      tiles.forEach(tile => {
+        tile.textContent = '';
+        tile.className = 'tile';
+      });
+      
+      // Clear message
+      const message = document.getElementById('message');
+      if (message) message.textContent = '';
+      
+      // Reset game state (basic reset)
+      window.currentWord = '';
+      window.currentRow = 0;
+      window.currentTile = 0;
+      window.gameOver = false;
+      
+      console.log('Wordle game reset');
+    }
+    
+    // Modal control functions
+    function resumeGameFromMenu() {
+      console.log('Resume game from menu');
+      const gameMenuModal = document.getElementById('gameMenuModal');
+      const gameScreen = document.getElementById('wordleGameScreen');
+      if (gameMenuModal) gameMenuModal.style.display = 'none';
+      if (gameScreen) gameScreen.classList.remove('hidden');
+    }
+    
+    function backToMainMenuFromMenu() {
+      console.log('Back to main menu from modal');
+      const gameMenuModal = document.getElementById('gameMenuModal');
+      const mainMenu = document.getElementById('mainMenu');
+      if (gameMenuModal) gameMenuModal.style.display = 'none';
+      if (mainMenu) mainMenu.classList.remove('hidden');
     }
     
     // Fallback: Ensure buttons work even if script fails
