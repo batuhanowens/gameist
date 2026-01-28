@@ -6221,6 +6221,98 @@
                 };
             }
         });
+        
+        // In-page push ad function
+        function showInPagePushAd() {
+            console.log('📢 Showing in-page push ad');
+            
+            // Create push notification style ad
+            const pushAd = document.createElement('div');
+            pushAd.id = 'inpage-push-ad';
+            pushAd.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                width: 360px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 12px;
+                padding: 16px;
+                color: white;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                z-index: 9999;
+                animation: slideInRight 0.5s ease;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            `;
+            
+            pushAd.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 12px; height: 12px; background: #ff6b6b; border-radius: 50%; margin-right: 8px; animation: pulse 2s infinite;"></div>
+                        <span style="font-size: 14px; font-weight: 600;">🔔 ÖNERİ</span>
+                    </div>
+                    <button onclick="closeInPagePushAd()" style="
+                        background: none;
+                        border: none;
+                        color: white;
+                        font-size: 18px;
+                        cursor: pointer;
+                        padding: 0;
+                        width: 24px;
+                        height: 24px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 50%;
+                        transition: background 0.2s;
+                    " onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='none'">✕</button>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <div style="font-size: 16px; font-weight: bold; margin-bottom: 4px;">🎮 Ücretsiz Oyunlar Keşfet!</div>
+                    <div style="font-size: 13px; opacity: 0.9;">Yeni ve heyecanlı oyunlar seni bekliyor!</div>
+                </div>
+                <div id="inpage-push-content" style="width: 100%; height: 90px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                    <script src="https://pl28593867.effectivegatecpm.com/64/3c/29/643c29985d8b770cf97d0f5bd88ac66e.js"><\/script>
+                </div>
+            `;
+            
+            // Add to page
+            document.body.appendChild(pushAd);
+            
+            // Auto-close after 15 seconds
+            setTimeout(() => {
+                closeInPagePushAd();
+            }, 15000);
+        }
+        
+        // Close in-page push ad
+        function closeInPagePushAd() {
+            const ad = document.getElementById('inpage-push-ad');
+            if (ad) {
+                ad.style.animation = 'slideOutRight 0.5s ease';
+                setTimeout(() => {
+                    ad.remove();
+                }, 500);
+            }
+        }
+        
+        // Add additional animations
+        const additionalStyle = document.createElement('style');
+        additionalStyle.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+            @keyframes pulse {
+                0% { transform: scale(1); opacity: 1; }
+                50% { transform: scale(1.2); opacity: 0.7; }
+                100% { transform: scale(1); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(additionalStyle);
     </script>
   </body>
 </html>
