@@ -8647,18 +8647,18 @@ class GlowlingsGame {
         const finalStats = document.getElementById('finalStats');
         if (finalStats) finalStats.innerHTML = `
             <div style="margin-bottom:8px;">
-                <span style="color:#22c55e; font-weight:700; font-size:16px;">🏆 Final Skor: ${this.score}</span>
+                <span style="color:var(--neon-green); font-weight:700; font-size:18px;">🏆 Final Score: ${this.score}</span>
             </div>
-            <div style="margin-bottom:4px;">
-                <span style="color:#94a3b8;">Boyut:</span> 
+            <div style="margin-bottom:6px;">
+                <span style="color:#94a3b8;">Size:</span> 
                 <span style="color:#e5e7eb; font-weight:600;">${this.player ? this.player.size.toFixed(1) : '0'}</span>
             </div>
-            <div style="margin-bottom:4px;">
+            <div style="margin-bottom:6px;">
                 <span style="color:#94a3b8;">Element:</span> 
                 <span style="color:#e5e7eb; font-weight:600;">${this.player ? this.getElementDisplayName(this.player.element) : '-'}</span>
             </div>
             <div>
-                <span style="color:#94a3b8;">Süre:</span> 
+                <span style="color:#94a3b8;">Duration:</span> 
                 <span style="color:#e5e7eb; font-weight:600;">${this.formatRunTime(this.gameTime - this.remainingTime)}</span>
             </div>
         `;
@@ -8748,9 +8748,9 @@ class GlowlingsGame {
     addPlayerHitFlash(damage) {
         if (!this.player) return;
         
-        // Reduced screen flash effect - more subtle
-        this.screenFlashUntil = Date.now() + 100; // Reduced from 150ms
-        this.screenFlashIntensity = Math.min(0.25, 0.05 + (damage / 200)); // Reduced intensity
+        // Vignette-style damage flash effect
+        this.screenFlashUntil = Date.now() + 150; // Slightly longer for vignette effect
+        this.screenFlashIntensity = Math.min(0.4, 0.1 + (damage / 150)); // Adjusted for vignette
         
         // Damage number particles
         for (let i = 0; i < 3; i++) {
@@ -9220,10 +9220,30 @@ class GlowlingsGame {
         // Draw background by selected map (fallback to stars)
         this.drawBackgroundByMap();
         
-        // Apply screen flash if active
+        // Apply vignette-style screen flash if active
         if (this.screenFlashUntil && Date.now() < this.screenFlashUntil) {
             const intensity = this.screenFlashIntensity || 0.3;
-            this.ctx.fillStyle = `rgba(255, 100, 100, ${intensity})`;
+            const centerX = this.canvas.width / 2;
+            const centerY = this.canvas.height / 2;
+            const maxRadius = Math.sqrt(centerX * centerX + centerY * centerY);
+            
+            // Reduce intensity on mobile devices for less eye strain
+            const mobileMultiplier = this.usingTouch ? 0.5 : 1.0;
+            const adjustedIntensity = intensity * mobileMultiplier;
+            
+            // Create radial gradient for vignette effect
+            const gradient = this.ctx.createRadialGradient(
+                centerX, centerY, 0,
+                centerX, centerY, maxRadius
+            );
+            
+            // Red vignette that fades from center to edges
+            gradient.addColorStop(0, `rgba(255, 100, 100, 0)`); // Transparent center
+            gradient.addColorStop(0.4, `rgba(255, 100, 100, ${adjustedIntensity * 0.3})`); // Light red
+            gradient.addColorStop(0.7, `rgba(255, 80, 80, ${adjustedIntensity * 0.6})`); // Medium red
+            gradient.addColorStop(1, `rgba(255, 60, 60, ${adjustedIntensity})`); // Full red at edges
+            
+            this.ctx.fillStyle = gradient;
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
         
