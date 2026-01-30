@@ -6079,9 +6079,12 @@
             }
         }
         
-        // Run on load and resize
-        window.addEventListener('load', manageAds);
+        // Run ad management on page load and resize
+        document.addEventListener('DOMContentLoaded', manageAds);
         window.addEventListener('resize', manageAds);
+        
+        // Also run after a short delay to ensure all elements are loaded
+        setTimeout(manageAds, 100);
     </script>
     
     <!-- Hide auth container on mobile with CSS -->
