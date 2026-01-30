@@ -37,6 +37,38 @@ class GlowlingsGame {
         this.saveAchievements = () => {
             try { localStorage.setItem('elementist_ach', JSON.stringify(this.ach || { unlocked: {} })); } catch {}
         };
+        
+        // --- Meta-Progression helpers ---
+        this.loadMetaProgression = () => {
+            try {
+                const raw = localStorage.getItem('elementist_meta');
+                const mp = raw ? JSON.parse(raw) : { 
+                    damageBonus: 0, 
+                    unlocked: false, 
+                    totalRuns: 0, 
+                    highScore: 0,
+                    nextUnlockScore: 1000 
+                };
+                if (!mp || typeof mp !== 'object') return { 
+                    damageBonus: 0, 
+                    unlocked: false, 
+                    totalRuns: 0, 
+                    highScore: 0,
+                    nextUnlockScore: 1000 
+                };
+                return mp;
+            } catch { return { 
+                damageBonus: 0, 
+                unlocked: false, 
+                totalRuns: 0, 
+                highScore: 0,
+                nextUnlockScore: 1000 
+            }; }
+        };
+        
+        this.saveMetaProgression = () => {
+            try { localStorage.setItem('elementist_meta', JSON.stringify(this.metaProgression)); } catch {}
+        };
         this.ensureAchievementsUI = () => {
             try {
                 const panel = document.getElementById('statsPanel');
@@ -392,6 +424,114 @@ class GlowlingsGame {
                 this.showToast && this.showToast(`Achievement: ${name}`);
             } catch {}
         };
+        
+        // --- Meta-Progression Functions ---
+        this.checkMetaProgression = () => {
+            try {
+                if (!this.metaProgression.unlocked && this.score >= this.metaProgression.nextUnlockScore) {
+                    this.metaProgression.unlocked = true;
+                    this.metaProgression.damageBonus = 0.05; // +5% hasar
+                    this.metaProgression.highScore = Math.max(this.metaProgression.highScore, this.score);
+                    this.saveMetaProgression();
+                    this.unlockAchievement('damage_master', '🔓 Hasar Ustası: +%5 kalıcı hasar!');
+                    this.showToast && this.showToast('🎉 Meta-Progression: +%5 kalıcı hasar açıldı!');
+                }
+                
+                // Update high score
+                this.metaProgression.highScore = Math.max(this.metaProgression.highScore, this.score);
+                this.metaProgression.totalRuns++;
+                this.saveMetaProgression();
+            } catch {}
+        };
+        
+        this.applyMetaDamageBonus = (baseDamage) => {
+            return baseDamage * (1 + this.metaProgression.damageBonus);
+        };
+        
+        this.getNextUnlockProgress = () => {
+            if (this.metaProgression.unlocked) return 100; // Already unlocked
+            return Math.min(100, (this.score / this.metaProgression.nextUnlockScore) * 100);
+        };
+        
+        // --- Enhanced Game Over Stats ---
+        this.showEnhancedGameOverStats = () => {
+            try {
+                const statsContainer = document.getElementById('enhancedStats');
+                if (!statsContainer) return;
+                
+                const progress = this.getNextUnlockProgress();
+                const nextUnlockScore = this.metaProgression.nextUnlockScore;
+                const scoreToNext = Math.max(0, nextUnlockScore - this.score);
+                const isClose = scoreToNext <= 200 && scoreToNext > 0;
+                const isVeryClose = scoreToNext <= 50 && scoreToNext > 0;
+                
+                // Calculate "one more run" messages
+                const getMotivationalMessage = () => {
+                    if (this.metaProgression.unlocked) {
+                        return "🔥 Damage bonus active! Keep pushing your limits!";
+                    } else if (isVeryClose) {
+                        return `⚡ SO CLOSE! Just ${scoreToNext} points from +5% damage!`;
+                    } else if (isClose) {
+                        return `🎯 Almost there! ${scoreToNext} points to unlock bonus!`;
+                    } else if (scoreToNext <= 500) {
+                        return `💪 Getting warmer! ${scoreToNext} points to next unlock!`;
+                    } else {
+                        return `🚀 Keep going! ${scoreToNext} points to meta-progression!`;
+                    }
+                };
+                
+                // Calculate improvement from last run
+                const lastRunScore = this.runHistory?.lastRuns?.[0]?.score || 0;
+                const improvement = this.score - lastRunScore;
+                const improvementPercent = lastRunScore > 0 ? Math.round((improvement / lastRunScore) * 100) : 0;
+                
+                statsContainer.innerHTML = `
+                    <div style="background: rgba(0,0,0,0.8); border: 2px solid var(--neon-cyan); border-radius: 12px; padding: 16px; margin: 12px 0;">
+                        <h3 style="color: var(--neon-cyan); margin: 0 0 12px 0; font-size: 16px;">📊 Meta-Progression</h3>
+                        
+                        ${!this.metaProgression.unlocked ? `
+                            <div style="margin-bottom: 8px;">
+                                <div style="color: white; font-size: 12px; margin-bottom: 4px;">
+                                    🎯 Next Unlock: +5% Damage (${scoreToNext} pts needed)
+                                </div>
+                                <div style="background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan)); width: ${progress}%; height: 100%; transition: width 0.5s ease;"></div>
+                                </div>
+                            </div>
+                            ${isVeryClose ? `
+                                <div style="color: var(--neon-red); font-size: 11px; font-weight: 600; animation: pulse 0.8s infinite;">
+                                    ⚡ SO CLOSE! Only ${scoreToNext} points to unlock!
+                                </div>
+                            ` : isClose ? `
+                                <div style="color: var(--neon-orange); font-size: 11px; font-weight: 600; animation: pulse 1s infinite;">
+                                    🔥 So close! Only ${scoreToNext} points to unlock!
+                                </div>
+                            ` : ''}
+                        ` : `
+                            <div style="color: var(--neon-green); font-size: 12px; font-weight: 600;">
+                                ✅ +5% Damage Bonus Active
+                            </div>
+                        `}
+                        
+                        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.2);">
+                            <div style="color: var(--neon-yellow); font-size: 11px; font-weight: 600; margin-bottom: 4px;">
+                                ${getMotivationalMessage()}
+                            </div>
+                            ${improvement > 0 ? `
+                                <div style="color: var(--neon-green); font-size: 10px;">
+                                    📈 +${improvement} points from last run (${improvementPercent}% improvement!)
+                                </div>
+                            ` : ''}
+                            <div style="color: rgba(255,255,255,0.8); font-size: 11px; margin-top: 4px;">
+                                📈 Total Runs: ${this.metaProgression.totalRuns} | 🏆 Best Score: ${this.metaProgression.highScore}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                console.error('Error showing enhanced stats:', e);
+            }
+        };
         // --- Settings persistence ---
         this.loadUserSettings = () => {
             try {
@@ -555,6 +695,15 @@ class GlowlingsGame {
 
         // Achievements (very lightweight)
         this.ach = this.loadAchievements ? this.loadAchievements() : { unlocked: {} };
+
+        // Meta-Progression System
+        this.metaProgression = this.loadMetaProgression ? this.loadMetaProgression() : {
+            damageBonus: 0,
+            unlocked: false,
+            totalRuns: 0,
+            highScore: 0,
+            nextUnlockScore: 1000
+        };
 
         // Core defaults
         this.player = null;
@@ -3237,19 +3386,19 @@ class GlowlingsGame {
         const w = Math.max(1, wave|0);
         let weights;
         if (w <= 3) {
-            weights = { weak: 0.7, fast: 0.2, tank: 0.1 };
+            weights = { weak: 0.6, fast: 0.2, tank: 0.1, phase: 0.1 }; // Add Phase Ghost early
         } else if (w <= 6) {
-            weights = { weak: 0.55, fast: 0.25, tank: 0.15, elite: 0.05 };
+            weights = { weak: 0.45, fast: 0.25, tank: 0.15, elite: 0.05, phase: 0.1 };
         } else if (w <= 10) {
-            weights = { weak: 0.45, fast: 0.25, tank: 0.20, elite: 0.10 };
+            weights = { weak: 0.35, fast: 0.25, tank: 0.20, elite: 0.10, phase: 0.1 };
         } else if (w <= 15) {
-            weights = { weak: 0.35, fast: 0.25, tank: 0.25, elite: 0.15 };
+            weights = { weak: 0.25, fast: 0.25, tank: 0.25, elite: 0.15, phase: 0.1 };
         } else { // 16-20 (boss handled separately)
-            weights = { weak: 0.25, fast: 0.30, tank: 0.25, elite: 0.20 };
+            weights = { weak: 0.15, fast: 0.30, tank: 0.25, elite: 0.20, phase: 0.1 };
         }
         const roll = Math.random();
         let acc = 0;
-        for (const k of ['weak','fast','tank','elite']) {
+        for (const k of ['weak','fast','tank','elite','phase']) {
             if (weights[k]) { acc += weights[k]; if (roll < acc) return k; }
         }
         return 'weak';
@@ -3257,7 +3406,7 @@ class GlowlingsGame {
 
     // Compute enemy HP scaling by type and wave
     getEnemyStats(type, wave) {
-        const base = { weak: 20, fast: 18, tank: 45, elite: 80 };
+        const base = { weak: 20, fast: 18, tank: 45, elite: 80, phase: 25 }; // Phase Ghost has moderate HP
         const b = base[type] || base.weak;
         const w = Math.max(1, wave|0);
         let hp = Math.round(b * Math.pow(1.10, w - 1)); // ~+10% per wave
@@ -4173,6 +4322,9 @@ class GlowlingsGame {
             }
         }
 
+        // Update Neon Storm effects
+        this.updateNeonStorm(deltaTime);
+
         // Check if shop overlay is open to freeze movement globally
         const shopOverlay = document.getElementById('shopOverlay');
         const shopOpen = !!(shopOverlay && shopOverlay.style.display && shopOverlay.style.display !== 'none');
@@ -4393,6 +4545,9 @@ class GlowlingsGame {
             case 'diamond':
                 this._drawRegularPolygon(screenPos, size, 4, Math.PI/4);
                 break;
+            case 'ghost':
+                this._drawGhost(screenPos, size);
+                break;
             case 'circle':
                 ctx.arc(screenPos.x, screenPos.y, size, 0, Math.PI * 2);
                 break;
@@ -4559,6 +4714,141 @@ class GlowlingsGame {
             if (i===0) ctx.moveTo(x,y); else ctx.quadraticCurveTo((p.x+x)/2, (p.y+y)/2, x, y);
         }
         ctx.closePath();
+    }
+
+    _drawGhost(p, r) {
+        const ctx = this.ctx;
+        // Ghost body: wavy top half
+        ctx.beginPath();
+        const waves = 8;
+        for (let i = 0; i <= waves; i++) {
+            const angle = Math.PI + (i / waves) * Math.PI; // Top half (180° to 360°)
+            const waveOffset = Math.sin(i * 1.5) * r * 0.15;
+            const x = p.x + Math.cos(angle) * (r + waveOffset);
+            const y = p.y + Math.sin(angle) * (r + waveOffset);
+            if (i === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        }
+        
+        // Wavy bottom tail
+        const tailPoints = 4;
+        for (let i = 0; i <= tailPoints; i++) {
+            const x = p.x - r + (i / tailPoints) * (r * 2);
+            const waveHeight = Math.sin((i / tailPoints) * Math.PI * 2) * r * 0.2;
+            const y = p.y + r + waveHeight;
+            ctx.lineTo(x, y);
+        }
+        
+        ctx.closePath();
+    }
+
+    // Neon Storm modifier: temporary chaos with visual effects
+    activateNeonStorm() {
+        this.neonStormActive = true;
+        this.neonStormEndAt = Date.now() + 20000; // 20 seconds duration
+        
+        // Visual notification
+        this.showNotification && this.showNotification('⚡ NEON STORM ⚡', 'Chaos mode activated!', '#00ffff');
+        
+        // Apply storm effects
+        this.weaponFireRate *= 0.7; // 30% faster firing
+        this.weaponDamage *= 1.2;   // 20% more damage
+        this.player.speedBoost *= 1.15; // 15% faster movement
+        
+        // Enhanced visual effects
+        this.neonStormParticles = [];
+        this.neonStormLightning = [];
+    }
+    
+    // Update Neon Storm effects
+    updateNeonStorm(dt) {
+        if (!this.neonStormActive) return;
+        
+        const now = Date.now();
+        if (now > this.neonStormEndAt) {
+            // End storm
+            this.neonStormActive = false;
+            this.weaponFireRate /= 0.7;
+            this.weaponDamage /= 1.2;
+            this.player.speedBoost /= 1.15;
+            this.neonStormParticles = [];
+            this.neonStormLightning = [];
+            return;
+        }
+        
+        // Generate random lightning effects
+        if (Math.random() < 0.02) { // 2% chance per frame
+            this.neonStormLightning.push({
+                start: new Vector2(Math.random() * this.canvas.width, 0),
+                end: new Vector2(Math.random() * this.canvas.width, this.canvas.height),
+                life: 200,
+                color: ['#00ffff', '#ff00ff', '#ffff00'][Math.floor(Math.random() * 3)]
+            });
+        }
+        
+        // Generate particles
+        if (Math.random() < 0.1) { // 10% chance per frame
+            this.neonStormParticles.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height,
+                vx: (Math.random() - 0.5) * 2,
+                vy: (Math.random() - 0.5) * 2,
+                life: 1000,
+                color: ['#00ffff', '#ff00ff', '#ffff00', '#ff00aa'][Math.floor(Math.random() * 4)]
+            });
+        }
+        
+        // Update particles
+        this.neonStormParticles = this.neonStormParticles.filter(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life -= dt;
+            return p.life > 0;
+        });
+        
+        // Update lightning
+        this.neonStormLightning = this.neonStormLightning.filter(l => {
+            l.life -= dt;
+            return l.life > 0;
+        });
+    }
+    
+    // Draw Neon Storm effects
+    drawNeonStorm() {
+        if (!this.neonStormActive) return;
+        
+        const ctx = this.ctx;
+        
+        // Draw lightning
+        ctx.save();
+        ctx.lineWidth = 2;
+        ctx.shadowBlur = 10;
+        this.neonStormLightning.forEach(l => {
+            ctx.strokeStyle = l.color;
+            ctx.shadowColor = l.color;
+            ctx.globalAlpha = l.life / 200;
+            ctx.beginPath();
+            ctx.moveTo(l.start.x, l.start.y);
+            ctx.lineTo(l.end.x, l.end.y);
+            ctx.stroke();
+        });
+        ctx.restore();
+        
+        // Draw particles
+        ctx.save();
+        this.neonStormParticles.forEach(p => {
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.life / 1000;
+            ctx.shadowBlur = 5;
+            ctx.shadowColor = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        ctx.restore();
     }
 
     // Activate a quick dodge/dash with brief invulnerability
@@ -7862,7 +8152,27 @@ class GlowlingsGame {
             this.ctx.fillStyle = bot.color;
             this.ctx.strokeStyle = '#ffffff';
             this.ctx.lineWidth = 1;
+            
+            // Phase Ghost visual effects
+            if (bot.isPhaseGhost) {
+                if (bot.isPhasing) {
+                    // Phasing: translucent with ethereal glow
+                    this.ctx.globalAlpha = 0.4;
+                    this.ctx.fillStyle = '#ff00ff';
+                    this.ctx.strokeStyle = '#ffffff';
+                    this.ctx.shadowBlur = 15;
+                    this.ctx.shadowColor = '#ff00ff';
+                } else {
+                    // Normal: slight transparency
+                    this.ctx.globalAlpha = 0.8;
+                }
+            }
+            
             this.drawEnemyShape(screenPos, sizeV, bot.shape, this.waveNumber);
+            
+            // Reset effects
+            this.ctx.globalAlpha = 1;
+            this.ctx.shadowBlur = 0;
 
             // Role-specific idle VFX for better readability
             try {
@@ -8649,6 +8959,12 @@ class GlowlingsGame {
             const outcome = (this.waveNumber >= (this.targetWinWave || 9999)) ? 'win' : 'death';
             this.recordRunEnd && this.recordRunEnd(outcome);
         } catch (_) {}
+        
+        // Check meta-progression and update stats
+        this.checkMetaProgression && this.checkMetaProgression();
+        
+        // Show enhanced game over stats
+        this.showEnhancedGameOverStats && this.showEnhancedGameOverStats();
 
         // Show final stats with enhanced information
         const finalStats = document.getElementById('finalStats');
@@ -9242,6 +9558,9 @@ class GlowlingsGame {
         
         // Draw background by selected map (fallback to stars)
         this.drawBackgroundByMap();
+        
+        // Draw Neon Storm effects (before game elements for background effect)
+        this.drawNeonStorm();
         
         // Apply vignette-style screen flash if active
         if (this.screenFlashUntil && Date.now() < this.screenFlashUntil) {
@@ -10910,6 +11229,12 @@ class GlowlingsGame {
         try { this.detachConsumableBarFromShop && this.detachConsumableBarFromShop(); } catch(_) {}
         // SFX
         this.playWaveStart();
+        
+        // Neon Storm modifier: chance to activate on wave start
+        if (this.waveNumber >= 5 && Math.random() < 0.15) { // 15% chance from wave 5+
+            this.activateNeonStorm();
+        }
+        
         // Shrink play zone slightly each wave (kept centered)
         if (this.playZone) {
             const factor = this.playZoneShrinkFactor || 1;
@@ -11310,10 +11635,12 @@ class GlowlingsGame {
                 const isGravity = cwNorm.startsWith('grav') || !!this.gravityOrb;
                 // Common base weapon
                 const dmg = this.weaponDamage != null ? this.weaponDamage : (this.weaponDmg||0);
+                // Apply meta-progression damage bonus
+                const finalDamage = this.applyMetaDamageBonus ? this.applyMetaDamageBonus(dmg) : dmg;
                 const frMs = Math.max(1, this.weaponFireRate || 0);
                 const frS = (frMs/1000).toFixed(2)+'s';
                 const rng = this.weaponRange || this.baseWeaponRange || 0;
-                rows.push(`<div>${t('wepDamage','Damage')}</div><div>${dmg}</div>`);
+                rows.push(`<div>${t('wepDamage','Damage')}</div><div>${finalDamage}${this.metaProgression.unlocked ? ' ✨' : ''}</div>`);
                 rows.push(`<div>${t('wepFireRate','Fire Rate')}</div><div>${frS}</div>`);
                 rows.push(`<div>${t('wepRange','Range')}</div><div>${rng}</div>`);
                 if (isTurrets) {
@@ -11379,6 +11706,7 @@ class GlowlingsGame {
             case 'parasite': return 'spider';
             case 'juggernaut': return 'block';
             case 'mutant': return 'amoeba';
+            case 'phase': return 'ghost'; // New Phase Ghost enemy
             default: return 'circle';
         }
     }
@@ -11398,6 +11726,7 @@ class GlowlingsGame {
             case 'parasite': return '#7f8c8d';  // gray
             case 'juggernaut': return '#7a5cff';// violet
             case 'mutant': return '#9c27b0';    // purple
+            case 'phase': return '#ff00ff';    // neon magenta for Phase Ghost
             default: return this.getRandomNeonColor();
         }
     }
@@ -12275,7 +12604,14 @@ class GlowlingsGame {
                             if (d < bestD && d <= range) { best = b; bestD = d; bestIdx = i; }
                         }
                         if (!best) break;
-                        if (best.hp != null) best.hp -= dmg;
+                        if (best.hp != null) {
+                            // Phase Ghosts take reduced damage while phasing
+                            if (best.isPhaseGhost && best.isPhasing) {
+                                best.hp -= dmg * 0.1; // 90% damage reduction while phasing
+                            } else {
+                                best.hp -= dmg;
+                            }
+                        }
                         best._stunTimer = Math.max(best._stunTimer||0, (g.stunMs||150));
                         // jagged points for electric feel
                         const pts = makeJagged(from, best.pos);
@@ -12777,6 +13113,18 @@ class AIBot {
         this.spawnedAt = Date.now();
         this._lastCornerEscapeAt = 0;
         this._avoidCornerUntil = 0;
+        
+        // Phase Ghost specific properties
+        this.isPhaseGhost = (shape === 'ghost');
+        if (this.isPhaseGhost) {
+            this.phaseCooldown = 3000; // 3 seconds between phases
+            this.phaseDuration = 800; // 0.8 seconds of invulnerability
+            this.lastPhaseAt = 0;
+            this.isPhasing = false;
+            this.phaseEndAt = 0;
+            this.speedMult = 1.3; // Phase ghosts are faster
+            this.size = 14; // Slightly smaller for ghost effect
+        }
     }
     getSpeed() {
         // Moderate baseline; large bots slow down a bit more to reduce early overwhelm
@@ -12792,6 +13140,23 @@ class AIBot {
     }
     update(game, dt) {
         const now = Date.now();
+        
+        // Phase Ghost phasing logic
+        if (this.isPhaseGhost) {
+            // Check if we should phase (when low health or randomly)
+            const shouldPhase = this.hp < this.maxHP * 0.4 || Math.random() < 0.01;
+            if (shouldPhase && !this.isPhasing && now - this.lastPhaseAt > this.phaseCooldown) {
+                this.isPhasing = true;
+                this.phaseEndAt = now + this.phaseDuration;
+                this.lastPhaseAt = now;
+            }
+            
+            // End phasing
+            if (this.isPhasing && now > this.phaseEndAt) {
+                this.isPhasing = false;
+            }
+        }
+        
         // Wave 10 boss: keep distance from player (standoff + orbit)
         if (this.isBoss && game.waveNumber === 10 && game.player) {
             const toPlayer = game.player.pos.minusNew(this.pos);
