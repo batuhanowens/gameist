@@ -3065,7 +3065,7 @@
             </div>
             
             <!-- Adsterra 320x50 - Strategic Placement in Game Menu (Desktop Only) -->
-            <div class="desktop-ad" style="display: flex; justify-content: center; margin: 15px 0;">
+            <div class="desktop-ad" style="display: flex !important; justify-content: center; margin: 15px 0;">
                 <div style="width: 320px; height: 50px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; position: relative;">
                     <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
                         <script>
@@ -6116,6 +6116,16 @@
         
         // Also run after a short delay to ensure all elements are loaded
         setTimeout(manageAds, 100);
+        
+        // Force show desktop ads after 2 seconds
+        setTimeout(() => {
+            const desktopAds = document.querySelectorAll('.desktop-ad');
+            desktopAds.forEach(ad => {
+                if (window.innerWidth > 768) {
+                    ad.style.display = 'flex !important';
+                }
+            });
+        }, 2000);
     </script>
     
     <!-- Hide auth container on mobile with CSS -->
