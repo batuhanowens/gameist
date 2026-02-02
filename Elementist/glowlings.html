@@ -3126,22 +3126,24 @@
             <script>
                 // Reklam yükleme ve kontrol
                 (function() {
-                    const adContainer = document.getElementById('desktop-ad-container');
-                    
-                    // Sadece desktop'ta göster
-                    if (window.innerWidth <= 768) {
-                        return; // Mobilde gösterme
-                    }
-                    
                     try {
+                        const adContainer = document.getElementById('desktop-ad-container');
+                        
+                        // Sadece desktop'ta göster
+                        if (window.innerWidth <= 768) {
+                            return; // Mobilde gösterme
+                        }
+                        
                         // atOptions global olarak ayarla
-                        window.atOptions = {
-                            'key' : 'ce673f1e09efadddcb7e75ee9d586e4a',
-                            'format' : 'iframe',
-                            'height' : 50,
-                            'width' : 320,
-                            'params' : {}
-                        };
+                        if (typeof window.atOptions === 'undefined') {
+                            window.atOptions = {
+                                'key' : 'ce673f1e09efadddcb7e75ee9d586e4a',
+                                'format' : 'iframe',
+                                'height' : 50,
+                                'width' : 320,
+                                'params' : {}
+                            };
+                        }
                         
                         // Reklam div'ini container içine oluştur
                         const adDiv = document.createElement('div');
@@ -3160,7 +3162,7 @@
                             adContainer.style.minHeight = '50px';
                             
                             // Reklamın yüklenip yüklenmediğini kontrol et
-                            setTimeout(() => {
+                            setTimeout(function() {
                                 const hasContent = adDiv.innerHTML.trim().length > 0 || adDiv.querySelector('iframe');
                                 if (!hasContent) {
                                     console.log('Reklam içeriği yüklenemedi - container gizleniyor');
