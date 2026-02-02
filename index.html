@@ -106,9 +106,10 @@
         document.head.appendChild(script);
       }
       
-      // Load 468x60 ad script
+      // Load both desktop and mobile ad scripts
       setTimeout(function() {
-        loadAdsterraScript('https://www.highperformanceformat.com/d48fff2b59ec4dfb05673304089e4939/invoke.js');
+        loadAdsterraScript('https://www.highperformanceformat.com/d48fff2b59ec4dfb05673304089e4939/invoke.js'); // Desktop 468x60
+        loadAdsterraScript('https://www.highperformanceformat.com/ce673f1e09efadddcb7e75ee9d586e4a/invoke.js'); // Mobile 320x50
       }, 1000);
     </script>
     <script type="application/ld+json">
@@ -346,7 +347,8 @@
             
             <!-- Strategic Ad Placement - Below Update Notification -->
             <div style="display: flex; justify-content: center; margin: 20px 0;">
-              <div style="width: 468px; height: 60px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center;">
+              <!-- Desktop Ad (468x60) - Hidden on Mobile -->
+              <div class="desktop-ad" style="width: 468px; height: 60px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center;">
                 <!-- Adsterra 468x60 - Strategic Placement -->
                 <script>
                   atOptions = {
@@ -359,7 +361,35 @@
                 </script>
                 <script src="https://www.highperformanceformat.com/d48fff2b59ec4dfb05673304089e4939/invoke.js"></script>
               </div>
+              
+              <!-- Mobile Ad (320x50) - Hidden on Desktop -->
+              <div class="mobile-ad" style="width: 320px; height: 50px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center;">
+                <!-- Adsterra 320x50 - Strategic Placement -->
+                <script>
+                  atOptions = {
+                    'key' : 'ce673f1e09efadddcb7e75ee9d586e4a',
+                    'format' : 'iframe',
+                    'height' : 50,
+                    'width' : 320,
+                    'params' : {}
+                  };
+                </script>
+                <script src="https://www.highperformanceformat.com/ce673f1e09efadddcb7e75ee9d586e4a/invoke.js"></script>
+              </div>
             </div>
+            
+            <!-- Responsive CSS -->
+            <style>
+              @media (max-width: 768px) {
+                .desktop-ad { display: none !important; }
+                .mobile-ad { display: flex !important; }
+              }
+              
+              @media (min-width: 769px) {
+                .desktop-ad { display: flex !important; }
+                .mobile-ad { display: none !important; }
+              }
+            </style>
             
             <div id="userInfo" style="display: none; margin-top: 20px;">
               <div style="padding: 20px; background: linear-gradient(145deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 100%); border-radius: 16px; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden;">
