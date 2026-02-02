@@ -6,6 +6,44 @@
     border-color 0.3s ease;
 }
 
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .mobile-action-buttons {
+    display: flex !important;
+    gap: 8px !important;
+    justify-content: center !important;
+    margin: 8px 0 !important;
+    padding: 0 15px !important;
+  }
+  
+  .mobile-action-btn {
+    flex: 1 !important;
+    max-width: 140px !important;
+    padding: 10px 16px !important;
+    font-size: 13px !important;
+    border-radius: 6px !important;
+  }
+  
+  .mobile-action-btn:active {
+    transform: scale(0.95) !important;
+  }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px) {
+  .mobile-action-buttons {
+    gap: 6px !important;
+    margin: 6px 0 !important;
+    padding: 0 10px !important;
+  }
+  
+  .mobile-action-btn {
+    max-width: 120px !important;
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+  }
+}
+
 :root {
   /* Light Theme */
   --primary-color: #35587c;

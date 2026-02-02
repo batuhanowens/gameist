@@ -6192,10 +6192,17 @@ if (isMobile) {
   mobileInput.addEventListener("keydown", function (e) {
     if (gameOver) return;
 
-    // Backspace ile harf silme
+    // Backspace ile harf silme - çift silmeyi önle
     if (e.key === "Backspace") {
       e.preventDefault();
-      deleteLetter();
+      e.stopPropagation();
+      // Sadece bir harf sil
+      if (currentTile > 0) {
+        currentTile--;
+        const tile = rows[currentRow].children[currentTile];
+        tile.textContent = "";
+        tile.classList.remove("correct", "present", "absent");
+      }
     }
     // Enter ile satırı kontrol etme
     else if (e.key === "Enter") {
