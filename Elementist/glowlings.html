@@ -3122,74 +3122,27 @@
             <div id="banner-ad-container" style="display: flex; justify-content: center; margin: 15px 0; min-height: 60px;">
                 <div id="ad-content" style="width: 468px; height: 60px;">
                     <script>
-                        (function() {
-                            // Reklam yükleme fonksiyonu
-                            function loadAd() {
-                                try {
-                                    // Clear previous content
-                                    const adContent = document.getElementById('ad-content');
-                                    if (adContent) {
-                                        adContent.innerHTML = '';
-                                    }
-                                    
-                                    // Set atOptions
-                                    window.atOptions = {
-                                        'key' : 'd48fff2b59ec4dfb05673304089e4939',
-                                        'format' : 'iframe',
-                                        'height' : 60,
-                                        'width' : 468,
-                                        'params' : {}
-                                    };
-                                    
-                                    // Create and append script with cache-busting
-                                    const script = document.createElement('script');
-                                    const timestamp = new Date().getTime();
-                                    script.src = 'https://www.highperformanceformat.com/d48fff2b59ec4dfb05673304089e4939/invoke.js?t=' + timestamp;
-                                    script.async = true;
-                                    
-                                    // Error handling for ad blocker
-                                    script.onerror = function() {
-                                        console.log('Reklam engellendi - fallback gösteriliyor');
-                                        if (adContent) {
-                                            adContent.innerHTML = '<div style="width:468px;height:60px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;border:1px solid #ddd;color:#666;font-size:12px;">Advertisement</div>';
-                                        }
-                                    };
-                                    
-                                    // Success handling
-                                    script.onload = function() {
-                                        console.log('Reklam script yüklendi');
-                                        // Check if ad actually loaded after 2 seconds
-                                        setTimeout(function() {
-                                            if (adContent && !adContent.querySelector('iframe')) {
-                                                console.log('Reklam içeriği yüklenemedi - fallback gösteriliyor');
-                                                adContent.innerHTML = '<div style="width:468px;height:60px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;border:1px solid #ddd;color:#666;font-size:12px;">Advertisement</div>';
-                                            }
-                                        }, 2000);
-                                    };
-                                    
-                                    if (adContent) {
-                                        adContent.appendChild(script);
-                                        console.log('Reklam yüklendi');
-                                    }
-                                } catch(e) {
-                                    console.log('Reklam yüklenemedi:', e);
-                                    const adContent = document.getElementById('ad-content');
-                                    if (adContent) {
-                                        adContent.innerHTML = '<div style="width:468px;height:60px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;border:1px solid #ddd;color:#666;font-size:12px;">Advertisement</div>';
-                                    }
-                                }
-                            }
-                            
-                            // Sayfa yüklendiğinde yükle
-                            if (document.readyState === 'loading') {
-                                document.addEventListener('DOMContentLoaded', loadAd);
+                        atOptions = {
+                            'key' : 'd48fff2b59ec4dfb05673304089e4939',
+                            'format' : 'iframe',
+                            'height' : 60,
+                            'width' : 468,
+                            'params' : {}
+                        };
+                    </script>
+                    <script src="https://www.highperformanceformat.com/d48fff2b59ec4dfb05673304089e4939/invoke.js"></script>
+                    <script>
+                        // Check if ad loaded after 3 seconds
+                        setTimeout(function() {
+                            const adContent = document.getElementById('ad-content');
+                            if (adContent && !adContent.querySelector('iframe')) {
+                                console.log('Reklam yüklenmedi - boş alan bırakılıyor');
+                                // Reklam yüklenmediyse container'ı gizle
+                                document.getElementById('banner-ad-container').style.display = 'none';
                             } else {
-                                loadAd();
+                                console.log('Reklam başarıyla yüklendi');
                             }
-                            
-                            // Cache'i engellemek için her zaman yeniden yükle
-                            window.addEventListener('load', loadAd);
-                        })();
+                        }, 3000);
                     </script>
                 </div>
             </div>
