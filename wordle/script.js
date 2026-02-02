@@ -6188,6 +6188,27 @@ if (isMobile) {
     }
     mobileInput.value = "";
   });
+
+  // Mobil backspace sorununu düzelt
+  mobileInput.addEventListener("keydown", function (e) {
+    if (gameOver) return;
+    
+    if (e.key === "Backspace") {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      deleteLetter();
+      return false;
+    }
+    
+    if (e.key === "Enter") {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      checkRow();
+      return false;
+    }
+  });
 }
 
 function handleMouseClick(e) {
@@ -6212,6 +6233,11 @@ function handleMouseClick(e) {
 }
 
 function handleKeyPress(e) {
+  // Mobil cihazlarda mobil input handler'ı devredeyse, bu fonksiyonu çalıştırma
+  if (isMobile && document.activeElement === document.getElementById("wordleInput")) {
+    return;
+  }
+  
   if (gameOver && e.key === "Enter") {
     resetGame();
     return;
@@ -6363,13 +6389,23 @@ function getCurrentWord() {
 }
 
 function showMessage(msg) {
-  message.textContent = msg; // Mesaj kutusuna yaz
-  message.style.display = "block";
+  const messageElement = document.getElementById("message");
+  if (!messageElement) return;
+  
+  messageElement.textContent = msg; // Mesaj kutusuna yaz
+  messageElement.style.display = "block";
 
   setTimeout(() => {
-    message.textContent = "";
-    message.style.display = "none";
-    message.style.backgroundColor = ""; // Arka planı temizle
+    // Mesajı tamamen temizle
+    messageElement.textContent = "";
+    messageElement.style.display = "none";
+    messageElement.style.backgroundColor = "";
+    messageElement.style.color = "";
+    messageElement.style.boxShadow = "";
+    messageElement.style.border = "";
+    messageElement.style.padding = "";
+    messageElement.setAttribute("style", ""); // Tüm inline style'ları temizle
+    messageElement.classList.remove("show"); // Show class'ını kaldır
   }, 3000); // Mesajı 3 saniye sonra kaldır
 }
 
@@ -6394,13 +6430,15 @@ function clearGameColors() {
 }
 
 function resetGame() {
-  // Karoları temizle - tüm class'ları kaldır
+  // Karoları temizle - tüm class'ları ve inline style'ları kaldır
   document.querySelectorAll(".tile").forEach((tile) => {
     tile.textContent = "";
     tile.className = "tile";
     tile.style.backgroundColor = "";
     tile.style.borderColor = "";
     tile.style.color = "";
+    tile.style.border = "";
+    tile.setAttribute("style", ""); // Tüm inline style'ları temizle
   });
 
   // Satır sayacını sıfırla
@@ -6411,16 +6449,26 @@ function resetGame() {
   // Yeni hedef kelimeyi seç
   targetWord = getRandomWord();
 
-  // Mesajı temizle
-  message.textContent = "";
-  message.style.backgroundColor = "";
-  message.style.display = "";
+  // Mesajı tamamen temizle - arka plan dahil
+  const messageElement = document.getElementById("message");
+  if (messageElement) {
+    messageElement.textContent = "";
+    messageElement.style.backgroundColor = "";
+    messageElement.style.display = "";
+    messageElement.style.color = "";
+    messageElement.style.boxShadow = "";
+    messageElement.style.border = "";
+    messageElement.style.padding = "";
+    messageElement.setAttribute("style", ""); // Tüm inline style'ları temizle
+    messageElement.classList.remove("show"); // Show class'ını kaldır
+  }
 
   // Klavye tuşlarını sıfırla
   document.querySelectorAll("button").forEach((button) => {
     button.classList.remove("correct", "present", "absent");
     button.style.backgroundColor = "";
     button.style.color = "";
+    button.setAttribute("style", ""); // Tüm inline style'ları temizle
   });
 
   // Input alanını temizle ve focus et
