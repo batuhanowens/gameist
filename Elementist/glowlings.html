@@ -3119,17 +3119,36 @@
             <p id="startSubtitle" data-lang="subtitle">Collect energy in a neon universe, grow, and defeat your rivals!</p>
             
             <!-- Banner Ad - Desktop Only -->
-            <div class="desktop-ad" style="display: flex; justify-content: center; margin: 15px 0;">
-                <script>
-                    atOptions = {
-                        'key' : 'ce673f1e09efadddcb7e75ee9d586e4a',
-                        'format' : 'iframe',
-                        'height' : 50,
-                        'width' : 320,
-                        'params' : {}
-                    };
-                </script>
-                <script async src="https://www.highperformanceformat.com/ce673f1e09efadddcb7e75ee9d586e4a/invoke.js"></script>
+            <div class="desktop-ad" style="display: flex; justify-content: center; margin: 15px 0; min-height: 50px;">
+                <div id="ad-container" style="width: 320px; height: 50px; display: flex; justify-content: center; align-items: center; background: transparent; border: none; border-radius: 4px; overflow: hidden;">
+                    <script>
+                        // Ad yükleme ve fallback
+                        (function() {
+                            try {
+                                atOptions = {
+                                    'key' : 'ce673f1e09efadddcb7e75ee9d586e4a',
+                                    'format' : 'iframe',
+                                    'height' : 50,
+                                    'width' : 320,
+                                    'params' : {}
+                                };
+                                document.write('<script async src="https://www.highperformanceformat.com/ce673f1e09efadddcb7e75ee9d586e4a/invoke.js"><\/script>');
+                                
+                                // Reklam yüklenmezsa container'ı gizle
+                                setTimeout(() => {
+                                    const container = document.getElementById('ad-container');
+                                    if (container && !container.querySelector('iframe')) {
+                                        container.style.display = 'none';
+                                    }
+                                }, 3000);
+                            } catch(e) {
+                                console.log('Reklam yüklenemedi:', e);
+                                const container = document.getElementById('ad-container');
+                                if (container) container.style.display = 'none';
+                            }
+                        })();
+                    </script>
+                </div>
             </div>
             
             <button id="startBtn" data-lang="startGame">START GAME</button>
@@ -6059,8 +6078,6 @@
             }
           });
         }
-        
-        // Monitor stats changes every 5 seconds
         setInterval(() => {
           syncStatsToMainIndex();
         }, 5000);
@@ -6320,7 +6337,7 @@
             
             console.log('🚀 Interstitial reklam gösteriliyor...');
             
-            // Create ad container
+            // Create ad container with proper cleanup
             const adContainer = document.createElement('div');
             adContainer.id = 'interstitial-ad';
             adContainer.style.cssText = `
@@ -6330,34 +6347,21 @@
                 width: 100%;
                 height: 100%;
                 background: rgba(0, 0, 0, 0.9);
-                z-index: 10000;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                animation: fadeIn 0.3s ease;
+                z-index: 10000;
             `;
             
-            // Create ad content
-            adContainer.innerHTML = `
-                <div style="position: relative; max-width: 90%; max-height: 90%;">
-                    <div id="interstitial-ad-content" style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
-                        <script async src="https://pl28580836.effectivegatecpm.com/02/74/05/0274056288dd0d4327742db82768e3ed.js"><\/script>
-                    </div>
-                    <button onclick="closeInterstitialAd()" style="
-                        position: absolute;
-                        top: 10px;
-                        right: 10px;
-                        background: rgba(255, 255, 255, 0.2);
-                        border: 2px solid white;
-                        color: white;
-                        padding: 8px 16px;
-                        border-radius: 8px;
-                        cursor: pointer;
-                        font-size: 16px;
-                        font-weight: bold;
-                        z-index: 10001;
-                    ">✕ KAPAT</button>
-                </div>
+            // Ad content
+            const adContent = document.createElement('div');
+            adContent.style.cssText = `
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                max-width: 400px;
+                width: 90%;
+                text-align: center;
             `;
             
             // Add to page
@@ -6421,6 +6425,7 @@
             }
           });
         });
+      }
     </script>
     
     <!-- GA4 Elementist Event Tracking -->
