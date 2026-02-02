@@ -363,89 +363,13 @@
         body.touch #startScreen { width: min(82vw, 520px); padding: 8px 10px; transform: translate(-50%, -50%) scale(0.80); transform-origin: center; }
         body.touch #startScreen h1 { font-size: clamp(15px, 2.2vw, 22px); margin-bottom: 6px; }
         body.touch #startSubtitle { font-size: clamp(11px, 1.4vw, 13px); margin-bottom: 16px; opacity: 0.9; }
-        body.touch .colorLabel, body.touch .shapeLabel { font-size: clamp(13px, 2vw, 15px); }
+        body.touch #colorLabel, body.touch #shapeLabel { font-size: clamp(13px, 2vw, 15px); }
         body.touch .color-selection { gap: clamp(6px, 1.2vw, 9px); margin: clamp(6px, 1.2vw, 9px) 0; }
         body.touch .color-btn { width: clamp(22px, 3.4vw, 30px); height: clamp(22px, 3.4vw, 30px); }
         body.touch .shape-selection { gap: clamp(8px, 1.6vw, 11px); margin: clamp(8px, 1.6vw, 11px) 0; }
         body.touch .shape-btn { width: clamp(36px, 5vw, 48px); height: clamp(36px, 5vw, 48px); font-size: clamp(14px, 2.4vw, 20px); }
         body.touch #startBtn { margin-top: 6px; }
         body.touch #startScreen .primary-btn { margin-top: 6px !important; }
-
-        /* Fix mobile ad visibility */
-        body.touch .adsbygoogle,
-        body.touch ins.adsbygoogle {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            position: relative !important;
-            width: 100% !important;
-            max-width: 100% !important;
-            margin: 10px 0 !important;
-            text-align: center !important;
-        }
-
-        /* Mobile ad container fixes */
-        body.touch .ad-container,
-        body.touch [id*="ad"],
-        body.touch [class*="ad"] {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            position: relative !important;
-            width: 100% !important;
-            max-width: 100% !important;
-            margin: 8px 0 !important;
-            text-align: center !important;
-        }
-
-        /* StartScreen specific ad fixes */
-        body.touch #startScreen .ad-container-top,
-        body.touch #startScreen .ad-container-bottom {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            position: relative !important;
-            width: 100% !important;
-            max-width: 100% !important;
-            margin: 8px 0 !important;
-            text-align: center !important;
-            background: transparent !important;
-            border: none !important;
-            padding: 5px 0 !important;
-        }
-
-        body.touch #startScreen .ad-container-top .adsbygoogle,
-        body.touch #startScreen .ad-container-bottom .adsbygoogle {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            width: 100% !important;
-            max-width: 100% !important;
-            margin: 0 auto !important;
-            text-align: center !important;
-            background: white !important;
-            border: 1px solid #ddd !important;
-            border-radius: 4px !important;
-            padding: 5px !important;
-            min-height: 50px !important;
-        }
-
-        /* Landscape mobile ad fixes */
-        @media (orientation: landscape) and (max-width: 768px) {
-            body.touch .adsbygoogle,
-            body.touch ins.adsbygoogle {
-                transform: scale(0.9) !important;
-                transform-origin: center !important;
-                margin: 5px auto !important;
-                max-width: 90% !important;
-            }
-            
-            body.touch #startScreen .ad-container-top .adsbygoogle,
-            body.touch #startScreen .ad-container-bottom .adsbygoogle {
-                transform: scale(0.85) !important;
-                max-width: 85% !important;
-            }
-        }
 
         /* Never show start screen during gameplay */
         body.playing #startScreen { display: none !important; }
@@ -2599,19 +2523,6 @@
           <ul id="statsLastRuns"></ul>
         </div>
         <div id="startScreen">
-            <!-- Top Ad -->
-            <div class="ad-container-top" style="margin-bottom: 15px; text-align: center;">
-                <ins class="adsbygoogle"
-                     style="display:block; text-align:center;"
-                     data-ad-layout="in-article"
-                     data-ad-format="fluid"
-                     data-ad-client="ca-pub-9478711342689131"
-                     data-ad-slot="1234567890"></ins>
-                <script>
-                     (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
-            </div>
-            
             <h1 id="startTitle" data-lang="gameTitle">🌟 ELEMENTIST 🌟</h1>
             <p id="startSubtitle" data-lang="subtitle">Collect energy in a neon universe, grow, and defeat your rivals!</p>
             
@@ -2627,20 +2538,6 @@
             <div style="display:block; margin-top:10px;">
                 <button id="backToHubBtn" class="primary-btn" data-lang="backToMenuBtn">BACK TO MENU</button>
             </div>
-            
-            <!-- Bottom Ad -->
-            <div class="ad-container-bottom" style="margin-top: 15px; text-align: center;">
-                <ins class="adsbygoogle"
-                     style="display:block; text-align:center;"
-                     data-ad-layout="in-article"
-                     data-ad-format="fluid"
-                     data-ad-client="ca-pub-9478711342689131"
-                     data-ad-slot="0987654321"></ins>
-                <script>
-                     (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
-            </div>
-            
             <div class="social-links">
                 <h3 class="brand-242" data-lang="followUs">242 Games</h3>
             </div>
