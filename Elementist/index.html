@@ -398,6 +398,38 @@
             text-align: center !important;
         }
 
+        /* StartScreen specific ad fixes */
+        body.touch #startScreen .ad-container-top,
+        body.touch #startScreen .ad-container-bottom {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: relative !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 8px 0 !important;
+            text-align: center !important;
+            background: transparent !important;
+            border: none !important;
+            padding: 5px 0 !important;
+        }
+
+        body.touch #startScreen .ad-container-top .adsbygoogle,
+        body.touch #startScreen .ad-container-bottom .adsbygoogle {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 auto !important;
+            text-align: center !important;
+            background: white !important;
+            border: 1px solid #ddd !important;
+            border-radius: 4px !important;
+            padding: 5px !important;
+            min-height: 50px !important;
+        }
+
         /* Landscape mobile ad fixes */
         @media (orientation: landscape) and (max-width: 768px) {
             body.touch .adsbygoogle,
@@ -406,6 +438,12 @@
                 transform-origin: center !important;
                 margin: 5px auto !important;
                 max-width: 90% !important;
+            }
+            
+            body.touch #startScreen .ad-container-top .adsbygoogle,
+            body.touch #startScreen .ad-container-bottom .adsbygoogle {
+                transform: scale(0.85) !important;
+                max-width: 85% !important;
             }
         }
 
@@ -2561,6 +2599,19 @@
           <ul id="statsLastRuns"></ul>
         </div>
         <div id="startScreen">
+            <!-- Top Ad -->
+            <div class="ad-container-top" style="margin-bottom: 15px; text-align: center;">
+                <ins class="adsbygoogle"
+                     style="display:block; text-align:center;"
+                     data-ad-layout="in-article"
+                     data-ad-format="fluid"
+                     data-ad-client="ca-pub-9478711342689131"
+                     data-ad-slot="1234567890"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+            
             <h1 id="startTitle" data-lang="gameTitle">🌟 ELEMENTIST 🌟</h1>
             <p id="startSubtitle" data-lang="subtitle">Collect energy in a neon universe, grow, and defeat your rivals!</p>
             
@@ -2576,6 +2627,20 @@
             <div style="display:block; margin-top:10px;">
                 <button id="backToHubBtn" class="primary-btn" data-lang="backToMenuBtn">BACK TO MENU</button>
             </div>
+            
+            <!-- Bottom Ad -->
+            <div class="ad-container-bottom" style="margin-top: 15px; text-align: center;">
+                <ins class="adsbygoogle"
+                     style="display:block; text-align:center;"
+                     data-ad-layout="in-article"
+                     data-ad-format="fluid"
+                     data-ad-client="ca-pub-9478711342689131"
+                     data-ad-slot="0987654321"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+            
             <div class="social-links">
                 <h3 class="brand-242" data-lang="followUs">242 Games</h3>
             </div>
