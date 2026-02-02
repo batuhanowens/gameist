@@ -3146,7 +3146,7 @@
             </div>
             
             <!-- Adsterra 320x50 - Strategic Placement in Game Menu (Desktop Only) -->
-            <div class="desktop-ad menu-ad" style="display: flex !important; justify-content: center; margin: 15px 0;">
+            <div class="desktop-ad" style="display: flex !important; justify-content: center; margin: 15px 0;">
                 <div style="width: 320px; height: 50px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; position: relative;">
                     <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
                         <script>
@@ -3167,7 +3167,7 @@
                 <h3 class="brand-242" data-lang="followUs">242 Games</h3>
             </div>
             <!-- Buy Me a Coffee Banner -->
-            <div id="buymeacoffee-banner" style="position: fixed; bottom: 10px; right: 10px; z-index: 1000; opacity: 0.6; transition: opacity 0.3s ease; text-align: center;" 
+            <div style="position: fixed; bottom: 10px; right: 10px; z-index: 1000; opacity: 0.6; transition: opacity 0.3s ease; text-align: center;" 
                  onmouseover="this.style.opacity='1'" 
                  onmouseout="this.style.opacity='0.6'">
               <div class="support-message" style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff6b6b); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: gradientShift 3s ease-in-out infinite; font-size: 10px; font-weight: 600; margin-bottom: 3px; text-shadow: 0 0 8px rgba(255,255,255,0.3); line-height: 1.2;">
@@ -6164,22 +6164,15 @@
             const isMobile = window.innerWidth <= 768;
             const leftAd = document.getElementById('leftAd');
             const rightAd = document.getElementById('rightAd');
-            const desktopAds = document.querySelectorAll('.desktop-ad:not(.menu-ad)');
+            const desktopAds = document.querySelectorAll('.desktop-ad');
             
             if (isMobile) {
                 // Show side ads on mobile
                 if (leftAd) leftAd.style.display = 'block';
                 if (rightAd) rightAd.style.display = 'block';
                 
-                // Hide desktop ads on mobile EXCEPT menu-ad
+                // Hide desktop ads on mobile
                 desktopAds.forEach(ad => ad.style.display = 'none');
-                
-                // Keep menu-ad visible on mobile
-                const menuAds = document.querySelectorAll('.desktop-ad.menu-ad');
-                menuAds.forEach(ad => {
-                    ad.style.display = 'flex';
-                    ad.style.justifyContent = 'center';
-                });
                 
                 // Hide auth container on mobile
                 const authContainer = document.getElementById('gameist-auth-container');
@@ -6189,9 +6182,8 @@
                 if (leftAd) leftAd.style.display = 'none';
                 if (rightAd) rightAd.style.display = 'none';
                 
-                // Show all desktop ads on desktop including menu-ad
-                const allDesktopAds = document.querySelectorAll('.desktop-ad');
-                allDesktopAds.forEach(ad => ad.style.display = 'flex');
+                // Show desktop ads on desktop
+                desktopAds.forEach(ad => ad.style.display = 'flex');
                 
                 // Show auth container on desktop
                 const authContainer = document.getElementById('gameist-auth-container');
@@ -6212,9 +6204,6 @@
             desktopAds.forEach(ad => {
                 if (window.innerWidth > 768) {
                     ad.style.display = 'flex !important';
-                } else if (ad.classList.contains('menu-ad')) {
-                    // Keep menu-ad visible on mobile
-                    ad.style.display = 'flex !important';
                 }
             });
         }, 2000);
@@ -6227,23 +6216,9 @@
                 display: none !important;
             }
             
-            /* Hide all desktop ads on mobile EXCEPT the one under Back to Menu */
-            .desktop-ad:not(.menu-ad) {
+            /* Hide all desktop ads on mobile */
+            .desktop-ad {
                 display: none !important;
-            }
-            
-            /* Keep the menu ad always visible */
-            .desktop-ad.menu-ad {
-                display: flex !important;
-                justify-content: center !important;
-                margin: 15px 0 !important;
-            }
-            
-            /* Keep Buy Me a Coffee banner always visible */
-            #buymeacoffee-banner {
-                display: block !important;
-                opacity: 0.8 !important;
-                z-index: 10000 !important;
             }
             
             /* Optimize side ads for mobile */
