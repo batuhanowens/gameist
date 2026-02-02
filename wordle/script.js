@@ -6188,27 +6188,6 @@ if (isMobile) {
     }
     mobileInput.value = "";
   });
-
-  mobileInput.addEventListener("keydown", function (e) {
-    if (gameOver) return;
-
-    // Backspace ile harf silme - çift silmeyi önle
-    if (e.key === "Backspace") {
-      e.preventDefault();
-      e.stopPropagation();
-      return false; // Event propagation'u tamamen durdur
-    }
-    // Enter ile satırı kontrol etme
-    else if (e.key === "Enter") {
-      e.preventDefault();
-      checkRow();
-    }
-    // Diğer harfler ile harf ekleme
-    else if (e.key.length === 1 && /^[a-zA-ZğüşıöçĞÜŞİÖÇ]$/.test(e.key)) {
-      e.preventDefault(); // Varsayılan davranışı engelle
-      addLetter(e.key.toUpperCase());
-    }
-  });
 }
 
 function handleMouseClick(e) {
@@ -6351,6 +6330,7 @@ function checkRow() {
   if (guess === targetWord) {
     setTimeout(() => {
       gameOver = true;
+      clearGameColors();
     }, 500);
     return;
   }
@@ -6363,16 +6343,16 @@ function checkRow() {
         messageElement.textContent = `Başaramadın! Doğru kelime: ${targetWord}. Yeni oyun için Yenile tuşuna bas`;
         messageElement.classList.add("show"); // 'show' sınıfını ekleyerek görünmesini sağla
         gameOver = true;
+        clearGameColors();
       } else {
         currentRow++;
         currentTile = 0;
       }
-    }, 500);
-    return;
+    }, 1000);
+  } else {
+    currentRow++;
+    currentTile = 0;
   }
-
-  currentRow++;
-  currentTile = 0;
 }
 
 function getCurrentWord() {
@@ -6399,6 +6379,18 @@ function shakeRow() {
   setTimeout(() => {
     currentRowEl.classList.remove("shake");
   }, 500);
+}
+
+function clearGameColors() {
+  // Oyun bittiğinde tüm tile renklerini temizle
+  setTimeout(() => {
+    document.querySelectorAll(".tile").forEach((tile) => {
+      tile.classList.remove("correct", "present", "absent", "all-wrong", "filled");
+      tile.style.backgroundColor = "";
+      tile.style.borderColor = "";
+      tile.style.color = "";
+    });
+  }, 2000); // 2 saniye sonra renkleri temizle
 }
 
 function resetGame() {
