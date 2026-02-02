@@ -3167,7 +3167,7 @@
                 <h3 class="brand-242" data-lang="followUs">242 Games</h3>
             </div>
             <!-- Buy Me a Coffee Banner -->
-            <div style="position: fixed; bottom: 10px; right: 10px; z-index: 1000; opacity: 0.6; transition: opacity 0.3s ease; text-align: center;" 
+            <div id="buymeacoffee-banner" style="position: fixed; bottom: 10px; right: 10px; z-index: 1000; opacity: 0.6; transition: opacity 0.3s ease; text-align: center;" 
                  onmouseover="this.style.opacity='1'" 
                  onmouseout="this.style.opacity='0.6'">
               <div class="support-message" style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff6b6b); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: gradientShift 3s ease-in-out infinite; font-size: 10px; font-weight: 600; margin-bottom: 3px; text-shadow: 0 0 8px rgba(255,255,255,0.3); line-height: 1.2;">
@@ -6219,6 +6219,13 @@
             /* Hide all desktop ads on mobile */
             .desktop-ad {
                 display: none !important;
+            }
+            
+            /* Keep Buy Me a Coffee banner always visible */
+            #buymeacoffee-banner {
+                display: block !important;
+                opacity: 0.8 !important;
+                z-index: 10000 !important;
             }
             
             /* Optimize side ads for mobile */
