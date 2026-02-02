@@ -715,6 +715,50 @@
         body.touch #gameOverScreen button { padding: 8px 12px !important; font-size: 14px !important; }
         body.touch #shopOverlay > div { width: 92vw !important; max-width: 92vw !important; font-size: 90%; }
 
+        /* Mobile death screen fixes */
+        body.touch #gameOverScreen > div {
+            width: min(85vw, 380px) !important;
+            max-width: 85vw !important;
+            padding: clamp(12px, 3vw, 18px) !important;
+            margin: 0 auto !important;
+            position: relative !important;
+            top: auto !important;
+            left: auto !important;
+            transform: none !important;
+            max-height: min(80vh, 600px) !important;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+        
+        body.touch #gameOverScreen {
+            padding: 10px !important;
+            box-sizing: border-box !important;
+            padding-top: env(safe-area-inset-top, 10px) !important;
+            padding-bottom: env(safe-area-inset-bottom, 10px) !important;
+        }
+
+        body.touch #gameOverScreen .button-container {
+            flex-direction: column !important;
+            gap: clamp(8px, 2vw, 12px) !important;
+        }
+
+        body.touch #gameOverScreen button {
+            width: 100% !important;
+            max-width: 200px !important;
+            margin: 0 auto !important;
+        }
+
+        /* Extra small mobile devices */
+        @media (max-width: 380px) {
+            body.touch #gameOverScreen > div {
+                width: min(90vw, 320px) !important;
+                padding: clamp(10px, 2.5vw, 14px) !important;
+            }
+            body.touch #gameOverScreen h2 { font-size: 18px !important; }
+            body.touch #gameOverScreen #finalStats { font-size: 11px !important; }
+            body.touch #gameOverScreen button { font-size: 13px !important; }
+        }
+
         .stat {
             background: rgba(0, 0, 0, 0.7);
             padding: 10px;
@@ -2550,7 +2594,7 @@
                 <h2 id="gameOverTitle" data-lang="gameOverTitle" style="color:#00ffff; margin:0 0 8px 0; letter-spacing:1px;">YOU DIED</h2>
                 <div id="finalStats" style="color:#e5e7eb; font-size:14px; line-height:1.6; margin-bottom:14px;"></div>
                 <div id="deathHint" data-lang="deathHint" style="color:#b6c2d1; font-size:13px; margin: -6px 0 14px 0; opacity:0.95;"></div>
-                <div style="display:flex; gap:12px; justify-content:center;">
+                <div class="button-container" style="display:flex; gap:12px; justify-content:center;">
                     <button id="restartBtn" data-lang="restartBtn" style="padding:10px 16px; border-radius:10px; border:2px solid #22c55e; background:#052e1f; color:#22c55e; cursor:pointer; font-weight:700;">RETRY</button>
                     <button id="backToMenuBtn" data-lang="backToMenuBtn" style="padding:10px 16px; border-radius:10px; border:2px solid #0ea5e9; background:#042433; color:#0ea5e9; cursor:pointer; font-weight:700;">BACK TO MENU</button>
                 </div>
