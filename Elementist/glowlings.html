@@ -3119,37 +3119,70 @@
             <p id="startSubtitle" data-lang="subtitle">Collect energy in a neon universe, grow, and defeat your rivals!</p>
             
             <!-- Banner Ad - Desktop Only -->
-            <div class="desktop-ad" style="display: flex; justify-content: center; margin: 15px 0; min-height: 50px;">
-                <div id="ad-container" style="width: 320px; height: 50px; display: flex; justify-content: center; align-items: center; background: transparent; border: none; border-radius: 4px; overflow: hidden;">
-                    <script>
-                        // Ad yükleme ve fallback
-                        (function() {
-                            try {
-                                atOptions = {
-                                    'key' : 'ce673f1e09efadddcb7e75ee9d586e4a',
-                                    'format' : 'iframe',
-                                    'height' : 50,
-                                    'width' : 320,
-                                    'params' : {}
-                                };
-                                document.write('<script async src="https://www.highperformanceformat.com/ce673f1e09efadddcb7e75ee9d586e4a/invoke.js"><\/script>');
-                                
-                                // Reklam yüklenmezsa container'ı gizle
-                                setTimeout(() => {
-                                    const container = document.getElementById('ad-container');
-                                    if (container && !container.querySelector('iframe')) {
-                                        container.style.display = 'none';
-                                    }
-                                }, 3000);
-                            } catch(e) {
-                                console.log('Reklam yüklenemedi:', e);
-                                const container = document.getElementById('ad-container');
-                                if (container) container.style.display = 'none';
-                            }
-                        })();
-                    </script>
-                </div>
+            <div class="desktop-ad" id="desktop-ad-container" style="display: none; justify-content: center; margin: 15px 0; min-height: 0;">
+                <!-- Reklam container'ı sadece yüklendiğinde gösterilecek -->
             </div>
+            
+            <script>
+                // Reklam yükleme ve kontrol
+                (function() {
+                    const adContainer = document.getElementById('desktop-ad-container');
+                    
+                    // Sadece desktop'ta göster
+                    if (window.innerWidth <= 768) {
+                        return; // Mobilde gösterme
+                    }
+                    
+                    try {
+                        // atOptions global olarak ayarla
+                        window.atOptions = {
+                            'key' : 'ce673f1e09efadddcb7e75ee9d586e4a',
+                            'format' : 'iframe',
+                            'height' : 50,
+                            'width' : 320,
+                            'params' : {}
+                        };
+                        
+                        // Reklam div'ini container içine oluştur
+                        const adDiv = document.createElement('div');
+                        adDiv.style.cssText = 'width: 320px; height: 50px; display: flex; justify-content: center; align-items: center;';
+                        adContainer.appendChild(adDiv);
+                        
+                        // Reklam script'ini oluştur
+                        const script = document.createElement('script');
+                        script.async = true;
+                        script.src = 'https://www.highperformanceformat.com/ce673f1e09efadddcb7e75ee9d586e4a/invoke.js';
+                        
+                        // Script yüklenince container'ı göster
+                        script.onload = function() {
+                            console.log('Reklam script yüklendi');
+                            adContainer.style.display = 'flex';
+                            adContainer.style.minHeight = '50px';
+                            
+                            // Reklamın yüklenip yüklenmediğini kontrol et
+                            setTimeout(() => {
+                                const hasContent = adDiv.innerHTML.trim().length > 0 || adDiv.querySelector('iframe');
+                                if (!hasContent) {
+                                    console.log('Reklam içeriği yüklenemedi - container gizleniyor');
+                                    adContainer.style.display = 'none';
+                                } else {
+                                    console.log('Reklam başarıyla gösteriliyor');
+                                }
+                            }, 3000);
+                        };
+                        
+                        script.onerror = function() {
+                            console.log('Reklam script yüklenemedi');
+                        };
+                        
+                        // Script'i ad div içine ekle
+                        adDiv.appendChild(script);
+                        
+                    } catch(e) {
+                        console.log('Reklam yüklenemedi:', e);
+                    }
+                })();
+            </script>
             
             <button id="startBtn" data-lang="startGame">START GAME</button>
             <button id="settingsBtn" class="primary-btn" style="margin-top:10px;" data-lang="settings">SETTINGS</button>
