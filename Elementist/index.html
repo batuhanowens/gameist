@@ -363,13 +363,51 @@
         body.touch #startScreen { width: min(82vw, 520px); padding: 8px 10px; transform: translate(-50%, -50%) scale(0.80); transform-origin: center; }
         body.touch #startScreen h1 { font-size: clamp(15px, 2.2vw, 22px); margin-bottom: 6px; }
         body.touch #startSubtitle { font-size: clamp(11px, 1.4vw, 13px); margin-bottom: 16px; opacity: 0.9; }
-        body.touch #colorLabel, body.touch #shapeLabel { font-size: clamp(13px, 2vw, 15px); }
+        body.touch .colorLabel, body.touch .shapeLabel { font-size: clamp(13px, 2vw, 15px); }
         body.touch .color-selection { gap: clamp(6px, 1.2vw, 9px); margin: clamp(6px, 1.2vw, 9px) 0; }
         body.touch .color-btn { width: clamp(22px, 3.4vw, 30px); height: clamp(22px, 3.4vw, 30px); }
         body.touch .shape-selection { gap: clamp(8px, 1.6vw, 11px); margin: clamp(8px, 1.6vw, 11px) 0; }
         body.touch .shape-btn { width: clamp(36px, 5vw, 48px); height: clamp(36px, 5vw, 48px); font-size: clamp(14px, 2.4vw, 20px); }
         body.touch #startBtn { margin-top: 6px; }
         body.touch #startScreen .primary-btn { margin-top: 6px !important; }
+
+        /* Fix mobile ad visibility */
+        body.touch .adsbygoogle,
+        body.touch ins.adsbygoogle {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: relative !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 10px 0 !important;
+            text-align: center !important;
+        }
+
+        /* Mobile ad container fixes */
+        body.touch .ad-container,
+        body.touch [id*="ad"],
+        body.touch [class*="ad"] {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: relative !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 8px 0 !important;
+            text-align: center !important;
+        }
+
+        /* Landscape mobile ad fixes */
+        @media (orientation: landscape) and (max-width: 768px) {
+            body.touch .adsbygoogle,
+            body.touch ins.adsbygoogle {
+                transform: scale(0.9) !important;
+                transform-origin: center !important;
+                margin: 5px auto !important;
+                max-width: 90% !important;
+            }
+        }
 
         /* Never show start screen during gameplay */
         body.playing #startScreen { display: none !important; }
