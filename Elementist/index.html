@@ -717,9 +717,9 @@
 
         /* Mobile death screen fixes for LANDSCAPE orientation */
         body.touch #gameOverScreen > div {
-            width: min(70vw, 400px) !important;
-            max-width: 70vw !important;
-            max-height: min(70vh, 300px) !important;
+            width: min(84vw, 480px) !important;
+            max-width: 84vw !important;
+            max-height: min(76vh, 324px) !important;
             padding: clamp(10px, 2vh, 16px) !important;
             margin: 0 auto !important;
             position: relative !important;
@@ -772,8 +772,8 @@
         /* Landscape-specific mobile fixes */
         @media (orientation: landscape) and (max-height: 500px) {
             body.touch #gameOverScreen > div {
-                width: min(60vw, 350px) !important;
-                max-height: min(60vh, 250px) !important;
+                width: min(72vw, 420px) !important;
+                max-height: min(65vh, 270px) !important;
                 padding: clamp(8px, 1.5vh, 12px) !important;
             }
             body.touch #gameOverScreen h2 { font-size: clamp(14px, 2.5vw, 18px) !important; }
@@ -2612,7 +2612,7 @@
             <div id="magnetOverlayIcon">🧲</div>
         </div>
         <div id="gameOverScreen" style="display:none; position:fixed; inset:0; width:100vw; height:100vh; align-items:center; justify-content:center; background:rgba(0,0,0,0.7); z-index:9999;">
-            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(0,0,0,0.92); border:2px solid #00ffff; box-shadow:0 0 30px #00ffff; border-radius:18px; padding:22px 20px; width:min(520px, 92vw); text-align:center;">
+            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(0,0,0,0.92); border:2px solid #00ffff; box-shadow:0 0 15px #00ffff; border-radius:18px; padding:22px 20px; width:min(520px, 92vw); text-align:center;">
                 <h2 id="gameOverTitle" data-lang="gameOverTitle" style="color:#00ffff; margin:0 0 8px 0; letter-spacing:1px;">YOU DIED</h2>
                 <div id="finalStats" style="color:#e5e7eb; font-size:14px; line-height:1.6; margin-bottom:14px;"></div>
                 <div id="deathHint" data-lang="deathHint" style="color:#b6c2d1; font-size:13px; margin: -6px 0 14px 0; opacity:0.95;"></div>

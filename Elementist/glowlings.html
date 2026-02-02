@@ -953,9 +953,9 @@
 
         /* Mobile death screen fixes for LANDSCAPE orientation */
         body.touch #gameOverScreen .game-over-card {
-            width: min(70vw, 400px) !important;
-            max-width: 70vw !important;
-            max-height: min(70vh, 300px) !important;
+            width: min(84vw, 480px) !important;
+            max-width: 84vw !important;
+            max-height: min(76vh, 324px) !important;
             padding: clamp(10px, 2vh, 16px) !important;
             margin: 0 auto !important;
             position: relative !important;
@@ -1013,8 +1013,8 @@
         /* Landscape-specific mobile fixes */
         @media (orientation: landscape) and (max-height: 500px) {
             body.touch #gameOverScreen .game-over-card {
-                width: min(60vw, 350px) !important;
-                max-height: min(60vh, 250px) !important;
+                width: min(72vw, 420px) !important;
+                max-height: min(65vh, 270px) !important;
                 padding: clamp(8px, 1.5vh, 12px) !important;
             }
             body.touch #gameOverScreen h2 { font-size: clamp(14px, 2.5vw, 18px) !important; }
@@ -1302,7 +1302,7 @@
             background: linear-gradient(135deg, rgba(10, 10, 15, 0.98), rgba(26, 26, 46, 0.95));
             border: 2px solid var(--neon-red);
             border-radius: var(--radius-2xl);
-            box-shadow: 0 0 25px var(--neon-red), 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(239, 68, 68, 0.1);
+            box-shadow: 0 0 12px var(--neon-red), 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(239, 68, 68, 0.1);
             padding: var(--spacing-xl);
             width: min(580px, 94vw);
             text-align: center;
@@ -1316,7 +1316,7 @@
             letter-spacing: 3px;
             font-size: clamp(28px, 5vw, 36px);
             font-weight: 800;
-            text-shadow: 0 0 25px var(--neon-red);
+            text-shadow: 0 0 12px var(--neon-red);
             animation: titleGlow 2s ease-in-out infinite;
         }
 
@@ -1951,8 +1951,8 @@
 
         /* Game over screen title glow animation */
         @keyframes titleGlow {
-            0%, 100% { text-shadow: 0 0 25px var(--neon-red), 0 0 40px var(--neon-red); }
-            50% { text-shadow: 0 0 30px var(--neon-red), 0 0 50px var(--neon-red), 0 0 60px var(--neon-red); }
+            0%, 100% { text-shadow: 0 0 12px var(--neon-red), 0 0 20px var(--neon-red); }
+            50% { text-shadow: 0 0 15px var(--neon-red), 0 0 25px var(--neon-red), 0 0 30px var(--neon-red); }
         }
 
         /* Game over screen pulse animation */
@@ -1984,12 +1984,12 @@
         #runTimeStats > div:nth-child(3) { animation-delay: 0.3s; }
         #runTimeStats > div:nth-child(4) { animation-delay: 0.4s; }
 
-        /* Mobile responsive adjustments for game over screen */
+        /* Mobile responsive adjustments for game over screen - Updated for landscape */
         @media (max-width: 600px) {
             body.touch #gameOverScreen .game-over-card {
-                width: min(70vw, 400px) !important;
-                max-width: 70vw !important;
-                max-height: min(70vh, 300px) !important;
+                width: min(84vw, 480px) !important;
+                max-width: 84vw !important;
+                max-height: min(76vh, 324px) !important;
                 padding: clamp(10px, 2vh, 16px) !important;
             }
             
