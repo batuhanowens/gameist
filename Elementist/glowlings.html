@@ -3146,7 +3146,7 @@
             </div>
             
             <!-- Adsterra 320x50 - Strategic Placement in Game Menu (Desktop Only) -->
-            <div class="desktop-ad" style="display: flex !important; justify-content: center; margin: 15px 0;">
+            <div class="desktop-ad menu-ad" style="display: flex !important; justify-content: center; margin: 15px 0;">
                 <div style="width: 320px; height: 50px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; position: relative;">
                     <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
                         <script>
@@ -6164,15 +6164,22 @@
             const isMobile = window.innerWidth <= 768;
             const leftAd = document.getElementById('leftAd');
             const rightAd = document.getElementById('rightAd');
-            const desktopAds = document.querySelectorAll('.desktop-ad');
+            const desktopAds = document.querySelectorAll('.desktop-ad:not(.menu-ad)');
             
             if (isMobile) {
                 // Show side ads on mobile
                 if (leftAd) leftAd.style.display = 'block';
                 if (rightAd) rightAd.style.display = 'block';
                 
-                // Hide desktop ads on mobile
+                // Hide desktop ads on mobile EXCEPT menu-ad
                 desktopAds.forEach(ad => ad.style.display = 'none');
+                
+                // Keep menu-ad visible on mobile
+                const menuAds = document.querySelectorAll('.desktop-ad.menu-ad');
+                menuAds.forEach(ad => {
+                    ad.style.display = 'flex';
+                    ad.style.justifyContent = 'center';
+                });
                 
                 // Hide auth container on mobile
                 const authContainer = document.getElementById('gameist-auth-container');
@@ -6182,8 +6189,9 @@
                 if (leftAd) leftAd.style.display = 'none';
                 if (rightAd) rightAd.style.display = 'none';
                 
-                // Show desktop ads on desktop
-                desktopAds.forEach(ad => ad.style.display = 'flex');
+                // Show all desktop ads on desktop including menu-ad
+                const allDesktopAds = document.querySelectorAll('.desktop-ad');
+                allDesktopAds.forEach(ad => ad.style.display = 'flex');
                 
                 // Show auth container on desktop
                 const authContainer = document.getElementById('gameist-auth-container');
@@ -6204,6 +6212,9 @@
             desktopAds.forEach(ad => {
                 if (window.innerWidth > 768) {
                     ad.style.display = 'flex !important';
+                } else if (ad.classList.contains('menu-ad')) {
+                    // Keep menu-ad visible on mobile
+                    ad.style.display = 'flex !important';
                 }
             });
         }, 2000);
@@ -6216,9 +6227,16 @@
                 display: none !important;
             }
             
-            /* Hide all desktop ads on mobile */
-            .desktop-ad {
+            /* Hide all desktop ads on mobile EXCEPT the one under Back to Menu */
+            .desktop-ad:not(.menu-ad) {
                 display: none !important;
+            }
+            
+            /* Keep the menu ad always visible */
+            .desktop-ad.menu-ad {
+                display: flex !important;
+                justify-content: center !important;
+                margin: 15px 0 !important;
             }
             
             /* Keep Buy Me a Coffee banner always visible */
