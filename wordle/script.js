@@ -6196,13 +6196,7 @@ if (isMobile) {
     if (e.key === "Backspace") {
       e.preventDefault();
       e.stopPropagation();
-      // Sadece bir harf sil
-      if (currentTile > 0) {
-        currentTile--;
-        const tile = rows[currentRow].children[currentTile];
-        tile.textContent = "";
-        tile.classList.remove("correct", "present", "absent");
-      }
+      return false; // Event propagation'u tamamen durdur
     }
     // Enter ile satırı kontrol etme
     else if (e.key === "Enter") {
@@ -6247,12 +6241,15 @@ function handleKeyPress(e) {
   if (gameOver) return;
 
   if (e.key === "Backspace") {
+    e.preventDefault();
     deleteLetter();
   } else if (e.key === "Enter") {
+    e.preventDefault();
     checkRow();
   } else {
     const key = e.key.toUpperCase();
     if (isLetter(key) && currentTile < 5) {
+      e.preventDefault();
       addLetter(key);
     }
   }
@@ -6392,6 +6389,7 @@ function showMessage(msg) {
   setTimeout(() => {
     message.textContent = "";
     message.style.display = "none";
+    message.style.backgroundColor = ""; // Arka planı temizle
   }, 3000); // Mesajı 3 saniye sonra kaldır
 }
 
@@ -6404,10 +6402,13 @@ function shakeRow() {
 }
 
 function resetGame() {
-  // Karoları temizle
+  // Karoları temizle - tüm class'ları kaldır
   document.querySelectorAll(".tile").forEach((tile) => {
     tile.textContent = "";
     tile.className = "tile";
+    tile.style.backgroundColor = "";
+    tile.style.borderColor = "";
+    tile.style.color = "";
   });
 
   // Satır sayacını sıfırla
@@ -6420,11 +6421,22 @@ function resetGame() {
 
   // Mesajı temizle
   message.textContent = "";
+  message.style.backgroundColor = "";
+  message.style.display = "";
 
   // Klavye tuşlarını sıfırla
   document.querySelectorAll("button").forEach((button) => {
     button.classList.remove("correct", "present", "absent");
+    button.style.backgroundColor = "";
+    button.style.color = "";
   });
+
+  // Input alanını temizle ve focus et
+  const mobileInput = document.getElementById("wordleInput");
+  if (mobileInput) {
+    mobileInput.value = "";
+    setTimeout(() => mobileInput.focus(), 100);
+  }
 }
 
 // BU KODUN TAMAMINI MEVCUT JAVASCRIPT DOSYANIN SONUNA YAPIŞTIR

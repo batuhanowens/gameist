@@ -10,18 +10,19 @@
 @media (max-width: 768px) {
   .mobile-action-buttons {
     display: flex !important;
-    gap: 8px !important;
+    gap: 6px !important;
     justify-content: center !important;
-    margin: 8px 0 !important;
     padding: 0 15px !important;
+    bottom: 15px !important;
   }
   
   .mobile-action-btn {
     flex: 1 !important;
-    max-width: 140px !important;
-    padding: 10px 16px !important;
-    font-size: 13px !important;
-    border-radius: 6px !important;
+    max-width: 70px !important;
+    padding: 6px 8px !important;
+    font-size: 11px !important;
+    border-radius: 4px !important;
+    min-height: 32px !important;
   }
   
   .mobile-action-btn:active {
@@ -32,15 +33,16 @@
 /* Extra small mobile devices */
 @media (max-width: 480px) {
   .mobile-action-buttons {
-    gap: 6px !important;
-    margin: 6px 0 !important;
+    gap: 4px !important;
+    bottom: 10px !important;
     padding: 0 10px !important;
   }
   
   .mobile-action-btn {
-    max-width: 120px !important;
-    padding: 8px 12px !important;
-    font-size: 12px !important;
+    max-width: 60px !important;
+    padding: 5px 6px !important;
+    font-size: 10px !important;
+    min-height: 28px !important;
   }
 }
 

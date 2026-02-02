@@ -179,47 +179,6 @@
         </div>
     <div id="wordleGameScreen" class="screen hidden">
       <h1 class="oyunicih1"><span data-lang="gameTitle">Wordlist Kelime Tahmin Oyunu</span></h1>
-      
-      <!-- Mobile action buttons -->
-      <div class="mobile-action-buttons" style="
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-        margin: 10px 0;
-        padding: 0 20px;
-      ">
-        <button id="mobileMenuBtn" class="mobile-action-btn" onclick="openGameMenu()" style="
-          background: linear-gradient(45deg, #667eea, #764ba2);
-          color: white;
-          border: none;
-          padding: 12px 20px;
-          border-radius: 8px;
-          font-size: 14px;
-          font-weight: bold;
-          cursor: pointer;
-          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-          flex: 1;
-          max-width: 150px;
-        ">
-          <i class="fas fa-bars"></i> Menü
-        </button>
-        <button id="mobileRefreshBtn" class="mobile-action-btn" onclick="resetGame()" style="
-          background: linear-gradient(45deg, #f093fb, #f5576c);
-          color: white;
-          border: none;
-          padding: 12px 20px;
-          border-radius: 8px;
-          font-size: 14px;
-          font-weight: bold;
-          cursor: pointer;
-          box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
-          flex: 1;
-          max-width: 150px;
-        ">
-          <i class="fas fa-redo"></i> Yenile
-        </button>
-      </div>
-      
       <p id="message"></p>
 
       <!-- Hidden input for mobile keyboard -->
@@ -305,6 +264,52 @@
         </div>
       </div>
 
+      <!-- Mobile action buttons at bottom -->
+      <div class="mobile-action-buttons" style="
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        padding: 0 20px;
+        z-index: 100;
+      ">
+        <button id="mobileMenuBtn" class="mobile-action-btn" onclick="openGameMenu()" style="
+          background: var(--primary-color, #35587c);
+          color: var(--text-color, #ffffff);
+          border: 2px solid var(--border-color, #bdc3c7);
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-size: 12px;
+          font-weight: bold;
+          cursor: pointer;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+          flex: 1;
+          max-width: 80px;
+          transition: all 0.2s ease;
+        ">
+          <i class="fas fa-bars"></i> Menü
+        </button>
+        <button id="mobileRefreshBtn" class="mobile-action-btn" onclick="resetGame()" style="
+          background: var(--accent-color, #e74c3c);
+          color: var(--text-color, #ffffff);
+          border: 2px solid var(--border-color, #bdc3c7);
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-size: 12px;
+          font-weight: bold;
+          cursor: pointer;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+          flex: 1;
+          max-width: 80px;
+          transition: all 0.2s ease;
+        ">
+          <i class="fas fa-redo"></i> Yenile
+        </button>
+      </div>
+      
       <!-- Mobile keyboard removed - using native keyboard -->
       <div id="keyboard" style="display: none;">
         <!-- Keyboard content hidden -->
