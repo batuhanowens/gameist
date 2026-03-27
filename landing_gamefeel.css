@@ -747,8 +747,8 @@ header {
   
   /* Mobile Video Size - HERO LEFT */
   .hexagon-frame {
-    width: 280px !important;
-    height: 280px !important;
+    width: 200px !important;
+    height: 200px !important;
   }
   
   .hexagon-frame video {
@@ -776,8 +776,8 @@ header {
   
   /* Small Mobile Video Size - HERO LEFT */
   .hexagon-frame {
-    width: 220px !important;
-    height: 220px !important;
+    width: 160px !important;
+    height: 160px !important;
   }
   
   .hexagon-frame video {
