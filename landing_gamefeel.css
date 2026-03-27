@@ -744,6 +744,17 @@ header {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
   }
+  
+  /* Mobile Video Size - HERO LEFT */
+  .hexagon-frame {
+    width: 280px !important;
+    height: 280px !important;
+  }
+  
+  .hexagon-frame video {
+    width: calc(100% - 16px) !important;
+    height: calc(100% - 16px) !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -761,6 +772,17 @@ header {
   
   .page-section h2 {
     font-size: 1.2rem;
+  }
+  
+  /* Small Mobile Video Size - HERO LEFT */
+  .hexagon-frame {
+    width: 220px !important;
+    height: 220px !important;
+  }
+  
+  .hexagon-frame video {
+    width: calc(100% - 16px) !important;
+    height: calc(100% - 16px) !important;
   }
   
   .stats-grid {
