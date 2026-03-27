@@ -555,7 +555,7 @@
       }
 
       /* Shop Overlay Mobile - Stats panel size - HIGH PRIORITY */
-      @media (max-width: 767px) {
+      @media (max-width: 1024px) {
         body #shopOverlay .shop-box {
           position: fixed !important;
           top: 50% !important;
@@ -577,7 +577,7 @@
         }
         
         /* Landscape: Keep centered */
-        @media (orientation: landscape) {
+        @media (orientation: landscape) and (max-height: 500px) {
           body #shopOverlay .shop-box {
             top: 50% !important;
             bottom: auto !important;
@@ -592,7 +592,9 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
           }
         }
-        body #shopOverlay #shopItems {
+      }
+      
+      body #shopOverlay #shopItems {
           display: grid !important;
           grid-template-columns: repeat(2, 1fr) !important;
           gap: 8px !important;
