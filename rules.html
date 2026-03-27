@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kurallar - Gameist</title>
+    <link rel="stylesheet" href="landing_gamefeel.css?v=38">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Nunito:wght@400;600;800&family=Varela+Round&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Hero Background Pattern -->
+    <div class="hero-background-pattern"></div>
+    
+    <!-- Header -->
+    <header>
+        <div class="lang-switch">
+            <select id="gameistLangSelect" class="lang-switch-select">
+                <option value="tr">🇹🇷 TR</option>
+                <option value="en">🇬🇧 EN</option>
+            </select>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="page-container">
+        <div class="page-content">
+            <!-- Back Button -->
+            <a href="index.html" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                <span id="backText">Ana Sayfaya Dön</span>
+            </a>
+
+            <!-- Rules Content -->
+            <div class="page-card">
+                <h1 class="page-title" id="pageTitle">
+                    <i class="fas fa-book-open"></i>Kurallar
+                </h1>
+                
+                <div class="page-section">
+                    <h2>
+                        <i class="fas fa-gamepad"></i>Oyun Kuralları
+                    </h2>
+                    <ul>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Her oyuncu adil ve dürüst bir şekilde oyun oynamalıdır.</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Hile programları kullanmak kesinlikle yasaktır.</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Diğer oyunculara karşı saygılı davranılmalıdır.</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Oyun içi hataları bildirmek oyuncuların sorumluluğundadır.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="page-section">
+                    <h2>
+                        <i class="fas fa-users"></i>Topluluk Kuralları
+                    </h2>
+                    <ul>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Küfür, hakaret ve ayrımcılık kesinlikle yasaktır.</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Kişisel bilgileri paylaşmak güvenlik riski oluşturur.</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Ticari amaçlı reklam ve spam yapmak yasaktır.</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Telif haklarına saygı gösterilmelidir.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="page-section">
+                    <h2>
+                        <i class="fas fa-gavel"></i>Cezalar
+                    </h2>
+                    <ul>
+                        <li>
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Kural ihlali: Uyarı</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Tekrar ihlal: Geçici hesap kapatma (1-7 gün)</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Sürekli ihlal: Kalıcı hesap kapatma</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Ağır ihlal: IP ban ve yasal işlem</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="page-section highlight">
+                    <h2>
+                        <i class="fas fa-info-circle"></i>Önemli Not
+                    </h2>
+                    <p>
+                        Kurallarımız oyun deneyimini korumak ve adil bir ortam sağlamak için tasarlanmıştır. 
+                        Tüm oyuncuların bu kurallara uyması beklenir.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-20">
+        <div class="footer-links">
+            <a href="rules.html" id="rulesLink">Kurallar</a>
+            <a href="privacy.html" id="privacyLink">Gizlilik</a>
+            <a href="terms.html" id="termsLink">Kullanım Şartları</a>
+            <a href="support.html" id="supportLink">Destek</a>
+        </div>
+        <div class="copyright">
+            <a href="https://www.batuhanberk.online" target="_blank" style="color: inherit; text-decoration: none;">2026 Gameist by Batuhan Berk – Antalya</a>
+        </div>
+    </footer>
+
+    <script>
+        // Language translations
+        const translations = {
+            tr: {
+                backText: 'Ana Sayfaya Dön',
+                pageTitle: 'Kurallar',
+                gameRules: 'Oyun Kuralları',
+                communityRules: 'Topluluk Kuralları',
+                penalties: 'Cezalar',
+                importantNote: 'Önemli Not'
+            },
+            en: {
+                backText: 'Back to Home',
+                pageTitle: 'Rules',
+                gameRules: 'Game Rules',
+                communityRules: 'Community Rules',
+                penalties: 'Penalties',
+                importantNote: 'Important Note'
+            }
+        };
+
+        // Language selector
+        const languageSelector = document.getElementById('gameistLangSelect');
+        const currentLang = localStorage.getItem('gameistLanguage') || 'tr';
+        languageSelector.value = currentLang;
+
+        function updateLanguage(lang) {
+            const t = translations[lang];
+            document.getElementById('backText').textContent = t.backText;
+            document.getElementById('pageTitle').innerHTML = `<i class="fas fa-book-open mr-3"></i>${t.pageTitle}`;
+            localStorage.setItem('gameistLanguage', lang);
+        }
+
+        languageSelector.addEventListener('change', (e) => {
+            updateLanguage(e.target.value);
+        });
+
+        // Initialize
+        updateLanguage(currentLang);
+    </script>
+</body>
+</html>

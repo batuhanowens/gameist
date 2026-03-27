@@ -1,0 +1,33 @@
+<svg width="120" height="104" viewBox="0 0 120 104" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="120" height="104" fill="transparent"/>
+  
+  <!-- Perfect Honeycomb Pattern - Two Hexagons Touching -->
+  
+  <!-- Left Hexagon with Hero Character -->
+  <g>
+    <path d="M30,5 L50,17 L50,37 L30,49 L10,37 L10,17 Z" 
+          fill="none" stroke="#0A2E5A" stroke-width="3" opacity="0.7"/>
+    <!-- Hero Character -->
+    <g transform="translate(30, 27)">
+      <circle cx="0" cy="-4" r="3" fill="#0A2E5A" opacity="0.6"/>
+      <rect x="-2" y="-1" width="4" height="6" rx="1" fill="#0A2E5A" opacity="0.7"/>
+      <rect x="-4" y="0" width="1.5" height="4" rx="0.5" fill="#0A2E5A" opacity="0.5"/>
+      <rect x="2.5" y="0" width="1.5" height="4" rx="0.5" fill="#0A2E5A" opacity="0.5"/>
+      <rect x="-1" y="4" width="1" height="3" rx="0.5" fill="#0A2E5A" opacity="0.5"/>
+      <rect x="0" y="4" width="1" height="3" rx="0.5" fill="#0A2E5A" opacity="0.5"/>
+    </g>
+  </g>
+  
+  <!-- Right Hexagon with Power Orb - Touching Left -->
+  <g>
+    <path d="M90,5 L110,17 L110,37 L90,49 L70,37 L70,17 Z" 
+          fill="none" stroke="#0A2E5A" stroke-width="3" opacity="0.7"/>
+    <!-- Power Orb -->
+    <g transform="translate(90, 27)">
+      <circle cx="0" cy="0" r="6" fill="#0A2E5A" opacity="0.5"/>
+      <circle cx="0" cy="0" r="3" fill="#0A2E5A" opacity="0.7"/>
+      <circle cx="0" cy="0" r="1" fill="#0A2E5A" opacity="0.9"/>
+    </g>
+  </g>
+</svg>

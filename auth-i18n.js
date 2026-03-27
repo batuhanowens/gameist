@@ -122,20 +122,20 @@ function applyAuthTranslations(lang = getCurrentLanguage()) {
 
     
 
-    // Update login button
-
+    // Update login button - keep SVG and add text
     const loginBtn = document.getElementById('googleLogin');
 
     if (loginBtn && translations.login_button) {
-
         const svg = loginBtn.querySelector('svg');
-
         loginBtn.innerHTML = '';
-
-        if (svg) loginBtn.appendChild(svg);
-
-        loginBtn.appendChild(document.createTextNode(' ' + translations.login_button));
-
+        
+        if (svg) {
+            loginBtn.appendChild(svg);
+            loginBtn.appendChild(document.createTextNode(' ' + translations.login_button));
+        } else {
+            // If no SVG found, just add text
+            loginBtn.innerHTML = translations.login_button;
+        }
     }
 
     

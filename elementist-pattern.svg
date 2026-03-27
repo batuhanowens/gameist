@@ -1,0 +1,47 @@
+<svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="80" height="80" fill="transparent"/>
+  
+  <!-- Fire Element - Top Left -->
+  <g transform="translate(15, 15)">
+    <path d="M8 2C8 2 4 6 4 10C4 14 6 16 8 16C10 16 12 14 12 10C12 6 8 2 8 2Z" 
+          fill="#12487E" opacity="0.8"/>
+    <circle cx="8" cy="8" r="2" fill="#12487E" opacity="0.6"/>
+  </g>
+  
+  <!-- Water Element - Top Right -->
+  <g transform="translate(55, 15)">
+    <path d="M8 2C8 2 4 6 4 10C4 14 6 16 8 16C10 16 12 14 12 10C12 6 8 2 8 2Z" 
+          fill="#12487E" opacity="0.8"/>
+    <circle cx="6" cy="6" r="1.5" fill="#12487E" opacity="0.6"/>
+    <circle cx="10" cy="8" r="1" fill="#12487E" opacity="0.6"/>
+  </g>
+  
+  <!-- Earth Element - Bottom Left -->
+  <g transform="translate(15, 55)">
+    <rect x="4" y="4" width="8" height="8" rx="2" fill="#12487E" opacity="0.8"/>
+    <circle cx="8" cy="8" r="2" fill="#12487E" opacity="0.6"/>
+  </g>
+  
+  <!-- Air Element - Bottom Right -->
+  <g transform="translate(55, 55)">
+    <circle cx="8" cy="8" r="6" fill="none" stroke="#12487E" stroke-width="1.5" opacity="0.8"/>
+    <circle cx="8" cy="8" r="3" fill="none" stroke="#12487E" stroke-width="1" opacity="0.6"/>
+    <circle cx="8" cy="8" r="1" fill="#12487E" opacity="0.8"/>
+  </g>
+  
+  <!-- Hero Silhouette - Center -->
+  <g transform="translate(35, 35)">
+    <!-- Simple hero figure -->
+    <ellipse cx="5" cy="3" rx="3" ry="2" fill="#12487E" opacity="0.6"/>
+    <rect x="3" y="4" width="4" height="6" rx="1" fill="#12487E" opacity="0.7"/>
+    <rect x="2" y="5" width="1.5" height="4" rx="0.5" fill="#12487E" opacity="0.5"/>
+    <rect x="6.5" y="5" width="1.5" height="4" rx="0.5" fill="#12487E" opacity="0.5"/>
+    <rect x="3.5" y="9" width="1.5" height="3" rx="0.5" fill="#12487E" opacity="0.5"/>
+    <rect x="5" y="9" width="1.5" height="3" rx="0.5" fill="#12487E" opacity="0.5"/>
+  </g>
+  
+  <!-- Connecting Lines -->
+  <line x1="23" y1="23" x2="57" y2="57" stroke="#12487E" stroke-width="0.5" opacity="0.3"/>
+  <line x1="57" y1="23" x2="23" y2="57" stroke="#12487E" stroke-width="0.5" opacity="0.3"/>
+</svg>

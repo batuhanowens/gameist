@@ -18,7 +18,7 @@
   "volume": "Ses Seviyesi",
   "language": "Dil",
   "credits": "Emeği Geçenler",
-  "creditsText": "Elementist geliştirici ekibi ve katkıda bulunanlara teşekkürler.",
+  "creditsText": "Her şey Batuhan Berk tarafından geliştirildi.",
   "fpsInfo": "FPS Bilgisi",
   "fullscreen": "Tam Ekran",
   "mouseSensitivity": "Fare Hassasiyeti",
@@ -88,5 +88,6 @@
   "rotateDesc": "Bu oyun yatay (16:9) modda en iyi oynanır.",
   "dodgeBtn": "KAÇIŞ",
   "skillBtn": "YETENEKLİ",
-  "back": "← Geri"
+  "back": "← Geri",
+  "controls_attack": "Saldırı"
 }

@@ -73,7 +73,7 @@ class GlowlingsGame {
           if (apH3)  apH3.textContent  = t('appearance', apH3.textContent||'Appearance');
           if (crTab) crTab.textContent = t('credits', crTab.textContent||'Credits');
           if (crH3)  crH3.textContent  = t('credits', crH3.textContent||'Credits');
-          if (crTxt) crTxt.textContent = t('creditsText', crTxt.textContent||'Thanks to the Elementist dev team and contributors.');
+          if (crTxt) crTxt.textContent = t('creditsText', crTxt.textContent||'Everything developed by Batuhan Berk.');
         }catch(_){ }
       }
       // Builds overlay: open/close (mirror strong behavior)

@@ -1350,7 +1350,7 @@ class GlowlingsGame {
                 // Settings tabs and controls (new)
                 appearance: 'Appearance',
                 credits: 'Credits',
-                creditsText: 'Thanks to the Elementist dev team and contributors.',
+                creditsText: 'Everything developed by Batuhan Berk.',
                 fullscreen: 'Fullscreen',
                 fpsCap: 'FPS Cap',
                 fpsInfo: 'FPS Info',
@@ -2660,6 +2660,10 @@ class GlowlingsGame {
 
         // Kick off
         this.init();
+        
+        // Preload click sound for instant playback
+        this.clickSound = null;
+        this.preloadClickSound();
     }
 
     // Spawn the Wave 5 mini-boss (lighter triangle boss)
@@ -4089,8 +4093,37 @@ class GlowlingsGame {
         osc.stop(this.audioCtx.currentTime + duration + 0.02);
     }
 
-    playClick() { this.playBeep({ freq: 520, duration: 0.07, type: 'square', gain: 0.24 }); }
-    playHover() { this.playBeep({ freq: 740, duration: 0.04, type: 'triangle', gain: 0.16 }); }
+    // Preload click sound for instant playback
+    preloadClickSound() {
+        try {
+            this.clickSound = new Audio('../assets/click.MP3');
+            this.clickSound.volume = 0.5;
+            this.clickSound.preload = 'auto';
+            // Load the audio
+            this.clickSound.load();
+        } catch (error) {
+            console.log('Click sound preload error:', error);
+        }
+    }
+
+    playClick() { 
+        if (this.clickSound) {
+            try {
+                this.clickSound.currentTime = 0;
+                this.clickSound.play().catch(() => {});
+            } catch (error) {
+                // Fallback to beep if audio fails
+                this.playBeep({ freq: 520, duration: 0.07, type: 'square', gain: 0.24 });
+            }
+        }
+    }
+    
+    // Test function - call this from console to test: window.game.testClickSound()
+    testClickSound() {
+        console.log('Testing click sound...');
+        this.playClick();
+    }
+    playHover() { return; }
 
     playAbilitySound(element) {
         if (!this.audioCtx) return;
@@ -5148,6 +5181,7 @@ class GlowlingsGame {
         // Element selection
         document.querySelectorAll('.element-btn').forEach(btn => {
             btn.addEventListener('click', () => {
+                this.playClick();
                 document.querySelectorAll('.element-btn').forEach(b=>b.classList.remove('selected'));
                 btn.classList.add('selected');
                 // Update ability icon preview immediately
@@ -5168,6 +5202,7 @@ class GlowlingsGame {
         // Character selection
         document.querySelectorAll('.char-btn').forEach(btn => {
             btn.addEventListener('click', () => {
+                this.playClick();
                 document.querySelectorAll('.char-btn').forEach(b=>b.classList.remove('selected'));
                 btn.classList.add('selected');
                 const key = btn.getAttribute('data-char');
@@ -5180,6 +5215,7 @@ class GlowlingsGame {
         // Color selection
         document.querySelectorAll('.color-btn').forEach(btn => {
             btn.addEventListener('click', () => {
+                this.playClick();
                 document.querySelectorAll('.color-btn').forEach(b=>b.classList.remove('selected'));
                 btn.classList.add('selected');
             });
@@ -5187,6 +5223,7 @@ class GlowlingsGame {
         // Shape selection
         document.querySelectorAll('.shape-btn').forEach(btn => {
             btn.addEventListener('click', () => {
+                this.playClick();
                 document.querySelectorAll('.shape-btn').forEach(b=>b.classList.remove('selected'));
                 btn.classList.add('selected');
             });
@@ -5223,291 +5260,264 @@ class GlowlingsGame {
                 if (this.isMobile() && screen.orientation && screen.orientation.lock) {
                     screen.orientation.lock('landscape').catch(()=>{});
                 }
-                // Hide start screen and show element overlay
+                // Hide start screen and start game directly with default element
                 const startScreen = document.getElementById('startScreen');
                 if (startScreen) startScreen.style.display = 'none';
-                const overlay = document.getElementById('elementSelectOverlay');
-                if (overlay) overlay.style.display = 'block';
-                // Keep cursor visible while selecting element
-                this.setCursorVisible(true);
-
-                // Ensure element description matches device (mobile vs desktop)
-                try {
-                    const elDescNode = document.getElementById('elementOverlayDesc');
-                    if (elDescNode) elDescNode.textContent = this.t(this.isMobile() ? 'elementOverlayDescMobile' : 'elementOverlayDesc');
-                } catch {}
-
-                // Ensure default character is visually selected
-                try {
-                    const selKey = this.selectedCharacter || 'berserker';
-                    const btn = document.querySelector(`.char-btn[data-char="${selKey}"]`);
-                    if (btn && !btn.classList.contains('selected')) btn.classList.add('selected');
-                } catch {}
-                // Apply initial visual styles for selections
-                this.updateSelectStyles();
-
+                
+                // Use selected element from start screen or default to 'fire'
+                const defaultElement = window.gameElement || 'fire';
+                console.log('🔥 Using element for player creation:', defaultElement);
+                
                 // Persist pre-selected name/color/shape from start screen
                 const name = (document.getElementById('playerName')?.value || '').trim() || 'Elementist';
                 let color = document.querySelector('.color-btn.selected')?.getAttribute('data-color') || '#00ffff';
                 let shape = document.querySelector('.shape-btn.selected')?.getAttribute('data-shape') || 'circle';
-
-                const choose = (elem) => {
-                    // Create player at world center after choosing element
-                    // Apply selected skin override if available
-                    try {
-                        const selRaw = localStorage.getItem('glowlings_selected_skin');
-                        if (selRaw) {
-                            const sel = JSON.parse(selRaw);
-                            if (sel && (sel.color || sel.shape)) {
-                                if (sel.color) color = sel.color;
-                                if (sel.shape) shape = sel.shape;
-                            }
+                
+                // Create player at world center with default element
+                // Apply selected skin override if available
+                try {
+                    const selRaw = localStorage.getItem('glowlings_selected_skin');
+                    if (selRaw) {
+                        const sel = JSON.parse(selRaw);
+                        if (sel && (sel.color || sel.shape)) {
+                            if (sel.color) color = sel.color;
+                            if (sel.shape) shape = sel.shape;
                         }
-                    } catch(_){ }
-                    this.player = new Glowling(new Vector2(this.worldSize.width/2, this.worldSize.height/2), {
-                        name, element: elem, color, shape
-                    });
+                    }
+                } catch(_){ }
+                this.player = new Glowling(new Vector2(this.worldSize.width/2, this.worldSize.height/2), {
+                    name, element: defaultElement, color, shape
+                });
                     // Apply character modifiers now that player exists
-                    this.applyCharacterModifiers(this.selectedCharacter);
-                    // Turrets will unlock at Wave 4 (initialized in startNextWave)
-                    // Ensure weapon skin selections exist (one per weapon)
-                    try { this.ensureWeaponSkinSelections && this.ensureWeaponSkinSelections(); } catch(_) {}
-                    this.gameState = 'playing';
-                    this.syncBodyPlaying && this.syncBodyPlaying();
-                    // Apply mobile zoom immediately
-                    if (this.isMobile()) this.resizeCanvas();
-                    this.updateTouchControlsVisibility();
-
-                    // Close element select overlay immediately
-                    if (overlay) overlay.style.display = 'none';
+                this.applyCharacterModifiers(this.selectedCharacter);
+                // Turrets will unlock at Wave 4 (initialized in startNextWave)
+                // Ensure weapon skin selections exist (one per weapon)
+                try { this.ensureWeaponSkinSelections && this.ensureWeaponSkinSelections(); } catch(_) {}
+                this.gameState = 'playing';
+                this.syncBodyPlaying && this.syncBodyPlaying();
+                // Apply mobile zoom immediately
+                if (this.isMobile()) this.resizeCanvas();
+                this.updateTouchControlsVisibility();
 
                     // Define proceed-to-shop flow (what used to happen immediately)
-                    const proceedToShop = () => {
-                        try {
-                            const gameUI = document.getElementById('gameUI');
-                            if (gameUI) gameUI.style.display = 'block';
-                            const timer = document.getElementById('timer');
-                            if (timer) timer.style.display = 'block';
-                            const leaderboard = document.getElementById('leaderboard');
-                            if (leaderboard) leaderboard.style.display = 'block';
-                            const ability = document.querySelector('.ability-cooldown');
-                            if (ability) ability.style.display = 'block';
-                        } catch {}
-                        // Hide cursor for gameplay
-                        this.setCursorVisible(false);
-                        this.updateAbilityIcon();
-                        // Brotato: open shop first (intermission) until player starts wave
-                        if (this.gameMode === 'brotato') {
-                            this.inWave = false;
-                            // First upgrade timing optimization: 10% faster for first wave only
-                            const isFirstWave = this.waveNumber === 0;
-                            this.intermissionTimer = isFirstWave ? 9000 : 10000; // 9s instead of 10s for first wave
-                            this.updateShopCounters();
-                            // Ensure shop offers match chosen element
-                            this.refreshShopItems && this.refreshShopItems();
-                            // Shop open -> show cursor
-                            this.setCursorVisible(true);
-                            try {
-                                const overlay = document.getElementById('shopOverlay');
-                                if (overlay) overlay.style.display = 'block';
-                                if (document && document.body && document.body.classList) document.body.classList.add('shop-open');
-                                // Position consumable bar under the shop box
-                                try { this.attachConsumableBarUnderShop && this.attachConsumableBarUnderShop(); } catch(_) {}
-                            } catch {}
-                        }
-                    };
-
-                    // Show cutscene overlay and play video, then proceed to shop
+                const proceedToShop = () => {
                     try {
-                        const cs = document.getElementById('cutsceneOverlay');
-                        const video = document.getElementById('cutsceneVideo');
-                        const skip = document.getElementById('cutsceneSkipBtn');
-                        if (cs && video) {
-                            // Ensure skip button label reflects current language
-                            try {
-                                if (skip) {
-                                    const label = (this && typeof this.t === 'function') ? this.t('close') : 'CLOSE';
-                                    // Remove stray text nodes to avoid duplicates
-                                    Array.from(skip.childNodes).forEach(n => { if (n.nodeType === Node.TEXT_NODE) skip.removeChild(n); });
-                                    skip.textContent = label;
-                                    skip.setAttribute('data-lang', 'close');
-                                }
-                            } catch(_) {}
-                            // Ensure overlay is at top-level and above everything
-                            try {
-                                if (cs.parentElement && cs.parentElement !== document.body) {
-                                    document.body.appendChild(cs);
-                                }
-                                cs.style.position = 'fixed';
-                                cs.style.inset = '0';
-                                cs.style.display = 'flex';
-                                cs.style.background = '#000';
-                                cs.style.zIndex = '2147483647';
-                                cs.style.pointerEvents = 'all';
-                                // Prepare for smooth fade-out on close
-                                cs.style.opacity = '1';
-                                cs.style.transition = 'opacity 500ms ease';
-                                video.style.position = 'absolute';
-                                video.style.inset = '0';
-                                video.style.width = '100vw';
-                                video.style.height = '100vh';
-                                video.style.objectFit = 'contain';
-                                video.style.background = '#000';
-                                // Hide game canvas to prevent any bleed-through
-                                try { const cvs = document.getElementById('gameCanvas'); if (cvs) cvs.style.visibility = 'hidden'; } catch {}
-                            } catch {}
-                            // Resolve cutscene URL by language, allow external override via window.CUTSCENE_URL
-                            // Extended mapping for newly added languages and regional variants
-                            const __langRaw = (this && this.lang) ? String(this.lang) : 'tr';
-                            const __lang = __langRaw.toLowerCase();
-                            let defaultByLang = 'video/4keng.mp4'; // fallback
-                            switch (__lang) {
-                                case 'tr':
-                                    defaultByLang = 'video/4kTr.mp4';
-                                    break;
-                                case 'en':
-                                    defaultByLang = 'video/4keng.mp4';
-                                    break;
-                                case 'de': // German
-                                    defaultByLang = 'video/deutsch.mp4';
-                                    break;
-                                case 'es': // Spanish
-                                    // Note: file name is spainsh.mp4 in repo
-                                    defaultByLang = 'video/spainsh.mp4';
-                                    break;
-                                case 'pt': // Portuguese (generic)
-                                case 'pt-br':
-                                case 'pt_br': // tolerate underscore variant
-                                    defaultByLang = 'video/br.mp4';
-                                    break;
-                                case 'ja': // Japanese
-                                    defaultByLang = 'video/japan.mp4';
-                                    break;
-                                case 'hi': // Hindi
-                                    defaultByLang = 'video/hindu.mp4';
-                                    break;
-                                case 'zh': // Chinese (generic)
-                                case 'zh-cn':
-                                case 'zh_cn':
-                                case 'zh-hans':
-                                case 'zh_hans':
-                                case 'zh-hant':
-                                case 'zh_hant':
-                                    defaultByLang = 'video/china.mp4';
-                                    break;
-                                default:
-                                    defaultByLang = 'video/4keng.mp4';
-                            }
-                            const url = (typeof window !== 'undefined' && window.CUTSCENE_URL) ? window.CUTSCENE_URL : defaultByLang;
-                            if (url) {
-                                // Pause BGM during cutscene
-                                let bgmWasPlaying = false;
-                                try { const bgmEl = document.getElementById('bgm'); if (bgmEl) { bgmWasPlaying = !bgmEl.paused; bgmEl.pause(); } } catch {}
-                                video.src = url;
-                                video.currentTime = 0;
-                                // Try with sound first (user just clicked an element -> user gesture)
-                                video.muted = false;
-                                // Close with fade-out, then resume flow and fade-in BGM
-                                const closeWithFade = (next) => {
-                                    try { video.pause(); } catch {}
-                                    video.removeEventListener('ended', onEnd);
-                                    video.removeEventListener('error', onError);
-                                    if (skip) skip.removeEventListener('click', onSkip);
-                                    // Fade out overlay
-                                    try { cs.style.opacity = '0'; } catch {}
-                                    const afterFade = () => {
-                                        // Hide overlay
-                                        cs.style.display = 'none';
-                                        // Restore game canvas visibility
-                                        try { const cvs = document.getElementById('gameCanvas'); if (cvs) cvs.style.visibility = ''; } catch {}
-                                        // Start BGM with soft fade-in (only if not muted)
-                                        try {
-                                            const bgmEl = document.getElementById('bgm');
-                                            if (bgmEl) {
-                                                const s = this.settings || {};
-                                                const effectiveSoundMuted = (typeof this.muted === 'boolean') ? this.muted : !!s.soundMuted;
-                                                const effectiveMusicMuted = (typeof this.musicMuted === 'boolean') ? this.musicMuted : !!s.musicMuted;
-                                                if (effectiveSoundMuted || effectiveMusicMuted) {
-                                                    // Respect mute: ensure BGM stays muted and do not auto-play
-                                                    try { bgmEl.pause(); } catch {}
-                                                    bgmEl.muted = true;
-                                                } else {
-                                                    try { this.resumeAudioContext && this.resumeAudioContext(); } catch {}
-                                                    bgmEl.muted = false;
-                                                    // Enforce looping and resilient restart
-                                                    try { bgmEl.loop = true; } catch {}
-                                                    if (!bgmEl._loopBound) {
-                                                        bgmEl.addEventListener('ended', () => {
-                                                            try { bgmEl.currentTime = 0; } catch {}
-                                                            const tryPlay = () => bgmEl.play();
-                                                            tryPlay().catch(()=>{});
-                                                        });
-                                                        bgmEl._loopBound = true;
-                                                    }
-                                                    const target = Math.max(0, Math.min(1, (this.settings?.musicVolume ?? 0.15)));
-                                                    let vol = 0.0;
-                                                    bgmEl.volume = vol;
-                                                    const tryPlay = () => bgmEl.play();
-                                                    tryPlay().catch(() => {
-                                                        const onInteract = () => {
-                                                            document.removeEventListener('pointerdown', onInteract, true);
-                                                            tryPlay().catch(()=>{});
-                                                        };
-                                                        document.addEventListener('pointerdown', onInteract, true);
-                                                    });
-                                                    const stepMs = 50;
-                                                    const durationMs = 1000;
-                                                    const step = target / (durationMs / stepMs);
-                                                    const iv = setInterval(() => {
-                                                        vol = Math.min(target, vol + step);
-                                                        try { bgmEl.volume = vol; } catch {}
-                                                        if (vol >= target) clearInterval(iv);
-                                                    }, stepMs);
-                                                }
-                                            }
-                                        } catch {}
-                                        // Continue flow (open shop, etc.)
-                                        try { next && next(); } catch {}
-                                    };
-                                    // Wait for transition end or fallback timeout
-                                    let done = false;
-                                    const onEndTrans = () => { if (done) return; done = true; cs.removeEventListener('transitionend', onEndTrans); afterFade(); };
-                                    try { cs.addEventListener('transitionend', onEndTrans); } catch {}
-                                    setTimeout(onEndTrans, 520);
-                                };
-
-                                const onEnd = () => closeWithFade(proceedToShop);
-                                const onError = () => closeWithFade(proceedToShop);
-                                const onSkip = () => closeWithFade(proceedToShop);
-                                video.addEventListener('ended', onEnd);
-                                video.addEventListener('error', onError);
-                                if (skip) skip.addEventListener('click', onSkip);
-                                video.play().catch(()=>{
-                                    // Fallback: mute then play
-                                    try { video.muted = true; video.play().catch(onError); } catch { onError(); }
-                                });
-                            } else {
-                                // No video URL set; show a brief fade then continue
-                                let handled = false;
-                                const finish = () => { if (handled) return; handled = true; try { cs.style.display = 'none'; } catch {} proceedToShop(); };
-                                if (skip) skip.onclick = finish;
-                                setTimeout(finish, 3500);
-                            }
-                        } else {
-                            // Fallback if overlay missing
-                            proceedToShop();
-                        }
-                    } catch {
-                        proceedToShop();
+                        const gameUI = document.getElementById('gameUI');
+                        if (gameUI) gameUI.style.display = 'block';
+                        const timer = document.getElementById('timer');
+                        if (timer) timer.style.display = 'block';
+                        const leaderboard = document.getElementById('leaderboard');
+                        if (leaderboard) leaderboard.style.display = 'block';
+                        const ability = document.querySelector('.ability-cooldown');
+                        if (ability) ability.style.display = 'block';
+                    } catch {}
+                    // Hide cursor for gameplay
+                    this.setCursorVisible(false);
+                    this.updateAbilityIcon();
+                    // Brotato: open shop first (intermission) until player starts wave
+                    if (this.gameMode === 'brotato') {
+                        this.inWave = false;
+                        // First upgrade timing optimization: 10% faster for first wave only
+                        const isFirstWave = this.waveNumber === 0;
+                        this.intermissionTimer = isFirstWave ? 9000 : 10000; // 9s instead of 10s for first wave
+                        this.updateShopCounters();
+                        // Ensure shop offers match chosen element
+                        this.refreshShopItems && this.refreshShopItems();
+                        // Shop open -> show cursor
+                        this.setCursorVisible(true);
+                        try {
+                            const overlay = document.getElementById('shopOverlay');
+                            if (overlay) overlay.style.display = 'block';
+                            if (document && document.body && document.body.classList) document.body.classList.add('shop-open');
+                            // Position consumable bar under the shop box
+                            try { this.attachConsumableBarUnderShop && this.attachConsumableBarUnderShop(); } catch(_) {}
+                        } catch {}
                     }
                 };
 
-                const fireBtn = document.getElementById('chooseFire');
-                const waterBtn = document.getElementById('chooseWater');
-                const airBtn = document.getElementById('chooseAir');
-                if (fireBtn) { fireBtn.onclick = () => { this.playClick(); choose('fire'); }; fireBtn.onmouseover = () => this.playHover(); }
-                if (waterBtn) { waterBtn.onclick = () => { this.playClick(); choose('water'); }; waterBtn.onmouseover = () => this.playHover(); }
-                if (airBtn) { airBtn.onclick = () => { this.playClick(); choose('air'); }; airBtn.onmouseover = () => this.playHover(); }
+                // Show cutscene overlay and play video, then proceed to shop
+                try {
+                    const cs = document.getElementById('cutsceneOverlay');
+                    const video = document.getElementById('cutsceneVideo');
+                    const skip = document.getElementById('cutsceneSkipBtn');
+                    if (cs && video) {
+                        // Ensure skip button label reflects current language
+                        try {
+                            if (skip) {
+                                const label = (this && typeof this.t === 'function') ? this.t('close') : 'CLOSE';
+                                // Remove stray text nodes to avoid duplicates
+                                Array.from(skip.childNodes).forEach(n => { if (n.nodeType === Node.TEXT_NODE) skip.removeChild(n); });
+                                skip.textContent = label;
+                                skip.setAttribute('data-lang', 'close');
+                            }
+                        } catch(_) {}
+                        // Ensure overlay is at top-level and above everything
+                        try {
+                            if (cs.parentElement && cs.parentElement !== document.body) {
+                                document.body.appendChild(cs);
+                            }
+                            cs.style.position = 'fixed';
+                            cs.style.inset = '0';
+                            cs.style.display = 'flex';
+                            cs.style.background = '#000';
+                            cs.style.zIndex = '2147483647';
+                            cs.style.pointerEvents = 'all';
+                            // Prepare for smooth fade-out on close
+                            cs.style.opacity = '1';
+                            cs.style.transition = 'opacity 500ms ease';
+                            video.style.position = 'absolute';
+                            video.style.inset = '0';
+                            video.style.width = '100vw';
+                            video.style.height = '100vh';
+                            video.style.objectFit = 'contain';
+                            video.style.background = '#000';
+                            // Hide game canvas to prevent any bleed-through
+                            try { const cvs = document.getElementById('gameCanvas'); if (cvs) cvs.style.visibility = 'hidden'; } catch {}
+                        } catch {}
+                        // Resolve cutscene URL by language, allow external override via window.CUTSCENE_URL
+                        // Extended mapping for newly added languages and regional variants
+                        const __langRaw = (this && this.lang) ? String(this.lang) : 'tr';
+                        const __lang = __langRaw.toLowerCase();
+                        let defaultByLang = 'video/4keng.mp4'; // fallback
+                        switch (__lang) {
+                            case 'tr':
+                                defaultByLang = 'video/4kTr.mp4';
+                                break;
+                            case 'en':
+                                defaultByLang = 'video/4keng.mp4';
+                                break;
+                            case 'de': // German
+                                defaultByLang = 'video/deutsch.mp4';
+                                break;
+                            case 'es': // Spanish
+                                // Note: file name is spainsh.mp4 in repo
+                                defaultByLang = 'video/spainsh.mp4';
+                                    break;
+                            case 'pt': // Portuguese (generic)
+                            case 'pt-br':
+                            case 'pt_br': // tolerate underscore variant
+                                defaultByLang = 'video/br.mp4';
+                                break;
+                            case 'ja': // Japanese
+                                defaultByLang = 'video/japan.mp4';
+                                break;
+                            case 'hi': // Hindi
+                                defaultByLang = 'video/hindu.mp4';
+                                break;
+                            case 'zh': // Chinese (generic)
+                            case 'zh-cn':
+                            case 'zh_cn':
+                            case 'zh-hans':
+                            case 'zh_hans':
+                            case 'zh-hant':
+                            case 'zh_hant':
+                                defaultByLang = 'video/china.mp4';
+                                break;
+                            default:
+                                defaultByLang = 'video/4keng.mp4';
+                        }
+                        const url = (typeof window !== 'undefined' && window.CUTSCENE_URL) ? window.CUTSCENE_URL : defaultByLang;
+                        if (url) {
+                            // Pause BGM during cutscene
+                            let bgmWasPlaying = false;
+                            try { const bgmEl = document.getElementById('bgm'); if (bgmEl) { bgmWasPlaying = !bgmEl.paused; bgmEl.pause(); } } catch {}
+                            video.src = url;
+                            video.currentTime = 0;
+                            // Try with sound first (user just clicked start -> user gesture)
+                            video.muted = false;
+                            // Close with fade-out, then resume flow and fade-in BGM
+                            const closeWithFade = (next) => {
+                                try { video.pause(); } catch {}
+                                video.removeEventListener('ended', onEnd);
+                                video.removeEventListener('error', onError);
+                                if (skip) skip.removeEventListener('click', onSkip);
+                                // Fade out overlay
+                                try { cs.style.opacity = '0'; } catch {}
+                                const afterFade = () => {
+                                    // Hide overlay
+                                    cs.style.display = 'none';
+                                    // Restore game canvas visibility
+                                    try { const cvs = document.getElementById('gameCanvas'); if (cvs) cvs.style.visibility = ''; } catch {}
+                                    // Start BGM with soft fade-in (only if not muted)
+                                    try {
+                                        const bgmEl = document.getElementById('bgm');
+                                        if (bgmEl) {
+                                            const s = this.settings || {};
+                                            const effectiveSoundMuted = (typeof this.muted === 'boolean') ? this.muted : !!s.soundMuted;
+                                            const effectiveMusicMuted = (typeof this.musicMuted === 'boolean') ? this.musicMuted : !!s.musicMuted;
+                                            if (effectiveSoundMuted || effectiveMusicMuted) {
+                                                // Respect mute: ensure BGM stays muted and do not auto-play
+                                                try { bgmEl.pause(); } catch {}
+                                                bgmEl.muted = true;
+                                            } else {
+                                                try { this.resumeAudioContext && this.resumeAudioContext(); } catch {}
+                                                bgmEl.muted = false;
+                                                // Enforce looping and resilient restart
+                                                try { bgmEl.loop = true; } catch {}
+                                                if (!bgmEl._loopBound) {
+                                                    bgmEl.addEventListener('ended', () => {
+                                                        try { bgmEl.currentTime = 0; } catch {}
+                                                        const tryPlay = () => bgmEl.play();
+                                                        tryPlay().catch(()=>{});
+                                                    });
+                                                    bgmEl._loopBound = true;
+                                                }
+                                                const target = Math.max(0, Math.min(1, (this.settings?.musicVolume ?? 0.15)));
+                                                let vol = 0.0;
+                                                bgmEl.volume = vol;
+                                                const tryPlay = () => bgmEl.play();
+                                                tryPlay().catch(() => {
+                                                    const onInteract = () => {
+                                                        document.removeEventListener('pointerdown', onInteract, true);
+                                                        tryPlay().catch(()=>{});
+                                                    };
+                                                    document.addEventListener('pointerdown', onInteract, true);
+                                                });
+                                                const stepMs = 50;
+                                                const durationMs = 1000;
+                                                const step = target / (durationMs / stepMs);
+                                                const iv = setInterval(() => {
+                                                    vol = Math.min(target, vol + step);
+                                                    try { bgmEl.volume = vol; } catch {}
+                                                    if (vol >= target) clearInterval(iv);
+                                                }, stepMs);
+                                            }
+                                        }
+                                    } catch {}
+                                    // Continue flow (open shop, etc.)
+                                    try { next && next(); } catch {}
+                                };
+                                // Wait for transition end or fallback timeout
+                                let done = false;
+                                const onEndTrans = () => { if (done) return; done = true; cs.removeEventListener('transitionend', onEndTrans); afterFade(); };
+                                try { cs.addEventListener('transitionend', onEndTrans); } catch {}
+                                setTimeout(onEndTrans, 520);
+                            };
+
+                            const onEnd = () => closeWithFade(proceedToShop);
+                            const onError = () => closeWithFade(proceedToShop);
+                            const onSkip = () => closeWithFade(proceedToShop);
+                            video.addEventListener('ended', onEnd);
+                            video.addEventListener('error', onError);
+                            if (skip) skip.addEventListener('click', onSkip);
+                            video.play().catch(()=>{
+                                // Fallback: mute then play
+                                try { video.muted = true; video.play().catch(onError); } catch { onError(); }
+                            });
+                        } else {
+                            // No video URL set; show a brief fade then continue
+                            let handled = false;
+                            const finish = () => { if (handled) return; handled = true; try { cs.style.display = 'none'; } catch {} proceedToShop(); };
+                            if (skip) skip.onclick = finish;
+                            setTimeout(finish, 3500);
+                        }
+                    } else {
+                        // Fallback if overlay missing
+                        proceedToShop();
+                    }
+                } catch {
+                    proceedToShop();
+                }
             });
         }
         // Start screen settings overlay
@@ -5702,12 +5712,14 @@ class GlowlingsGame {
             const fov = v('fovDesktop');
             if (soundBtn) {
                 soundBtn.addEventListener('click', ()=>{
+                    this.playClick();
                     s.soundMuted = !s.soundMuted; this.saveSettings(); this.applyAudioSettings();
                     // Optional visual: toggle text
                 });
             }
             if (musicBtn) {
                 musicBtn.addEventListener('click', ()=>{
+                    this.playClick();
                     s.musicMuted = !s.musicMuted; this.saveSettings(); this.applyAudioSettings();
                 });
             }
@@ -9681,31 +9693,62 @@ class GlowlingsGame {
         }
     }
     
-    // Map-aware background dispatcher
+    // Map-aware background dispatcher - HONEYCOMB ONLY
     drawBackgroundByMap() {
-        try {
-            let mapId = this.selectedMapId || null;
-            if (!mapId) {
-                try { const raw = localStorage.getItem('glowlings_selected_map'); if (raw) mapId = (JSON.parse(raw)||{}).id || null; } catch(_) {}
+        // Draw honeycomb pattern instead of maps
+        this.drawHoneycombBackground();
+    }
+
+    // Honeycomb background implementation - EXACT COPY FROM INDEX.HTML
+    drawHoneycombBackground() {
+        const w = this.canvas.width, h = this.canvas.height;
+        
+        // Clear canvas
+        this.ctx.fillStyle = '#185C9F';
+        this.ctx.fillRect(0,0,w,h);
+        
+        // Draw exact honeycomb pattern from index.html
+        this.ctx.save();
+        
+        // Draw honeycomb pattern with exact same SVG data
+        this.ctx.globalAlpha = 0.08;
+        this.ctx.strokeStyle = '#ffffff';
+        this.ctx.lineWidth = 2;
+        
+        const hexSize = 28; // Same as 80px background-size
+        const hexHeight = hexSize * 2;
+        const hexWidth = Math.sqrt(3) * hexSize;
+        
+        for (let row = 0; row < h / hexHeight + 2; row++) {
+            for (let col = 0; col < w / hexWidth + 2; col++) {
+                const x = col * hexWidth + (row % 2) * (hexWidth / 2);
+                const y = row * hexHeight * 0.75;
+                
+                // Apply gradient mask per hexagon (like CSS mask-image)
+                const alpha = Math.max(0, 1 - (x / w) * 0.4);
+                this.ctx.globalAlpha = 0.08 * alpha;
+                
+                this.drawHexagon(x, y, hexSize);
             }
-            mapId = mapId || 'map_neon_core';
-            switch (mapId) {
-                case 'map_neon_core':      return this.bgNeonCore();
-                case 'map_frost_void':     return this.bgFrostVoid();
-                case 'map_storm_ridge':    return this.bgStormRidge();
-                case 'map_solar_dunes':    return this.bgSolarDunes();
-                case 'map_abyss_bloom':    return this.bgAbyssBloom();
-                case 'map_crystal_nexus':  return this.bgCrystalNexus();
-                case 'map_tidal_mist':     return this.bgTidalMist();
-                case 'map_ember_fields':   return this.bgEmberFields();
-                case 'map_city_circuit':   return this.bgCityCircuit();
-                case 'map_void_labyrinth': return this.bgVoidLabyrinth();
-                default: return this.bgNeonCore();
-            }
-        } catch(_) {
-            // Safe fallback
-            this.drawBackgroundStars();
         }
+        
+        this.ctx.restore();
+    }
+    
+    drawHexagon(x, y, size) {
+        this.ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI / 3) * i;
+            const hx = x + size * Math.cos(angle);
+            const hy = y + size * Math.sin(angle);
+            if (i === 0) {
+                this.ctx.moveTo(hx, hy);
+            } else {
+                this.ctx.lineTo(hx, hy);
+            }
+        }
+        this.ctx.closePath();
+        this.ctx.stroke();
     }
 
     // --- Map background implementations ---

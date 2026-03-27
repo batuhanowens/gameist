@@ -18,7 +18,7 @@
   "volume": "Volume",
   "language": "Language",
   "credits": "Credits",
-  "creditsText": "Thanks to the Elementist developer team and contributors.",
+  "creditsText": "Everything developed by Batuhan Berk.",
   "fpsInfo": "FPS Info",
   "fullscreen": "Fullscreen",
   "mouseSensitivity": "Mouse Sensitivity",
@@ -88,5 +88,6 @@
   "rotateDesc": "This game plays best in landscape (16:9) mode.",
   "dodgeBtn": "DODGE",
   "skillBtn": "SKILL",
-  "back": "← Back"
+  "back": "← Back",
+  "controls_attack": "Attack"
 }

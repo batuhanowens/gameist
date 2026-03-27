@@ -1,0 +1,30 @@
+<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="150" height="150" fill="transparent"/>
+  
+  <!-- Fire Element - Large Triangle -->
+  <g transform="translate(75, 40)">
+    <path d="M0,-20 L15,10 L-15,10 Z" 
+          fill="#0A2E5A" opacity="0.3"/>
+    <path d="M0,-15 L10,5 L-10,5 Z" 
+          fill="#0A2E5A" opacity="0.5"/>
+    <circle cx="0" cy="-5" r="3" fill="#0A2E5A" opacity="0.7"/>
+    <circle cx="0" cy="-5" r="1.5" fill="#061A3A" opacity="0.9"/>
+    
+    <!-- Flame details -->
+    <path d="M-5,-8 L0,-12 L5,-8" fill="#0A2E5A" opacity="0.4"/>
+    <path d="M-3,-10 L0,-14 L3,-10" fill="#0A2E5A" opacity="0.3"/>
+  </g>
+  
+  <!-- Water Element - Large Circle with Waves -->
+  <g transform="translate(75, 110)">
+    <circle cx="0" cy="0" r="20" fill="#0A2E5A" opacity="0.3"/>
+    <circle cx="0" cy="0" r="15" fill="#0A2E5A" opacity="0.5"/>
+    <circle cx="-5" cy="-5" r="4" fill="#0A2E5A" opacity="0.6"/>
+    <circle cx="3" cy="2" r="2.5" fill="#0A2E5A" opacity="0.7"/>
+    
+    <!-- Wave details -->
+    <path d="M-12,0 Q-6,-3 0,0 Q6,3 12,0" fill="none" stroke="#0A2E5A" stroke-width="2" opacity="0.5"/>
+    <path d="M-10,4 Q-5,1 0,4 Q5,7 10,4" fill="none" stroke="#0A2E5A" stroke-width="1.5" opacity="0.4"/>
+  </g>
+</svg>

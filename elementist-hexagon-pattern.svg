@@ -1,0 +1,78 @@
+<svg width="90" height="90" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="90" height="90" fill="transparent"/>
+  
+  <!-- Hexagon Grid Structure -->
+  <defs>
+    <!-- Hexagon path -->
+    <path id="hexagon" d="M30,5 L50,5 L60,17.32 L60,32.68 L50,45 L30,45 L20,32.68 L20,17.32 Z" 
+          fill="none" stroke="#12487E" stroke-width="0.5" opacity="0.3"/>
+  </defs>
+  
+  <!-- Hexagon Grid Pattern -->
+  <g id="hexGrid">
+    <!-- Row 1 -->
+    <use href="#hexagon" x="0" y="0"/>
+    <use href="#hexagon" x="35" y="0"/>
+    <use href="#hexagon" x="70" y="0"/>
+    
+    <!-- Row 2 (offset) -->
+    <use href="#hexagon" x="-17.5" y="30"/>
+    <use href="#hexagon" x="17.5" y="30"/>
+    <use href="#hexagon" x="52.5" y="30"/>
+    
+    <!-- Row 3 -->
+    <use href="#hexagon" x="0" y="60"/>
+    <use href="#hexagon" x="35" y="60"/>
+    <use href="#hexagon" x="70" y="60"/>
+  </g>
+  
+  <!-- Element Icons in Hexagons -->
+  <!-- Fire Element - Top Left Hex -->
+  <g transform="translate(30, 17)">
+    <path d="M8 2C8 2 4 6 4 10C4 14 6 16 8 16C10 16 12 14 12 10C12 6 8 2 8 2Z" 
+          fill="#12487E" opacity="0.7"/>
+    <circle cx="8" cy="8" r="1.5" fill="#12487E" opacity="0.9"/>
+  </g>
+  
+  <!-- Water Element - Top Right Hex -->
+  <g transform="translate(65, 17)">
+    <path d="M8 2C8 2 4 6 4 10C4 14 6 16 8 16C10 16 12 14 12 10C12 6 8 2 8 2Z" 
+          fill="#12487E" opacity="0.7"/>
+    <circle cx="6" cy="6" r="1.5" fill="#12487E" opacity="0.8"/>
+    <circle cx="10" cy="8" r="1" fill="#12487E" opacity="0.6"/>
+  </g>
+  
+  <!-- Earth Element - Middle Left Hex -->
+  <g transform="translate(12.5, 47)">
+    <rect x="4" y="4" width="8" height="8" rx="2" fill="#12487E" opacity="0.7"/>
+    <circle cx="8" cy="8" r="2" fill="#12487E" opacity="0.9"/>
+  </g>
+  
+  <!-- Air Element - Middle Right Hex -->
+  <g transform="translate(47.5, 47)">
+    <circle cx="8" cy="8" r="6" fill="none" stroke="#12487E" stroke-width="1" opacity="0.7"/>
+    <circle cx="8" cy="8" r="3" fill="none" stroke="#12487E" stroke-width="0.8" opacity="0.8"/>
+    <circle cx="8" cy="8" r="1" fill="#12487E" opacity="0.9"/>
+  </g>
+  
+  <!-- Hero Figure - Bottom Hex -->
+  <g transform="translate(30, 77)">
+    <circle cx="5" cy="3" r="2.5" fill="#12487E" opacity="0.6"/>
+    <rect x="3" y="5" width="4" height="6" rx="1" fill="#12487E" opacity="0.7"/>
+    <rect x="1" y="6" width="1.5" height="4" rx="0.5" fill="#12487E" opacity="0.5"/>
+    <rect x="6.5" y="6" width="1.5" height="4" rx="0.5" fill="#12487E" opacity="0.5"/>
+  </g>
+  
+  <!-- Power Orb - Bottom Right Hex -->
+  <g transform="translate(65, 77)">
+    <circle cx="5" cy="5" r="3" fill="#12487E" opacity="0.6"/>
+    <circle cx="5" cy="5" r="1.5" fill="#12487E" opacity="0.8"/>
+  </g>
+  
+  <!-- Connecting Lines -->
+  <path d="M38 25 L47.5 55" stroke="#12487E" stroke-width="0.3" opacity="0.2"/>
+  <path d="M65 25 L47.5 55" stroke="#12487E" stroke-width="0.3" opacity="0.2"/>
+  <path d="M20.5 55 L30 85" stroke="#12487E" stroke-width="0.3" opacity="0.2"/>
+  <path d="M47.5 55 L65 85" stroke="#12487E" stroke-width="0.3" opacity="0.2"/>
+</svg>

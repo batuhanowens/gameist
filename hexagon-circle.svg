@@ -1,0 +1,15 @@
+<svg width="60" height="104" viewBox="0 0 60 104" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="60" height="104" fill="transparent"/>
+  
+  <!-- Hexagon Shape with Circle Element -->
+  <path d="M30,5 L50,17 L50,37 L30,49 L10,37 L10,17 Z" 
+        fill="none" stroke="#0A2E5A" stroke-width="2" opacity="0.6"/>
+  
+  <!-- Water Element - Circle -->
+  <g transform="translate(30, 27)">
+    <circle cx="0" cy="0" r="8" fill="#0A2E5A" opacity="0.4"/>
+    <circle cx="-2" cy="-2" r="2" fill="#0A2E5A" opacity="0.6"/>
+    <circle cx="2" cy="1" r="1.5" fill="#0A2E5A" opacity="0.5"/>
+  </g>
+</svg>

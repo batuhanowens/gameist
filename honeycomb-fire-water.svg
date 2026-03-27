@@ -1,0 +1,29 @@
+<svg width="120" height="104" viewBox="0 0 120 104" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="120" height="104" fill="transparent"/>
+  
+  <!-- Perfect Honeycomb Pattern - Two Hexagons Touching -->
+  
+  <!-- Left Hexagon with Fire Element -->
+  <g>
+    <path d="M30,5 L50,17 L50,37 L30,49 L10,37 L10,17 Z" 
+          fill="none" stroke="#0A2E5A" stroke-width="3" opacity="0.7"/>
+    <!-- Fire Element - Triangle -->
+    <g transform="translate(30, 27)">
+      <path d="M0,-8 L7,6 L-7,6 Z" fill="#0A2E5A" opacity="0.5"/>
+      <circle cx="0" cy="-2" r="2" fill="#0A2E5A" opacity="0.7"/>
+    </g>
+  </g>
+  
+  <!-- Right Hexagon with Water Element - Touching Left -->
+  <g>
+    <path d="M90,5 L110,17 L110,37 L90,49 L70,37 L70,17 Z" 
+          fill="none" stroke="#0A2E5A" stroke-width="3" opacity="0.7"/>
+    <!-- Water Element - Circle -->
+    <g transform="translate(90, 27)">
+      <circle cx="0" cy="0" r="8" fill="#0A2E5A" opacity="0.5"/>
+      <circle cx="-2" cy="-2" r="2" fill="#0A2E5A" opacity="0.7"/>
+      <circle cx="2" cy="1" r="1.5" fill="#0A2E5A" opacity="0.6"/>
+    </g>
+  </g>
+</svg>

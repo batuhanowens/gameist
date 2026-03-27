@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gizlilik Politikası - Gameist</title>
+    <link rel="stylesheet" href="landing_gamefeel.css?v=38">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Nunito:wght@400;600;800&family=Varela+Round&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Hero Background Pattern -->
+    <div class="hero-background-pattern"></div>
+    
+    <!-- Header -->
+    <header>
+        <div class="lang-switch">
+            <select id="gameistLangSelect" class="lang-switch-select">
+                <option value="tr">🇹🇷 TR</option>
+                <option value="en">🇬🇧 EN</option>
+            </select>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="page-container">
+        <div class="page-content">
+            <!-- Back Button -->
+            <a href="index.html" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                <span id="backText">Ana Sayfaya Dön</span>
+            </a>
+
+            <!-- Privacy Content -->
+            <div class="page-card">
+                <h1 class="page-title" id="pageTitle">
+                    <i class="fas fa-shield-alt"></i>Gizlilik Politikası
+                </h1>
+                
+                <div class="page-section">
+                    <h2>
+                        <i class="fas fa-info-circle"></i>Giriş
+                    </h2>
+                    <p>
+                        Gameist olarak kullanıcılarımızın gizliliğini korumayı taahhüt ediyoruz. Bu gizlilik politikası, 
+                        web sitemizi kullandığınızda kişisel bilgilerinizin nasıl toplandığını, kullanıldığını ve 
+                        korunduğunu açıklamaktadır.
+                    </p>
+                </div>
+
+                <div class="page-section">
+                    <h2>
+                        <i class="fas fa-database"></i>Toplanan Bilgiler
+                    </h2>
+                    <ul>
+                        <li>
+                            <i class="fas fa-user"></i>
+                            <span>Kimlik Bilgileri: Google hesabı bilgileriniz (e-posta, isim)</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-gamepad"></i>
+                            <span>Oyun Verileri: Skorlar, ilerleme, oyun istatistikleri</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-laptop"></i>
+                            <span>Teknik Bilgiler: IP adresi, tarayıcı bilgileri, cihaz bilgileri</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-clock"></i>
+                            <span>Kullanım Verileri: Oturum süresi, sayfa ziyaretleri</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="page-section">
+                    <h2>
+                        <i class="fas fa-lock"></i>Veri Güvenliği
+                    </h2>
+                    <ul>
+                        <li>
+                            <i class="fas fa-shield-alt"></i>
+                            <span>SSL şifreleme ile veri transferi</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-server"></i>
+                            <span>Güvenli sunucu altyapısı</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-user-shield"></i>
+                            <span>Yetkili personel erişimi</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-history"></i>
+                            <span>Düzenli güvenlik denetimleri</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="page-section highlight">
+                    <h2>
+                        <i class="fas fa-envelope"></i>İletişim
+                    </h2>
+                    <p>Gizlilik politikamızla ilgili sorularınız için bize ulaşabilirsiniz:</p>
+                    <p><i class="fas fa-envelope mr-2"></i> privacy@gameist.fun</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-20">
+        <div class="footer-links">
+            <a href="rules.html" id="rulesLink">Kurallar</a>
+            <a href="privacy.html" id="privacyLink">Gizlilik</a>
+            <a href="terms.html" id="termsLink">Kullanım Şartları</a>
+            <a href="support.html" id="supportLink">Destek</a>
+        </div>
+        <div class="copyright">
+            <a href="https://www.batuhanberk.online" target="_blank" style="color: inherit; text-decoration: none;">2026 Gameist by Batuhan Berk – Antalya</a>
+        </div>
+    </footer>
+
+    <script>
+        // Language translations
+        const translations = {
+            tr: {
+                backText: 'Ana Sayfaya Dön',
+                pageTitle: 'Gizlilik Politikası'
+            },
+            en: {
+                backText: 'Back to Home',
+                pageTitle: 'Privacy Policy'
+            }
+        };
+
+        // Language selector
+        const languageSelector = document.getElementById('gameistLangSelect');
+        const currentLang = localStorage.getItem('gameistLanguage') || 'tr';
+        languageSelector.value = currentLang;
+
+        function updateLanguage(lang) {
+            const t = translations[lang];
+            document.getElementById('backText').textContent = t.backText;
+            document.getElementById('pageTitle').innerHTML = `<i class="fas fa-shield-alt mr-3"></i>${t.pageTitle}`;
+            localStorage.setItem('gameistLanguage', lang);
+        }
+
+        languageSelector.addEventListener('change', (e) => {
+            updateLanguage(e.target.value);
+        });
+
+        // Initialize
+        updateLanguage(currentLang);
+    </script>
+</body>
+</html>

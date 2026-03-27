@@ -1,0 +1,15 @@
+<svg width="173" height="200" viewBox="0 0 173 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="173" height="200" fill="transparent"/>
+  
+  <!-- Perfect Hexagon Shape - Correct proportions -->
+  <path d="M86.5,10 L143,40 L143,120 L86.5,150 L30,120 L30,40 Z" 
+        fill="none" stroke="#0A2E5A" stroke-width="2" opacity="0.4"/>
+  
+  <!-- Inner Hexagon for depth -->
+  <path d="M86.5,20 L133,45 L133,115 L86.5,140 L40,115 L40,45 Z" 
+        fill="none" stroke="#0A2E5A" stroke-width="1" opacity="0.3"/>
+  
+  <!-- Center point for emoji -->
+  <circle cx="86.5" cy="80" r="2" fill="#0A2E5A" opacity="0.2"/>
+</svg>

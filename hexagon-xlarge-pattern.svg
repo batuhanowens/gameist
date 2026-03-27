@@ -1,0 +1,76 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="200" height="200" fill="transparent"/>
+  
+  <!-- Very Large Hexagon Pattern -->
+  <defs>
+    <!-- Extra large hexagon path -->
+    <path id="xlarge-hexagon" d="M60,15 L110,15 L135,50 L135,100 L110,135 L60,135 L35,100 L35,50 Z" 
+          fill="none" stroke="#12487E" stroke-width="4" opacity="0.6"/>
+  </defs>
+  
+  <!-- Main Hexagon Grid -->
+  <g id="hexGrid">
+    <!-- Row 1 -->
+    <use href="#xlarge-hexagon" x="0" y="0"/>
+    <use href="#xlarge-hexagon" x="100" y="0"/>
+    <use href="#xlarge-hexagon" x="200" y="0"/>
+    
+    <!-- Row 2 (offset) -->
+    <use href="#xlarge-hexagon" x="-50" y="100"/>
+    <use href="#xlarge-hexagon" x="50" y="100"/>
+    <use href="#xlarge-hexagon" x="150" y="100"/>
+    <use href="#xlarge-hexagon" x="250" y="100"/>
+    
+    <!-- Row 3 -->
+    <use href="#xlarge-hexagon" x="0" y="200"/>
+    <use href="#xlarge-hexagon" x="100" y="200"/>
+    <use href="#xlarge-hexagon" x="200" y="200"/>
+  </g>
+  
+  <!-- Very Bold Filled Hexagons -->
+  <g id="boldHexes">
+    <!-- Top left area - very opaque -->
+    <path d="M60,15 L110,15 L135,50 L135,100 L110,135 L60,135 L35,100 L35,50 Z" 
+          fill="#12487E" opacity="0.25"/>
+    <path d="M160,15 L210,15 L235,50 L235,100 L210,135 L160,135 L135,100 L135,50 Z" 
+          fill="#12487E" opacity="0.20"/>
+    <path d="M10,115 L60,115 L85,150 L85,200 L60,235 L10,235 L-15,200 L-15,150 Z" 
+          fill="#12487E" opacity="0.18"/>
+    
+    <!-- Middle area - medium opacity -->
+    <path d="M110,115 L160,115 L185,150 L185,200 L160,235 L110,235 L85,200 L85,150 Z" 
+          fill="#12487E" opacity="0.15"/>
+    <path d="M210,115 L260,115 L285,150 L285,200 L260,235 L210,235 L185,200 L185,150 Z" 
+          fill="#12487E" opacity="0.12"/>
+    
+    <!-- Bottom right area - less transparent -->
+    <path d="M160,215 L210,215 L235,250 L235,300 L210,335 L160,335 L135,300 L135,250 Z" 
+          fill="#12487E" opacity="0.08"/>
+    <path d="M260,215 L310,215 L335,250 L335,300 L310,335 L260,335 L235,300 L235,250 Z" 
+          fill="#12487E" opacity="0.06"/>
+  </g>
+  
+  <!-- Bold Structural Lines -->
+  <g id="boldConnections">
+    <line x1="85" y1="50" x2="135" y2="100" stroke="#12487E" stroke-width="3" opacity="0.3"/>
+    <line x1="185" y1="50" x2="235" y2="100" stroke="#12487E" stroke-width="2.5" opacity="0.25"/>
+    <line x1="35" y1="150" x2="85" y2="200" stroke="#12487E" stroke-width="2" opacity="0.2"/>
+    <line x1="135" y1="150" x2="185" y2="200" stroke="#12487E" stroke-width="1.5" opacity="0.15"/>
+    <line x1="235" y1="150" x2="285" y2="200" stroke="#12487E" stroke-width="1" opacity="0.1"/>
+  </g>
+  
+  <!-- Large Detail Hexagons -->
+  <g id="largeDetailHexes">
+    <path d="M30,30 L50,30 L60,45 L60,65 L50,80 L30,80 L20,65 L20,45 Z" 
+          fill="#12487E" opacity="0.15"/>
+    <path d="M120,60 L140,60 L150,75 L150,95 L140,110 L120,110 L110,95 L110,75 Z" 
+          fill="#12487E" opacity="0.12"/>
+    <path d="M210,90 L230,90 L240,105 L240,125 L230,140 L210,140 L200,125 L200,105 Z" 
+          fill="#12487E" opacity="0.08"/>
+    <path d="M90,150 L110,150 L120,165 L120,185 L110,200 L90,200 L80,185 L80,165 Z" 
+          fill="#12487E" opacity="0.06"/>
+    <path d="M180,180 L200,180 L210,195 L210,215 L200,230 L180,230 L170,215 L170,195 Z" 
+          fill="#12487E" opacity="0.04"/>
+  </g>
+</svg>

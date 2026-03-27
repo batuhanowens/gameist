@@ -95,10 +95,11 @@ class GlowlingsGame {
             });
         });
         
-        document.getElementById('startBtn').addEventListener('click', () => {
-            this.playerSettings.name = (document.getElementById('playerName')?.value || '').trim() || 'Elementist';
-            this.startGame();
-        });
+        // Event listener removed - now handled in glowlings.html
+        // document.getElementById('startBtn').addEventListener('click', () => {
+        //     this.playerSettings.name = (document.getElementById('playerName')?.value || '').trim() || 'Elementist';
+        //     this.startGame();
+        // });
         
         // Game controls
         this.canvas.addEventListener('mousemove', (e) => {
@@ -218,11 +219,27 @@ class GlowlingsGame {
         this.startTime = Date.now();
         this.score = 0;
         
+        // ALWAYS check for custom element selection from start screen
+        if (window.gameElement && ['fire', 'water', 'air'].includes(window.gameElement)) {
+            this.playerSettings.element = window.gameElement;
+            console.log('🔥 Using selected element:', window.gameElement);
+        } else {
+            console.log('🔥 Using default element: fire');
+        }
+        
+        // ALWAYS check for custom character selection
+        if (window.gameCharacter && ['warrior', 'mage', 'archer', 'assassin'].includes(window.gameCharacter)) {
+            this.playerSettings.character = window.gameCharacter;
+            console.log('⚔️ Using selected character:', window.gameCharacter);
+        }
+        
         // Create player
         this.player = new Glowling(
             new Vector2(this.worldSize.width / 2, this.worldSize.height / 2),
             this.playerSettings
         );
+        
+        console.log('🎮 Player created with element:', this.player.element);
         
         // Initialize leaderboard
         this.updateLeaderboard();
